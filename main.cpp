@@ -63,8 +63,18 @@ class Wordly {
     }
     void print(void) {
         for(const auto & x : this->w) {
-            std::cout << x.c << " : " << (x.type == NOT_IN ? "NOT_IN" : x.type == INCORRECT_POS ? "INCORRECT_POS" : "CORRECT") << std::endl;
+            if(x.type == CORRECT_POS) {
+                std::cout << Color::green << x.c << Color::reset;
+            }
+            else if(x.type == INCORRECT_POS) {
+                std::cout << Color::yellow << x.c << Color::reset;
+            }
+
+            else {
+                std::cout << x.c;
+            }
         }
+        std::cout << std::endl;
     }
     public :
     std::string word;
