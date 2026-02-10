@@ -17,14 +17,15 @@ struct Character {
 Type type;
 
 Character(char ch, Type t) : c(ch),type(t) {}
+Character() : c(' '), type(NOT_IN) {}
 };
 class Wordly {
     private :
     std::vector<std::string> rs;
     std::istream & ss;
-    size_t attempts;
-    std::vector<Character> w;
-    std::vector<std::vector<Character>> history;
+    size_t attempts = 0;
+    std::array<Character, 5> w;
+    std::array<std::array<Character, 5>, 6> history;
     int activeX = 0;
     int activeY = 0;
     bool isEmpty(std::string_view str) {
@@ -40,18 +41,6 @@ class Wordly {
         return true;
     }
 
-    bool wordChecker(std::string_view wr) {
-        w.clear();
-        size_t idx = 0;
-        for(const auto & c : wr) {
-            if(this->word.find(c) == std::string::npos) w.push_back(Character(c, NOT_IN));
-            else if(this->word[idx] == c) w.push_back(Character(c, CORRECT_POS));
-            else w.push_back(Character(c, INCORRECT_POS));
-            idx++;
-        }
-        history.push_back(w);
-        this->print();
-    }
 
     void getRandomWord(void)  {
         std::uniform_int_distribution<> dis(0, rs.size());
@@ -70,14 +59,14 @@ class Wordly {
         for(const auto & y : this->history) {
             for(const auto &x : y) {
             if(x.type == CORRECT_POS) {
-                std::cout  << x.c;
+                std::cout  << x.c << " ";
             }
             else if(x.type == INCORRECT_POS) {
-                std::cout << x.c ;
+                std::cout << x.c  << " ";
             }
 
             else {
-                std::cout << x.c;
+                std::cout << x.c  << " ";
             }
         }
         std::cout << std::endl;
@@ -85,46 +74,59 @@ class Wordly {
     }
     public :
     std::string word;
+        bool wordChecker(std::string_view wr) {
+            this->w.fill(Character());
+        size_t idx = 0;
+        for(const auto & c : wr) {
+            if(this->word.find(c) == std::string::npos) this->w[idx] = Character(c, NOT_IN);
+            else if(this->word[idx] == c) this->w[idx] = Character(c, CORRECT_POS);
+            else this->w[idx] = Character(c, INCORRECT_POS);
+            idx++;
+        }
+        this->history[attempts++] = w;
+        this->print();
+
+        return true;
+    }
     Wordly(std::istream & s) : ss(s), attempts(0) {
         this->parseFile();
         this->getRandomWord();
     }
 
-    void input(void) {
-        std::string str;
-        
-        getline(std::cin, str);
-        while(!this->handleInput(str)) {
-            std::cerr << "Incorrect input, please try again" << std::endl;
-            getline(std::cin, str);
-        }
-                
-        wordChecker(str);
-        }
-};
  void draw(void) {
-       for(size_t i = 1; i < 6; i++) {
-        for(size_t j = 1; j < 5; j++) {
+    std::string buf;
+       for(size_t i = 0; i < 6; i++) {
+        for(size_t j = 0; j < 5; j++) {
+            buf.clear();
+            auto c = this->history[i][j];
+            buf += c.c;
         float calculateX = (float) (j * 70 * 1.1);
         float calculateY =  (float) (i * 70 * 1.1);
-
         Rectangle box = {(float) calculateX,calculateY, 70, 70};
-
+            Vector2 textSize = MeasureTextEx(GetFontDefault(), buf.c_str(), 40.f, 2);
+            float textX = box.x + (box.width / 2) - (textSize.x / 2);
+            float textY = box.y + (box.height / 2) - (textSize.y / 2);
+            DrawText(buf.c_str(), (int) textX, (int) textY, 40, RED);
         float thickness = 3.0f;
 
         DrawRectangleLinesEx(box, thickness, GREEN);
        }
        }
     }
+
+};
+
 int main(int argc, char * argv[]) {
+    std::ifstream file (argv[1]);
+    Wordly wordly (file);
     InitWindow(500, 500, "Worldy-C++");
     SetTargetFPS(120);
     std::string buffer;
     while(!WindowShouldClose()) {
         BeginDrawing();
-        DrawText("Wordly-C++",140,5,32,GREEN);
+        //DrawText("Wordly-C++",140,5,32,GREEN);
             ClearBackground(BLACK);
-        draw();
+        wordly.draw();
 
         int key = GetCharPressed();
         while(key > 0) {
@@ -136,7 +138,7 @@ int main(int argc, char * argv[]) {
         }
 
         if(buffer.length() == 5 && IsKeyPressed(KEY_ENTER)){
-            std::cout << buffer << std::endl;
+            wordly.wordChecker(buffer);
             buffer.clear();
         }
         EndDrawing();
