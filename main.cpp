@@ -8,6 +8,7 @@
 #include "wordly.hpp"
 #include "raylib.h"
 #include <array>
+#include <unistd.h>
 std::random_device rd;
 std::mt19937 gen(rd());
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -19,6 +20,33 @@ Type type;
 Character(char ch, Type t) : c(ch),type(t) {}
 Character() : c(' '), type(NOT_IN) {}
 };
+
+struct Config {
+Color bg_color;
+Color grid_color;
+Color text_color;
+Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN) {}
+};
+
+struct Button {
+    Rectangle btn;
+    Color color;
+    std::string text;
+    bool isClicked;
+
+    bool checkClick(Vector2 pos) {
+        if(CheckCollisionPointRec(pos, btn)) {
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Button (const Rectangle & rec, const Color & c, const std::string & t) :
+    btn(rec), color(c), text(t), isClicked(false) {}
+};
+
 class Wordly {
     private :
     std::vector<std::string> rs;
@@ -27,7 +55,10 @@ class Wordly {
     std::array<std::array<Character, 5>, 6> history;
     int activeX = 0;
     int activeY = 0;
-    bool isEmpty(std::string_view str) {
+    const int startingCoordinate = 1;
+    bool gameOver = false;
+        std::string word;
+    bool isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
     }
 
@@ -53,7 +84,7 @@ class Wordly {
             rs.push_back(buffer);
          }
     }
-    bool lengthChecker(void) {
+    bool lengthChecker(void) const {
         for(const auto &c : history[activeY]) {
             if(!isalpha(c.c)) return false;
         }
@@ -70,8 +101,40 @@ class Wordly {
         }
         return GRAY;
     }
+    Color applyColor(std::string_view toCheck) const {
+        if(toCheck == "RED") return RED;
+        else if(toCheck == "BLUE") return BLUE;
+        else if(toCheck == "GREEN") return GREEN;
+        else if(toCheck == "YELLOW") return YELLOW;
+        else if(toCheck == "BLACK") return BLACK;
+        else if(toCheck == "PINK") return PINK;
+        else if(toCheck == "BLUE") return BLUE;
+        else if(toCheck == "VIOLET") return VIOLET;
+        return BLACK;
+    }
+    size_t getLength(const std::string & str) const {return str.length();}
+    void readConfig(void) {
+        std::ifstream config("../config.conf");
+        if(!config.is_open()) {
+            std::cout << "NOT FOUND" << std::endl;
+            return;
+        }
+        std::string buffer;
+
+        while(getline(config, buffer)) {
+            size_t toFind;
+            if((toFind = buffer.find("BG_COLOR=")) != std::string::npos){
+                buffer = buffer.substr(getLength("BG_COLOR="));
+                this->config.bg_color = applyColor(buffer);
+            }
+            else if((toFind = buffer.find("GRID_COLOR=")) != std::string::npos){
+                buffer = buffer.substr(getLength("GRID_COLOR="));
+                this->config.grid_color = applyColor(buffer);
+            }
+        }
+    }
     public :
-    std::string word;
+    Config config;
         bool wordChecker(void) {
             if(!lengthChecker()) return false;
             std::string toCheck;
@@ -88,24 +151,27 @@ class Wordly {
              activeY++;
         }
        
-
+        attempts++;
         return toCheck == word;
     }
-    Wordly(std::istream & s) : ss(s), attempts(0) {
+    Wordly(std::istream & s) : ss(s) {
         this->parseFile();
         this->getRandomWord();
+        this->readConfig();
         std::cout << word << std::endl;
     }
 
  void draw(void) {
+    DrawText("Wordly-C++",125,20,50,GREEN);
+    if(!gameOver) {
     std::string buf;
        for(size_t i = 0; i < 6; i++) {
         for(size_t j = 0; j < 5; j++) {
             buf.clear();
             auto c = this->history[i][j];
             buf += c.c;
-        float calculateX = (float) (j * 70 * 1.1);
-        float calculateY =  (float) (i * 70 * 1.1);
+        float calculateX = (float) ((j * 70 * 1.1) + 70);
+        float calculateY =  (float) ((i * 70 * 1.1) + 100);
         Rectangle box = {(float) calculateX,calculateY, 70, 70};
             Vector2 textSize = MeasureTextEx(GetFontDefault(), buf.c_str(), 40.f, 2);
             float textX = box.x + (box.width / 2) - (textSize.x / 2);
@@ -113,10 +179,13 @@ class Wordly {
             DrawText(buf.c_str(), (int) textX, (int) textY, 40, getColor(c.type));
         float thickness = 3.0f;
 
-        DrawRectangleLinesEx(box, thickness, GREEN);
+        DrawRectangleLinesEx(box, thickness, this->config.grid_color);
        }
        }
+    } else {
+        gameOverScreenRenderer();
     }
+}
 
 void updateCurrentWord(const char & c) {
 if(activeX < 5 && activeY < 6) {
@@ -133,23 +202,38 @@ void backspace(void) {
     }
 
 }
+void drawBtn(void) {
+    Rectangle box = {50, 50, 70, 20};
+    std::string text = "Play again";
+    Button btn (box, PINK, text);
 
+    DrawRectangleLinesEx(btn.btn, 10.f, btn.color);
+
+    if(btn.checkClick(GetMousePosition())) {
+        gameOver = false;
+        activeX = 0;
+        activeY = 0;
+        getRandomWord();
+    }
+}
 void gameOverScreenRenderer(void) {
     std::string text = "You guessed the word by " + std::to_string(attempts) + " attempts!";
-    DrawText(text.c_str(), 10, 10, 40, GREEN);
+    DrawText(text.c_str(), 10, 10, 20, this->config.text_color);
+    drawBtn();
 }
-
+void setGameOver(void) {
+    gameOver = true;
+}
 };
 
 int main(int argc, char * argv[]) {
     std::ifstream file (argv[1]);
     Wordly wordly (file);
-    InitWindow(500, 500, "Worldy-C++");
+    InitWindow(540, 600, "Worldy-C++");
     SetTargetFPS(120);
     while(!WindowShouldClose()) {
         BeginDrawing();
-        //DrawText("Wordly-C++",140,5,32,GREEN);
-            ClearBackground(BLACK);
+            ClearBackground(wordly.config.bg_color);
         wordly.draw();
 
         int key = GetCharPressed();
@@ -164,11 +248,13 @@ int main(int argc, char * argv[]) {
             wordly.backspace();
         }
         if(IsKeyPressed(KEY_ENTER)){
-            if(wordly.wordChecker()) break;
+            if(wordly.wordChecker()) {
+               wordly.setGameOver();
+            }
         }
         EndDrawing();
-        
 }
+
 CloseWindow();
     return 0;
 } 
