@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include <array>
 #include <unistd.h>
+#include <unordered_set>
 std::random_device rd;
 std::mt19937 gen(rd());
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -42,7 +43,7 @@ struct Button {
         }
         return false;
     }
-
+    
     Button (const Rectangle & rec, const Color & c, const std::string & t) :
     btn(rec), color(c), text(t), isClicked(false) {}
 };
@@ -57,7 +58,8 @@ class Wordly {
     int activeY = 0;
     const int startingCoordinate = 1;
     bool gameOver = false;
-        std::string word;
+    std::string word;
+    bool userWon;
     bool isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
     }
@@ -112,6 +114,11 @@ class Wordly {
         else if(toCheck == "VIOLET") return VIOLET;
         return BLACK;
     }
+    void clearHistory(void) {
+        std::for_each(history.begin(), history.end(), [] (std::array<Character, 5> & arr) {
+            return arr.fill(Character(' ', NOT_IN));
+        });
+    }
     size_t getLength(const std::string & str) const {return str.length();}
     void readConfig(void) {
         std::ifstream config("../config.conf");
@@ -149,9 +156,13 @@ class Wordly {
         activeX = 0;
         if(activeY < 6) {
              activeY++;
-        }
-       
+        }  
         attempts++;
+        if(attempts == 6) {
+            gameOver = true;
+
+        }
+         userWon = toCheck == word; 
         return toCheck == word;
     }
     Wordly(std::istream & s) : ss(s) {
@@ -202,24 +213,42 @@ void backspace(void) {
     }
 
 }
-void drawBtn(void) {
-    Rectangle box = {50, 50, 70, 20};
-    std::string text = "Play again";
+Button drawBtn(const Rectangle & box, const std::string & text, const Color & color) {
     Button btn (box, PINK, text);
 
-    DrawRectangleLinesEx(btn.btn, 10.f, btn.color);
-
-    if(btn.checkClick(GetMousePosition())) {
-        gameOver = false;
-        activeX = 0;
-        activeY = 0;
-        getRandomWord();
-    }
+    DrawRectangle(btn.btn.x, btn.btn.y, btn.btn.width, btn.btn.height, btn.color);
+    DrawText(btn.text.c_str(),btn.btn.x + 10, btn.btn.y + 5, 20, BLACK);
+    return btn;
 }
 void gameOverScreenRenderer(void) {
-    std::string text = "You guessed the word by " + std::to_string(attempts) + " attempts!";
-    DrawText(text.c_str(), 10, 10, 20, this->config.text_color);
-    drawBtn();
+    if(userWon) {
+    std::string text = "You guessed the word by " + std::to_string(attempts);
+    std::string next = attempts == 1 ? " attempt" : " attempts";
+    text += next;
+    DrawText(text.c_str(), 25, 90, 25, this->config.text_color);   
+    } else {
+        std::string text = "Unfortunately, you did not guess the\nword " + word + " within 6 attempts";
+        DrawText(text.c_str(), 25, 90, 23, this->config.text_color);   
+    }
+    Rectangle box = {120, 150, 120, 30};
+    std::string text = "Play again";
+    Button playAgain = drawBtn(box, text, PINK);
+        if(playAgain.checkClick(GetMousePosition())) {
+        gameOver = false;
+        clearHistory();
+        activeX = 0;
+        activeY = 0;
+        attempts = false;
+        getRandomWord();
+    }
+
+    Rectangle box2 =  {255, 150, 120, 30};
+    std::string text2 = "Exit";
+    Button exit = drawBtn(box2, text2, PINK);
+
+    if(exit.checkClick(GetMousePosition())) {
+        std::exit(0);
+    }
 }
 void setGameOver(void) {
     gameOver = true;
