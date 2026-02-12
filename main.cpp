@@ -43,20 +43,21 @@ struct Button {
         }
         return false;
     }
-    
+
     Button (const Rectangle & rec, const Color & c, const std::string & t) :
     btn(rec), color(c), text(t), isClicked(false) {}
 };
 
 class Wordly {
     private :
+    std::unordered_set<std::string> dictionary;
     std::vector<std::string> rs;
     std::istream & ss;
     size_t attempts = 0;
     std::array<std::array<Character, 5>, 6> history;
     int activeX = 0;
     int activeY = 0;
-    const int startingCoordinate = 1;
+    bool renderErrorMessage = false;
     bool gameOver = false;
     std::string word;
     bool userWon;
@@ -84,6 +85,7 @@ class Wordly {
             if(this->isEmpty(buffer)) continue;
 
             rs.push_back(buffer);
+            dictionary.insert(buffer);
          }
     }
     bool lengthChecker(void) const {
@@ -138,20 +140,34 @@ class Wordly {
                 buffer = buffer.substr(getLength("GRID_COLOR="));
                 this->config.grid_color = applyColor(buffer);
             }
+             else if((toFind = buffer.find("TEXT_COLOR=")) != std::string::npos){
+                buffer = buffer.substr(getLength("TEXT_COLOR="));
+                this->config.text_color = applyColor(buffer);
+            }
         }
+    }
+    void drawError(void) {
+        DrawText("This word does not exists in our database", 40, 580, 20, RED);
     }
     public :
     Config config;
         bool wordChecker(void) {
             if(!lengthChecker()) return false;
             std::string toCheck;
+         for(auto & c : history[activeY]) {
+            toCheck += c.c;
+         }
+         if(!dictionary.contains(toCheck)) {
+            renderErrorMessage = true;
+            return false;
+         }
+         renderErrorMessage = false;
         size_t idx = 0;
         for(auto & c : history[activeY]) {
             if(this->word.find(c.c) == std::string::npos) c.type = NOT_IN;
             else if(this->word[idx] == c.c) c.type  = CORRECT_POS;
             else c.type = INCORRECT_POS;
             idx++;
-            toCheck += c.c;
         }
         activeX = 0;
         if(activeY < 6) {
@@ -173,7 +189,7 @@ class Wordly {
     }
 
  void draw(void) {
-    DrawText("Wordly-C++",125,20,50,GREEN);
+    DrawText("Wordly-C++",125,20,50,config.text_color);
     if(!gameOver) {
     std::string buf;
        for(size_t i = 0; i < 6; i++) {
@@ -195,6 +211,10 @@ class Wordly {
        }
     } else {
         gameOverScreenRenderer();
+    }
+
+    if(renderErrorMessage) {
+        drawError();
     }
 }
 
@@ -258,7 +278,7 @@ void setGameOver(void) {
 int main(int argc, char * argv[]) {
     std::ifstream file (argv[1]);
     Wordly wordly (file);
-    InitWindow(540, 600, "Worldy-C++");
+    InitWindow(540, 620, "Worldy-C++");
     SetTargetFPS(120);
     while(!WindowShouldClose()) {
         BeginDrawing();
