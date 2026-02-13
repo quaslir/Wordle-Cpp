@@ -1,10 +1,10 @@
 {
-  "total_games" : "11",
-  "best_streak" : "2",
+  "total_games" : "17",
+  "best_streak" : "6",
   "last_played_date" : "",
   "losses" : "2",
   "guess_distribution" : {
   },
-  "current_streak" : "0",
-  "wins" : "7"
+  "current_streak" : "6",
+  "wins" : "13"
 }

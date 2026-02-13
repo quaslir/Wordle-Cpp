@@ -245,16 +245,36 @@ Button Wordly::drawBtn(const Rectangle & box, const std::string & text, const Co
     return btn;
 }
 void Wordly::gameOverScreenRenderer(void) {
-    
+    DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), ColorAlpha(BLACK, 0.5f));
+    Rectangle panel = {40, 60, (float) GetScreenWidth() - 80, (float) GetScreenHeight() - 120};
+
+    DrawRectangleRec(panel, ColorAlpha(DARKGRAY, 0.9f));
+    DrawRectangleLinesEx(panel,2 , config.grid_color);
     if(userWon) {
-    std::string text = "You guessed the word by " + std::to_string(attempts);
-    std::string next = attempts == 1 ? " attempt" : " attempts";
-    text += next;
-    DrawText(text.c_str(), 25, 90, 25, this->config.text_color);   
+    DrawText("WELL DONE!", panel.x + 20, panel.y + 20, 32, GREEN);   
     } else {
-        std::string text = "Unfortunately, you did not guess the\nword " + word + " within 6 attempts";
-        DrawText(text.c_str(), 25, 90, 23, this->config.text_color);   
+        DrawText("NEXT TIME...", panel.x + 20, panel.y + 20, 32, RED);
+        std::string str = "WORD WAS: " + this->word;
+        DrawText(str.c_str(), panel.x + 20, panel.y + 60, 20, LIGHTGRAY);  
     }
+    
+
+    
+    int statY = panel.y + 110;
+    auto drawStatRow = [&](const std::string & label, const std::string & key, int x) {
+        auto val = usersHistory.getValue<int>(key);
+        if(val.has_value()) {
+            DrawText(std::to_string(val.value()).c_str(), x, statY, 30, WHITE);
+            DrawText(label.c_str(), x, statY + 35, 12, LIGHTGRAY);
+        }
+    };
+
+    drawStatRow("Total games", "total_games", panel.x + 30);
+    drawStatRow("Wins", "wins", panel.x + 125);
+    drawStatRow("Losses", "losses", panel.x + 190);
+    drawStatRow("Current streak", "current_streak", panel.x + 270);
+    drawStatRow("Best streak", "best_streak", panel.x + 370);
+   
     Rectangle box = {120, 500, 120, 30};
     std::string text = "Play again";
     Button playAgain = drawBtn(box, text, PINK);
@@ -277,44 +297,6 @@ void Wordly::gameOverScreenRenderer(void) {
     if(exit.checkClick(GetMousePosition())) {
         std::exit(0);
     }
-
-    DrawText("Statistics:", 25, 150, 25, this->config.text_color);
-    
-    auto x = usersHistory.getValue<int>("total_games");
-    if(x.has_value()) {
-    int totalGamesNumber = x.value();
-    std::string totalGames = "Total games played: " + std::to_string(totalGamesNumber);
-        DrawText(totalGames.c_str(), 25, 180, 25, this->config.text_color);
-    }
-    x = usersHistory.getValue<int>("wins");
-    if(x.has_value()) {
-    int winnedNumber = x.value();
-    std::string winned = "Wins: " + std::to_string(winnedNumber);
-        DrawText(winned.c_str(), 25, 210, 25, this->config.text_color);
-    }
-
-    x = usersHistory.getValue<int>("losses");
-    if(x.has_value()) {
-    int lostNumber = x.value();
-    std::string lost = "Losses: " + std::to_string(lostNumber);
-        DrawText(lost.c_str(), 25, 240, 25, this->config.text_color);
-    }
-
-    x = usersHistory.getValue<int>("current_streak");
-    if(x.has_value()) {
-    int currentNumber = x.value();
-    std::string current = "Current streak: " + std::to_string(currentNumber);
-        DrawText(current.c_str(), 25, 270, 25, this->config.text_color);
-    }
-    
-     x = usersHistory.getValue<int>("best_streak");
-    if(x.has_value()) {
-    int bestNumber = x.value();
-    std::string best = "Best streak: " + std::to_string(bestNumber);
-        DrawText(best.c_str(), 25, 300, 25, this->config.text_color);
-    }
-    
-   
 }
 void Wordly::setGameOver(void) {
     gameOver = true;
