@@ -66,7 +66,6 @@ class Wordly {
     void drawError(void) const;
     void initHistory(void);
 
-    void updateTotalGames(const int num);
     public :
         ParserJSON usersHistory {"../history.json"};
     Config config;

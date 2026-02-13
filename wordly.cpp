@@ -17,13 +17,10 @@ bool Wordly::isEmpty(std::string_view str) const{
     void Wordly::initHistory(void) {
         this->usersHistory.parse();
     }
-    void Wordly::updateTotalGames(const int num) {
-        this->usersHistory.updateValue<std::string>("total_games", std::to_string(num));
-       usersHistory.stringify();
-    }
     void Wordly::getRandomWord(void)  {
         std::uniform_int_distribution<> dis(0, rs.size());
          this->word = rs[dis(gen)];
+         std::cout << word << std::endl;
     }
             void Wordly::parseFile(void) {
         std::string buffer;
@@ -144,14 +141,28 @@ bool Wordly::isEmpty(std::string_view str) const{
              activeY++;
         }  
         attempts++;
-        if(attempts == 6 || toCheck == word) {
+        if(toCheck == word) {
             auto x  = usersHistory.getValue<int>("total_games");
+            auto y = usersHistory.getValue<int>("wins");
             if(x.has_value()) {
-                std::cout << "Value is beign updated" << std::endl;
-                updateTotalGames(x.value() + 1);
+                usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
+            }
+            if(y.has_value()) {
+                usersHistory.updateValue<std::string>("wins",std::to_string(y.value() + 1));
             }
             gameOver = true;
 
+        }
+        else if(attempts == 6) {
+            auto x  = usersHistory.getValue<int>("total_games");
+            auto y = usersHistory.getValue<int>("losses");
+            if(x.has_value()) {
+                usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
+            }
+            if(y.has_value()) {
+                usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));
+            }
+            gameOver = true;
         }
          userWon = toCheck == word; 
         return toCheck == word;
@@ -220,7 +231,7 @@ void Wordly::gameOverScreenRenderer(void) {
         std::string text = "Unfortunately, you did not guess the\nword " + word + " within 6 attempts";
         DrawText(text.c_str(), 25, 90, 23, this->config.text_color);   
     }
-    Rectangle box = {120, 150, 120, 30};
+    Rectangle box = {120, 500, 120, 30};
     std::string text = "Play again";
     Button playAgain = drawBtn(box, text, PINK);
         if(playAgain.checkClick(GetMousePosition())) {
@@ -232,13 +243,38 @@ void Wordly::gameOverScreenRenderer(void) {
         getRandomWord();
     }
 
-    Rectangle box2 =  {255, 150, 120, 30};
+    Rectangle box2 =  {255, 500, 120, 30};
     std::string text2 = "Exit";
     Button exit = drawBtn(box2, text2, PINK);
 
     if(exit.checkClick(GetMousePosition())) {
         std::exit(0);
     }
+
+    DrawText("Statistics", 25, 150, 25, this->config.text_color);
+    
+    auto x = usersHistory.getValue<int>("total_games");
+    if(x.has_value()) {
+    int totalGamesNumber = x.value();
+    std::string totalGames = "Total games played: " + std::to_string(totalGamesNumber);
+        DrawText(totalGames.c_str(), 25, 180, 25, this->config.text_color);
+    }
+    x = usersHistory.getValue<int>("wins");
+    if(x.has_value()) {
+    int winnedNumber = x.value();
+    std::string winned = "Wins: " + std::to_string(winnedNumber);
+        DrawText(winned.c_str(), 25, 210, 25, this->config.text_color);
+    }
+
+    x = usersHistory.getValue<int>("losses");
+    if(x.has_value()) {
+    int lostNumber = x.value();
+    std::string lost = "Losses: " + std::to_string(lostNumber);
+        DrawText(lost.c_str(), 25, 240, 25, this->config.text_color);
+    }
+    
+    
+   
 }
 void Wordly::setGameOver(void) {
     gameOver = true;
