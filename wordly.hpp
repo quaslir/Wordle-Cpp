@@ -10,6 +10,8 @@
 #include <array>
 #include <unistd.h>
 #include <unordered_set>
+#include <algorithm>
+#include "parser.hpp"
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
 
 struct Character {
@@ -62,9 +64,11 @@ class Wordly {
 
     void readConfig(void);
     void drawError(void) const;
+    void initHistory(void);
 
+    void updateTotalGames(const int num);
     public :
-
+        ParserJSON usersHistory {"../history.json"};
     Config config;
         bool wordChecker(void);
 
@@ -72,6 +76,7 @@ class Wordly {
         this->parseFile();
         this->getRandomWord();
         this->readConfig();
+        this->initHistory();
     }
 
  void draw(void);

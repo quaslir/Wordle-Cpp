@@ -14,7 +14,13 @@ bool Wordly::isEmpty(std::string_view str) const{
         return true;
     }
 
-
+    void Wordly::initHistory(void) {
+        this->usersHistory.parse();
+    }
+    void Wordly::updateTotalGames(const int num) {
+        this->usersHistory.updateValue<std::string>("total_games", std::to_string(num));
+       usersHistory.stringify();
+    }
     void Wordly::getRandomWord(void)  {
         std::uniform_int_distribution<> dis(0, rs.size());
          this->word = rs[dis(gen)];
@@ -138,7 +144,12 @@ bool Wordly::isEmpty(std::string_view str) const{
              activeY++;
         }  
         attempts++;
-        if(attempts == 6) {
+        if(attempts == 6 || toCheck == word) {
+            auto x  = usersHistory.getValue<int>("total_games");
+            if(x.has_value()) {
+                std::cout << "Value is beign updated" << std::endl;
+                updateTotalGames(x.value() + 1);
+            }
             gameOver = true;
 
         }
@@ -199,6 +210,7 @@ Button Wordly::drawBtn(const Rectangle & box, const std::string & text, const Co
     return btn;
 }
 void Wordly::gameOverScreenRenderer(void) {
+    
     if(userWon) {
     std::string text = "You guessed the word by " + std::to_string(attempts);
     std::string next = attempts == 1 ? " attempt" : " attempts";
