@@ -6,9 +6,21 @@ bool Wordly::isEmpty(std::string_view str) const{
     }
 
 void Wordly::initKeyboard(void) {
-std::string layout{"qwertyuiopasdfghjklzxcvbnm"};
-for(const char & x : layout) {
-    keyboard.push_back({x, NOT_CHECKED});
+std::string layout{"qwertyuiopasdfghjklDELzxcvbnmENT"};
+std::string buffer;
+for(int i = 0; i < layout.size(); i++) {
+    buffer.clear();
+    if(layout[i] == 'D') {
+        while(layout[i] != 'z') buffer += layout[i++];
+    }
+    else if(layout[i] == 'E') {
+        while(layout[i]) buffer += layout[i++];
+    }
+    else {
+         buffer += layout[i];
+    }
+   
+    keyboard.push_back({buffer, NOT_CHECKED});
 }
 }
     bool Wordly::handleInput(std::string_view word) const{
@@ -96,7 +108,11 @@ for(const char & x : layout) {
             }
             else if((toFind = buffer.find("HARD_MODE=")) != std::string::npos){
                 buffer = buffer.substr(getLength("HARD_MODE="));
-                this->config.hardMode = buffer == "TRUE";
+                this->config.hardMode = buffer == "TRUE" || "ENABLED";
+            }
+            else if((toFind = buffer.find("AUTOPLAY=")) != std::string::npos){
+                buffer = buffer.substr(getLength("AUTOPLAY="));
+                this->config.autoplay = buffer == "TRUE" || "ENABLED";
             }
         }
     }
@@ -134,7 +150,7 @@ for(const char & x : layout) {
             if(this->word.find(c.c) == std::string::npos) {
                 c.type = NOT_IN;
                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
-                    return target.c == c.c;
+                    return target.c[0] == c.c;
                 });
 
                 if(it != keyboard.end()) {
@@ -310,6 +326,7 @@ void Wordly::gameOverScreenRenderer(void) {
         errorMessage = "";
         renderErrorMessage = false;
         mustUsedChars.clear();
+        initKeyboard();
         getRandomWord();
     }
 
@@ -333,17 +350,28 @@ for(auto & x : keyboard) {
     character.clear();
     character += x.c;
     Color color = x.status == NOT_CHECKED ? LIGHTGRAY : DARKGRAY;
-    Rectangle box = {(float) posX, (float) posY, CELL_SIZE, CELL_SIZE};
+    Rectangle box = {(float) posX, (float) posY, (x.c == "ENT" || x.c == "DEL") ? (float) (CELL_SIZE * 1.5)
+         : (float) CELL_SIZE, (float) CELL_SIZE};
     Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);
     float textX = box.x + (box.width / 2) - (textSize.x / 2);
     float textY = box.y + (box.height / 2) - (textSize.y / 2);
-    x.box = Rectangle(posX, posY, CELL_SIZE, CELL_SIZE);
-    DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, color);
+    bool specialButton  = x.c == "ENT" || x.c == "DEL" ? 1 : 0;
+    int size = 0;
+    if(specialButton) {
+         x.box = Rectangle(posX, posY, CELL_SIZE * 1.5, CELL_SIZE);
+         size = CELL_SIZE * 1.5;
+    }
+    else {
+        size = CELL_SIZE;
+         x.box = Rectangle(posX, posY, CELL_SIZE,CELL_SIZE);
+    }
+   
+    DrawRectangle(posX, posY, size, CELL_SIZE, color);
     DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
 
-    posX += CELL_SIZE + 6;
+    posX += size + 6;
 
-    if(x.c == 'p' || x.c == 'l') {
+    if(x.c == "p" || x.c == "l") {
         posY += CELL_SIZE + 6;
         posX = 60;
     }
@@ -354,9 +382,22 @@ for(auto & x : keyboard) {
 void Wordly::writeKey(void) {
 for(const auto & x : keyboard) {
     if(x.clickStatus()) {
-        if(activeX < 5) {
-            history[activeY][activeX++].c = x.c;
+        if(x.c == "DEL") {
+            if(activeX > 0) {
+                history[activeY][--activeX].c = ' ';
+            }
+        }
+        else if(x.c == "ENT") {
+            if(activeX == 5) {
+                if(wordChecker()) {
+               setGameOver();
+            }
+            } else shakeTimer = 0.5f;
+        }
+        else if(activeX < 5) {
+            history[activeY][activeX++].c = x.c[0];
         }
     }
 }
 }
+void autoBotPlay(void);

@@ -1,7 +1,7 @@
 #include "button.hpp"
 enum Keyboard {NOT_CHECKED, INVALID};
 struct Key {
-        char c;
+        std::string c;
         Keyboard status;
         Rectangle box;
         bool clickStatus(void) const ;

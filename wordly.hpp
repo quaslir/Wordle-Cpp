@@ -29,7 +29,8 @@ Color bg_color;
 Color grid_color;
 Color text_color;
 bool hardMode;
-Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false) {}
+bool autoplay;
+Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false), autoplay(false) {}
 };
 
 
@@ -70,7 +71,7 @@ class Wordly {
     void clearHistory(void);
 
     size_t getLength(const std::string & str) const;
-
+    void autoBotPlay(void);
     void readConfig(void);
     void drawError(const std::string & msg) const;
     void initHistory(void);
