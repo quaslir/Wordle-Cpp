@@ -283,7 +283,7 @@ void Wordly::gameOverScreenRenderer(void) {
         clearHistory();
         activeX = 0;
         activeY = 0;
-        attempts = false;
+        attempts = 0;
         errorMessage = "";
         renderErrorMessage = false;
         mustUsedChars.clear();

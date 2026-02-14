@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Wordly-C++** is a desktop clone of the popular `Wordle` game, built using **C++17** and the **raylib** library. The game challenges you to guess a hidden 5-letter word in 6 attempts with real-time color feedback.
+**Wordly-C++** is a desktop clone of the popular `Wordle` game, built using **C++20** and the **raylib** library. The game challenges you to guess a hidden 5-letter word in 6 attempts with real-time color feedback.
 
 ## Features
 
