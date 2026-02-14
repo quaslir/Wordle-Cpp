@@ -18,6 +18,7 @@ set(SOURCES
     main.cpp        
     wordly.cpp
     button.cpp
+    keyboard.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 

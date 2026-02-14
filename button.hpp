@@ -10,4 +10,6 @@ struct Button {
     
     Button (const Rectangle & rec, const Color & c, const std::string & t) :
     btn(rec), color(c), text(t), isClicked(false) {}
+
+    Button() {}
 };

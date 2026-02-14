@@ -5,13 +5,14 @@
 #include <fstream>
 #include <vector>
 #include <random>
-#include "button.hpp"
 #include "raylib.h"
 #include <array>
 #include <unistd.h>
 #include <unordered_set>
 #include <algorithm>
 #include "parser.hpp"
+#include "keyboard.hpp"
+
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -31,7 +32,6 @@ bool hardMode;
 Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false) {}
 };
 
-enum Keyboard {NOT_CHECKED, INVALID};
 
 class Wordly {
     private :
@@ -40,7 +40,7 @@ class Wordly {
     std::istream & ss;
     size_t attempts = 0;
     std::array<std::array<Character, 5>, 6> history;
-    std::vector<std::pair<char, Keyboard>> keyboard;
+    std::vector<Key> keyboard;
     int activeX = 0;
     int activeY = 0;
     bool renderErrorMessage = false;
@@ -58,9 +58,9 @@ class Wordly {
         void initKeyboard(void);
 
     void getRandomWord(void);
-
+    void writeKey(void);
     void parseFile(void);
-    void renderKeyBoard(void) const ;
+    void renderKeyBoard(void) ;
     bool lengthChecker(void) const;
 
     Color getColor(const Type & t)const;

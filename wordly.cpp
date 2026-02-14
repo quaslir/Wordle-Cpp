@@ -11,7 +11,6 @@ for(const char & x : layout) {
     keyboard.push_back({x, NOT_CHECKED});
 }
 }
-
     bool Wordly::handleInput(std::string_view word) const{
         if(word.length() != 5) return false;
 
@@ -134,6 +133,13 @@ for(const char & x : layout) {
         for(auto & c : history[activeY]) {
             if(this->word.find(c.c) == std::string::npos) {
                 c.type = NOT_IN;
+                auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
+                    return target.c == c.c;
+                });
+
+                if(it != keyboard.end()) {
+                    it->status = INVALID;
+                }
             }
             else if(this->word[idx] == c.c) {
                  c.type  = CORRECT_POS;
@@ -229,6 +235,7 @@ for(const char & x : layout) {
        }
 
        renderKeyBoard();
+       writeKey();
     } else {
         gameOverScreenRenderer();
     }
@@ -318,27 +325,38 @@ void Wordly::setGameOver(void) {
     gameOver = true;
 }
 
-void Wordly::renderKeyBoard(void) const {
+void Wordly::renderKeyBoard(void) {
 int posY = 8 * SQUARE_SIZE + SQUARE_SIZE / 3;
 int posX = 60;
 std::string character;
-for(const auto & x : keyboard) {
+for(auto & x : keyboard) {
     character.clear();
-    character += x.first;
-    Color color = x.second == NOT_CHECKED ? LIGHTGRAY : DARKGRAY;
+    character += x.c;
+    Color color = x.status == NOT_CHECKED ? LIGHTGRAY : DARKGRAY;
     Rectangle box = {(float) posX, (float) posY, CELL_SIZE, CELL_SIZE};
     Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);
     float textX = box.x + (box.width / 2) - (textSize.x / 2);
     float textY = box.y + (box.height / 2) - (textSize.y / 2);
+    x.box = Rectangle(posX, posY, CELL_SIZE, CELL_SIZE);
     DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, color);
     DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
 
     posX += CELL_SIZE + 6;
 
-    if(x.first == 'p' || x.first == 'l') {
+    if(x.c == 'p' || x.c == 'l') {
         posY += CELL_SIZE + 6;
         posX = 60;
     }
 
+}
+}
+
+void Wordly::writeKey(void) {
+for(const auto & x : keyboard) {
+    if(x.clickStatus()) {
+        if(activeX < 5) {
+            history[activeY][activeX++].c = x.c;
+        }
+    }
 }
 }
