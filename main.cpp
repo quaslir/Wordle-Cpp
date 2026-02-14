@@ -2,7 +2,7 @@
 int main(int argc, char * argv[]) {
     std::ifstream file (argv[1]);
     Wordly wordly (file);
-    InitWindow(540, 620, "Worldy-C++");
+    InitWindow(540, 730, "Worldy-C++");
     SetTargetFPS(120);
     while(!WindowShouldClose()) {
         BeginDrawing();

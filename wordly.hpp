@@ -12,6 +12,8 @@
 #include <unordered_set>
 #include <algorithm>
 #include "parser.hpp"
+#define SQUARE_SIZE 65
+#define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
 
 struct Character {
@@ -29,6 +31,8 @@ bool hardMode;
 Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false) {}
 };
 
+enum Keyboard {NOT_CHECKED, INVALID};
+
 class Wordly {
     private :
     std::unordered_set<std::string> dictionary;
@@ -36,6 +40,7 @@ class Wordly {
     std::istream & ss;
     size_t attempts = 0;
     std::array<std::array<Character, 5>, 6> history;
+    std::vector<std::pair<char, Keyboard>> keyboard;
     int activeX = 0;
     int activeY = 0;
     bool renderErrorMessage = false;
@@ -50,11 +55,12 @@ class Wordly {
 
     bool handleInput(std::string_view word) const;
 
+        void initKeyboard(void);
 
     void getRandomWord(void);
 
     void parseFile(void);
-
+    void renderKeyBoard(void) const ;
     bool lengthChecker(void) const;
 
     Color getColor(const Type & t)const;
@@ -79,6 +85,7 @@ class Wordly {
         this->getRandomWord();
         this->readConfig();
         this->initHistory();
+        this->initKeyboard();
     }
 
  void draw(void);

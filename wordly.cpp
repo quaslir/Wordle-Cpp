@@ -5,6 +5,13 @@ bool Wordly::isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
     }
 
+void Wordly::initKeyboard(void) {
+std::string layout{"qwertyuiopasdfghjklzxcvbnm"};
+for(const char & x : layout) {
+    keyboard.push_back({x, NOT_CHECKED});
+}
+}
+
     bool Wordly::handleInput(std::string_view word) const{
         if(word.length() != 5) return false;
 
@@ -208,9 +215,9 @@ bool Wordly::isEmpty(std::string_view str) const{
             buf.clear();
             auto c = this->history[i][j];
             buf += c.c;
-        float calculateX = (float) ((j * 70 * 1.1) + 75) + currentRowOffset;
-        float calculateY =  (float) ((i * 70 * 1.1) + 100);
-        Rectangle box = {(float) calculateX,calculateY, 70, 70};
+        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + 75) + currentRowOffset;
+        float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
+        Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
             Vector2 textSize = MeasureTextEx(GetFontDefault(), buf.c_str(), 40.f, 2);
             float textX = box.x + (box.width / 2) - (textSize.x / 2);
             float textY = box.y + (box.height / 2) - (textSize.y / 2);
@@ -220,6 +227,8 @@ bool Wordly::isEmpty(std::string_view str) const{
         DrawRectangleLinesEx(box, thickness, this->config.grid_color);
        }
        }
+
+       renderKeyBoard();
     } else {
         gameOverScreenRenderer();
     }
@@ -307,4 +316,29 @@ void Wordly::gameOverScreenRenderer(void) {
 }
 void Wordly::setGameOver(void) {
     gameOver = true;
+}
+
+void Wordly::renderKeyBoard(void) const {
+int posY = 8 * SQUARE_SIZE + SQUARE_SIZE / 3;
+int posX = 60;
+std::string character;
+for(const auto & x : keyboard) {
+    character.clear();
+    character += x.first;
+    Color color = x.second == NOT_CHECKED ? LIGHTGRAY : DARKGRAY;
+    Rectangle box = {(float) posX, (float) posY, CELL_SIZE, CELL_SIZE};
+    Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);
+    float textX = box.x + (box.width / 2) - (textSize.x / 2);
+    float textY = box.y + (box.height / 2) - (textSize.y / 2);
+    DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, color);
+    DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
+
+    posX += CELL_SIZE + 6;
+
+    if(x.first == 'p' || x.first == 'l') {
+        posY += CELL_SIZE + 6;
+        posX = 60;
+    }
+
+}
 }
