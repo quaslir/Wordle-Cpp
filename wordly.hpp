@@ -12,7 +12,7 @@
 #include <algorithm>
 #include "parser.hpp"
 #include "keyboard.hpp"
-
+#include <map>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -63,7 +63,7 @@ class Wordly {
     void parseFile(void);
     void renderKeyBoard(void) ;
     bool lengthChecker(void) const;
-
+    std::string generateTheMostAccurateWord(void) const;
     Color getColor(const Type & t)const;
 
     Color applyColor(std::string_view toCheck) const;
@@ -71,7 +71,6 @@ class Wordly {
     void clearHistory(void);
 
     size_t getLength(const std::string & str) const;
-    void autoBotPlay(void);
     void readConfig(void);
     void drawError(const std::string & msg) const;
     void initHistory(void);
@@ -90,9 +89,9 @@ class Wordly {
     }
 
  void draw(void);
-
+void autoBotPlay(void);
 void updateCurrentWord(const char & c);
-
+bool getAutoplayStatus(void) const;
 void backspace(void);
 
 Button drawBtn(const Rectangle & box, const std::string & text, const Color & color) const;

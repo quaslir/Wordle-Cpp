@@ -215,6 +215,12 @@ for(int i = 0; i < layout.size(); i++) {
             if(y.has_value()) {
                 usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));
             }
+            for(auto x : history) {
+                for(auto y : x) {
+                    std::cout << y.c;
+                }
+                std::cout << std::endl;
+            }
             gameOver = true;
             usersHistory.stringify();
         }
@@ -400,4 +406,83 @@ for(const auto & x : keyboard) {
     }
 }
 }
-void autoBotPlay(void);
+bool Wordly::getAutoplayStatus(void) const {
+    return this->config.autoplay;
+}
+std::string Wordly::generateTheMostAccurateWord(void) const {
+std::string notInWord;
+std::string incorrectPosition;
+std::map<int, char> correct;
+std::vector<std::string> total;
+std::string buffer;
+for(const auto & row : history) {
+
+        buffer.clear();
+    for(int i = 0; i < row.size(); i++) {
+        buffer += row[i].c;
+        if(row[i].type == NOT_IN) {
+            bool needed = false;
+            for(const auto & cell : row) {
+                if((cell.c == row[i].c) && (cell.type == INCORRECT_POS || cell.type == CORRECT_POS)) needed = true;
+            }
+            if(notInWord.find(row[i].c) == std::string::npos &&!needed ) {
+                 notInWord += row[i].c;
+            }
+
+           
+        }
+        else if(row[i].type == INCORRECT_POS) {
+            if(incorrectPosition.find(row[i].c) == std::string::npos) {
+            incorrectPosition += row[i].c;
+        }
+    }
+        else if(row[i].type == CORRECT_POS) {
+           correct.insert({i, row[i].c});
+        }
+    }
+    total.push_back(buffer);
+}
+
+auto mostProbableWord = std::find_if(rs.begin(), rs.end(), [notInWord, incorrectPosition, correct, total] (const std::string &w) {
+    for(const auto c : total) {
+        if(w == c) return false;
+    }
+for(const char & c : notInWord) {
+    if(w.find(c) != std::string::npos) return false;
+}
+
+for(const char & c : incorrectPosition) {
+    if(w.find(c) == std::string::npos) return false;
+}
+
+for(auto & c : correct) {
+    if(w[c.first] != c.second) return false;
+}
+
+return true;
+
+});
+if(mostProbableWord != rs.end())  return *mostProbableWord;
+return "";
+}
+void Wordly::autoBotPlay(void) {
+    std::string target;
+    if(activeY ==0) {
+        std::uniform_int_distribution<> dis(0, rs.size());
+        target = rs[dis(gen)];
+    }
+    else {
+target = generateTheMostAccurateWord();
+    }
+    std::uniform_int_distribution<> dis(0, rs.size());
+    if(activeX == 0) {
+    for(int i = 0; i < 5; i++) {
+    history[activeY][activeX++].c = target[i];  
+        
+    }
+    if(wordChecker()) {
+               setGameOver();
+            }
+}
+usleep(500000);
+}
