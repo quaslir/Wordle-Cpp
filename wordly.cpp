@@ -73,7 +73,6 @@ for(int i = 0; i < layout.size(); i++) {
         else if(toCheck == "YELLOW") return YELLOW;
         else if(toCheck == "BLACK") return BLACK;
         else if(toCheck == "PINK") return PINK;
-        else if(toCheck == "BLUE") return BLUE;
         else if(toCheck == "VIOLET") return VIOLET;
         return BLACK;
     }
@@ -108,11 +107,13 @@ for(int i = 0; i < layout.size(); i++) {
             }
             else if((toFind = buffer.find("HARD_MODE=")) != std::string::npos){
                 buffer = buffer.substr(getLength("HARD_MODE="));
-                this->config.hardMode = buffer == "TRUE" || "ENABLED";
+                if(buffer == "TRUE" || buffer == "ENABLED") this->config.hardMode = true;
+                else this->config.hardMode  = false;
             }
             else if((toFind = buffer.find("AUTOPLAY=")) != std::string::npos){
                 buffer = buffer.substr(getLength("AUTOPLAY="));
-                this->config.autoplay = buffer == "TRUE" || "ENABLED";
+                if(buffer == "TRUE" || buffer == "ENABLED") this->config.autoplay = true;
+                else this->config.autoplay  = false;
             }
         }
     }
@@ -193,7 +194,8 @@ for(int i = 0; i < layout.size(); i++) {
             if(y.has_value()) {
                 usersHistory.updateValue<std::string>("wins",std::to_string(y.value() + 1));
             }
-            gameOver = true;
+            pendingGameOver = true;
+            timer = 2.0f;
             usersHistory.stringify();
 
         }
@@ -221,10 +223,12 @@ for(int i = 0; i < layout.size(); i++) {
                 }
                 std::cout << std::endl;
             }
-            gameOver = true;
+            
+            pendingGameOver = true;
+            timer = 2.0f;
             usersHistory.stringify();
         }
-         userWon = toCheck == word; 
+        userWon = toCheck == word;
         return toCheck == word;
     }
 
@@ -233,6 +237,15 @@ for(int i = 0; i < layout.size(); i++) {
     if(!gameOver) {
     std::string buf;
     float offset = 0.f;
+    if(pendingGameOver) {
+        timer -= GetFrameTime();
+
+        if(timer <= 0) {
+            pendingGameOver = false;
+            gameOver = true;
+            timer  =0;
+        }
+    }
     if(shakeTimer > 0) {
         shakeTimer -= GetFrameTime();
         offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
@@ -334,6 +347,8 @@ void Wordly::gameOverScreenRenderer(void) {
         mustUsedChars.clear();
         initKeyboard();
         getRandomWord();
+        keyboard.clear();
+        initKeyboard();
     }
 
     Rectangle box2 =  {255, 500, 120, 30};
@@ -411,7 +426,7 @@ bool Wordly::getAutoplayStatus(void) const {
 }
 std::string Wordly::generateTheMostAccurateWord(void) const {
 std::string notInWord;
-std::string incorrectPosition;
+std::map<int, char> incorrectPosition;
 std::map<int, char> correct;
 std::vector<std::string> total;
 std::string buffer;
@@ -432,8 +447,8 @@ for(const auto & row : history) {
            
         }
         else if(row[i].type == INCORRECT_POS) {
-            if(incorrectPosition.find(row[i].c) == std::string::npos) {
-            incorrectPosition += row[i].c;
+            if(!incorrectPosition.contains(row[i].c)) {
+            incorrectPosition.insert({i, row[i].c});
         }
     }
         else if(row[i].type == CORRECT_POS) {
@@ -451,8 +466,8 @@ for(const char & c : notInWord) {
     if(w.find(c) != std::string::npos) return false;
 }
 
-for(const char & c : incorrectPosition) {
-    if(w.find(c) == std::string::npos) return false;
+for(const auto & c : incorrectPosition) {
+    if(w.find(c.second) == std::string::npos || w[c.first] == c.second) return false;
 }
 
 for(auto & c : correct) {
@@ -466,6 +481,11 @@ if(mostProbableWord != rs.end())  return *mostProbableWord;
 return "";
 }
 void Wordly::autoBotPlay(void) {
+    if(activeY == 6 || pendingGameOver) return;
+    if(botTimer >= 0) {
+        botTimer -= GetFrameTime();
+        return;
+    }
     std::string target;
     if(activeY ==0) {
         std::uniform_int_distribution<> dis(0, rs.size());
@@ -478,11 +498,10 @@ target = generateTheMostAccurateWord();
     if(activeX == 0) {
     for(int i = 0; i < 5; i++) {
     history[activeY][activeX++].c = target[i];  
-        
     }
     if(wordChecker()) {
-               setGameOver();
-            }
+        
+    }
+    else botTimer = 0.8f;
 }
-usleep(500000);
 }

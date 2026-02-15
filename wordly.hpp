@@ -13,6 +13,8 @@
 #include "parser.hpp"
 #include "keyboard.hpp"
 #include <map>
+#include <thread>
+#include <chrono>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -52,6 +54,9 @@ class Wordly {
     std::unordered_set<char> mustUsedChars;
     float shakeTimer = 0.0f;
     float shakeIntensity = 10.f;
+    float timer = 0.0f;
+    bool pendingGameOver = false;
+    float botTimer = 0.0f;
     bool isEmpty(std::string_view str) const;
 
     bool handleInput(std::string_view word) const;
