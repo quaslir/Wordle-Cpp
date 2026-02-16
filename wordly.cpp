@@ -231,9 +231,14 @@ for(int i = 0; i < layout.size(); i++) {
         userWon = toCheck == word;
         return toCheck == word;
     }
-
+    void Wordly::drawTimer(void) const {
+        std::string text = mainTimer.getCurrentTime();
+        DrawText(text.c_str(), 465, 25, 23, GREEN);
+    }
  void Wordly::draw(void) {
-    DrawText("Wordly-C++",125,20,50,config.text_color);
+    mainTimer.update();
+    drawTimer();
+    DrawText("Wordly-C++",115,20,50,config.text_color);
     if(!gameOver) {
     std::string buf;
     float offset = 0.f;
@@ -349,6 +354,7 @@ void Wordly::gameOverScreenRenderer(void) {
         getRandomWord();
         keyboard.clear();
         initKeyboard();
+        mainTimer.start();
     }
 
     Rectangle box2 =  {255, 500, 120, 30};

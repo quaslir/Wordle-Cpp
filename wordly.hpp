@@ -13,8 +13,7 @@
 #include "parser.hpp"
 #include "keyboard.hpp"
 #include <map>
-#include <thread>
-#include <chrono>
+#include "timer.hpp"
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -57,6 +56,7 @@ class Wordly {
     float timer = 0.0f;
     bool pendingGameOver = false;
     float botTimer = 0.0f;
+    Timer mainTimer;
     bool isEmpty(std::string_view str) const;
 
     bool handleInput(std::string_view word) const;
@@ -79,10 +79,11 @@ class Wordly {
     void readConfig(void);
     void drawError(const std::string & msg) const;
     void initHistory(void);
+    void drawTimer(void) const;
+    ParserJSON usersHistory {"../history.json"};
 
     public :
-        ParserJSON usersHistory {"../history.json"};
-    Config config;
+            Config config;
         bool wordChecker(void);
 
     Wordly(std::istream & s) : ss(s) {
@@ -91,6 +92,7 @@ class Wordly {
         this->readConfig();
         this->initHistory();
         this->initKeyboard();
+        mainTimer.start();
     }
 
  void draw(void);
