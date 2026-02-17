@@ -2,3 +2,6 @@ build
 ./build
 /build
 history.json
+./raylib
+.raylib
+raylib

@@ -15,11 +15,11 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(raylib)
 set(SOURCES
-    main.cpp        
-    wordly.cpp
-    button.cpp
-    keyboard.cpp
-    timer.cpp
+    src/main.cpp        
+    src/wordly.cpp
+    src/button.cpp
+    src/keyboard.cpp
+    src/timer.cpp
     
 )
 add_executable(${PROJECT_NAME} ${SOURCES})

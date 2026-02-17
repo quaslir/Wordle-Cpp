@@ -124,7 +124,7 @@ for(int i = 0; i < layout.size(); i++) {
     size_t Wordly::getLength(const std::string & str) const {return str.length();}
 
     void Wordly::readConfig(void) {
-        std::ifstream config("../config.conf");
+        std::ifstream config("../src/config.conf");
         if(!config.is_open()) {
             std::cout << "NOT FOUND" << std::endl;
             return;

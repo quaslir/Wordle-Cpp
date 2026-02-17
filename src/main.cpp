@@ -26,7 +26,6 @@ int main(int argc, char * argv[]) {
         }
         if(IsKeyPressed(KEY_ENTER)){
             if(wordly.wordChecker()) {
-               wordly.setGameOver();
             }
         }
     }
