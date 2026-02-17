@@ -11,7 +11,9 @@
 * **Dynamic Dictionary:** Loads almost 6000 popular 5-letter English words.
 * **Anti-Cheat System:** Only valid dictionary words are accepted as guesses.
 * **Customizable UI:** Change colors and themes via an external configuration file.
-* **Cross-platform:** Easy to build using CMake.
+* **Cross-platform:** Easy to build using CMake.draw
+* **Autoplay-feature** Autoplay playing mode is available
+* **User's statistic** User can see playing statistic, such as `current streak`, `total wins`, `win attempt distribution`, `total lost games`, `best streak` and finally `total games played`
 
 ## Getting Started
 
@@ -48,12 +50,15 @@ You can customize the visual experience by editing the `config.conf` file. The g
 | **BG_COLOR** | `BLACK`, `RAYWHITE` | Background color |
 | **GRID_COLOR** | `GREEN`, `GRAY` | Color of the letter cells |
 | **TEXT_COLOR** | `BLUE`, `WHITE` | Main UI text color |
+| **HARD_MODE** | `TRUE`, `FALSE` | Harder playing mode (you must use a particular letter if it has previously been revealed)|
 
 **Example `config.conf`:**
 ```conf
 BG_COLOR=BLACK
 GRID_COLOR=GREEN
 TEXT_COLOR=BLUE
+HARD_MODE=FALSE
+AUTOPLAY=FALSE
 ```
 ## Controls
 
