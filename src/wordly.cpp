@@ -158,7 +158,7 @@ for(int i = 0; i < layout.size(); i++) {
         }
     }
     void Wordly::drawError(const std::string & msg) const {
-        DrawText(msg.c_str(), 40, 580, 20, RED);
+        DrawText(msg.c_str(), 40, 680, 20, RED);
     }
 
       bool Wordly::wordChecker(void) {
@@ -203,12 +203,26 @@ for(int i = 0; i < layout.size(); i++) {
                  if(this->config.hardMode) {
                     this->mustUsedChars.insert(c.c);
                  }
+                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
+                    return target.c[0] == c.c;
+                });
+
+                if(it != keyboard.end()) {
+                    it->status = CORRECT;
+                }
             }
             else  {
                 c.type = INCORRECT_POS;
                  if(this->config.hardMode) {
                     this->mustUsedChars.insert(c.c);
                  }
+                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
+                    return target.c[0] == c.c;
+                });
+
+                if(it != keyboard.end()) {
+                    it->status = INCORRECT;
+                }
             }
             idx++;
         }
@@ -464,7 +478,7 @@ std::string character;
 for(auto & x : keyboard) {
     character.clear();
     character += x.c;
-    Color color = x.status == NOT_CHECKED ? LIGHTGRAY : DARKGRAY;
+    Color color = x.status == NOT_CHECKED ? LIGHTGRAY : x.status == CORRECT ? GREEN : x.status == INCORRECT ? YELLOW : DARKGRAY;
     Rectangle box = {(float) posX, (float) posY, (x.c == "ENT" || x.c == "DEL") ? (float) (CELL_SIZE * 1.5)
          : (float) CELL_SIZE, (float) CELL_SIZE};
     Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);

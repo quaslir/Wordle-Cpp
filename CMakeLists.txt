@@ -13,7 +13,7 @@ endif()
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(raylib)
+add_subdirectory(vendor/raylib)
 set(SOURCES
     src/main.cpp        
     src/wordly.cpp
