@@ -42,7 +42,7 @@ The game features an intelligent solver that attempts to crack the code using a 
 ### Installation & Build
 ```bash
 # Clone the repository
-git clone [https://github.com/quaslir/Wordly-C-](https://github.com/quaslir/Wordly-C-)
+git clone https://github.com/quaslir/Wordle-Cpp
 cd Wordly-C-
 
 # Clone json parsing library
