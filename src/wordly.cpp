@@ -158,7 +158,7 @@ for(int i = 0; i < layout.size(); i++) {
         }
     }
     void Wordly::drawError(const std::string & msg) const {
-        DrawText(msg.c_str(), 40, 580, 20, RED);
+        DrawText(msg.c_str(), 40, 680, 20, RED);
     }
 
       bool Wordly::wordChecker(void) {
@@ -402,7 +402,22 @@ void Wordly::gameOverScreenRenderer(void) {
     DrawRectangleRec(panel, ColorAlpha(DARKGRAY, 0.9f));
     DrawRectangleLinesEx(panel,2 , config.grid_color);
     if(userWon) {
-    DrawText("WELL DONE!", panel.x + 20, panel.y + 20, 32, GREEN);   
+    DrawText("WELL DONE!", panel.x + 20, panel.y + 20, 32, GREEN); 
+    std::string usersTime = this->mainTimer.getCurrentTime();
+    std::string text = "You guessed the word in ";
+    float minutes = this->mainTimer.getMins();
+    float seconds = this->mainTimer.getSeconds();
+    if(minutes) {
+        
+        
+        std::string params = seconds ? ",\nand " + std::to_string((int) seconds) + " seconds" : "";
+        text += std::to_string((int) minutes) + " minutes" + params;
+    }  
+    else {
+        text += std::to_string((int) seconds) + " seconds";
+    }
+
+    DrawText(text.c_str(), panel.x + 20, panel.y + 60, 20, GREEN);
     } else {
         DrawText("NEXT TIME...", panel.x + 20, panel.y + 20, 32, RED);
         std::string str = "WORD WAS: " + this->word;
