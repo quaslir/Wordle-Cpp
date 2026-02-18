@@ -40,6 +40,19 @@ void Wordly::drawFrontScreen(void) {
     }
     else if(dailyCh.checkClick(GetMousePosition())) {
         state = DAILY_CHALLENGE;
+        this->getRandomWord();
+        mainTimer.start();
+    }
+    else if(practice.checkClick(GetMousePosition())) {
+        state = DAILY_CHALLENGE;
+        this->getRandomWord();
+        mainTimer.start();
+    }
+    else if(BotShowCase.checkClick(GetMousePosition())) {
+        state = AUTOPLAY;
+        this->getRandomWord();
+        mainTimer.start();
+        this->config.autoplay = true;
     }
 }
 
@@ -61,7 +74,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         
        
         this->initKeyboard();
-                this->getRandomWord();
+           
         mainTimer.start();
 }
 bool Wordly::isEmpty(std::string_view str) const{
@@ -94,6 +107,7 @@ void Wordly::initHistoryFile(void) {
 }
 
 void Wordly::initKeyboard(void) {
+keyboard.clear();
 std::string layout{"qwertyuiopasdfghjklDELzxcvbnmENT"};
 std::string buffer;
 for(int i = 0; i < layout.size(); i++) {
@@ -281,7 +295,12 @@ for(int i = 0; i < layout.size(); i++) {
              activeY++;
         }  
         attempts++;
-        if(toCheck == word) {
+        if(this->config.autoplay && (toCheck == word || attempts == 6)) {
+            pendingGameOver = true;
+            timer = 2.0f;
+        }
+        else if(toCheck == word) {
+            try {
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
             auto best = usersHistory.getValue<int>("best_streak");
@@ -312,8 +331,12 @@ for(int i = 0; i < layout.size(); i++) {
             timer = 2.0f;
             usersHistory.stringify();
 
+        } catch(...) {
+            std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
         }
+    } 
         else if(attempts == 6) {
+            try {
             auto x  = usersHistory.getValue<int>("total_games");
             auto y = usersHistory.getValue<int>("losses");
             auto current = usersHistory.getValue<int>("current_streak");
@@ -335,6 +358,9 @@ for(int i = 0; i < layout.size(); i++) {
             pendingGameOver = true;
             timer = 2.0f;
             usersHistory.stringify();
+        } catch(...) {
+            std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
+        }
         }
         userWon = toCheck == word;
         return toCheck == word;
@@ -381,7 +407,7 @@ for(int i = 0; i < layout.size(); i++) {
 
     }
  void Wordly::draw(void) {
-    if(state == DAILY_CHALLENGE || state == PRACTICE) {
+    if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
     mainTimer.update();
     drawTimer();
     drawLogo();
@@ -523,8 +549,6 @@ void Wordly::gameOverScreenRenderer(void) {
         mustUsedChars.clear();
         initKeyboard();
         getRandomWord();
-        keyboard.clear();
-        initKeyboard();
         mainTimer.start();
     }
 
@@ -533,7 +557,18 @@ void Wordly::gameOverScreenRenderer(void) {
     Button exit = drawBtn(box2, text2, PINK);
 
     if(exit.checkClick(GetMousePosition())) {
-        std::exit(0);
+                this->config.autoplay = false;
+                state = MAIN_MENU;
+                gameOver = false;
+                 gameOver = false;
+                clearHistory();
+                activeX = 0;
+                activeY = 0;
+                attempts = 0;
+                errorMessage = "";
+                renderErrorMessage = false;
+                mustUsedChars.clear();
+                initKeyboard();
     }
 }
 void Wordly::setGameOver(void) {
@@ -676,9 +711,7 @@ target = generateTheMostAccurateWord();
     for(int i = 0; i < 5; i++) {
     history[activeY][activeX++].c = target[i];  
     }
-    if(wordChecker()) {
-        
-    }
+    if(wordChecker());
     else botTimer = 0.8f;
 }
 }
