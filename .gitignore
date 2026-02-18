@@ -5,3 +5,6 @@ history.json
 ./raylib
 .raylib
 raylib
+vendor
+./vendor
+/vendor

@@ -4,7 +4,12 @@ std::mt19937 gen(rd());
 Wordly::Wordly(std::istream & s) : ss(s) {
     this->initHistoryFile();
         this->parseFile();
-        this->readConfig();
+        try {
+            this->readConfig();
+        } catch(std::exception & err) {
+            std::cerr << err.what() << std::endl;
+        }
+        
         this->initHistory();
         this->initKeyboard();
                 this->getRandomWord();
@@ -72,7 +77,6 @@ for(int i = 0; i < layout.size(); i++) {
     void Wordly::getRandomWord(void)  {
         std::uniform_int_distribution<> dis(0, rs.size() - 1);
          this->word = rs[dis(gen)];
-         std::cout << word << std::endl;
     }
             void Wordly::parseFile(void) {
         std::string buffer;
@@ -82,8 +86,6 @@ for(int i = 0; i < layout.size(); i++) {
             rs.push_back(buffer);
             dictionary.insert(buffer);
          }
-         std::cout << "Loaded words: " << dictionary
-        .size() << std::endl;
 
     }
     bool Wordly::lengthChecker(void) const {
@@ -126,8 +128,7 @@ for(int i = 0; i < layout.size(); i++) {
     void Wordly::readConfig(void) {
         std::ifstream config("../src/config.conf");
         if(!config.is_open()) {
-            std::cout << "NOT FOUND" << std::endl;
-            return;
+            throw std::runtime_error("Config file was not found");
         }
         std::string buffer;
 

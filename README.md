@@ -61,7 +61,8 @@ make
 
 ```
 
-**⚠️ Important** In the root directory, there are two important files: `history.json` and `sgb-words.txt`. 
+**⚠️ Important** 
+#### In the root directory, there are two important files: `history.json` and `sgb-words.txt`. 
 
 * The first will be created automatically and stores history data; deleting this file will cause all your history to be reset to zero. 
 * The second file is the main dictionary; if you delete this file or move it to another directory, you will need to pass the name of the dictionary via the command line:
@@ -69,7 +70,7 @@ make
 ```bash
 ./Wordle-Cpp "../PATH_TO_DICTIONARY"
 ```
-In case a path is not provided, the game will not launch.
+#### In case a path is not provided, the game will not launch.
 ---
 ## Configuration
 

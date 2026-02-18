@@ -10,10 +10,11 @@
 #include <unistd.h>
 #include <unordered_set>
 #include <algorithm>
-#include "../parser/parser.hpp"
+#include "../json-parser-c/parser.hpp"
 #include "keyboard.hpp"
 #include <map>
 #include "timer.hpp"
+#include <exception>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
