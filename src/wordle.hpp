@@ -5,7 +5,6 @@
 #include <fstream>
 #include <vector>
 #include <random>
-#include "raylib.h"
 #include <array>
 #include <unistd.h>
 #include <unordered_set>
@@ -15,6 +14,7 @@
 #include <map>
 #include "timer.hpp"
 #include <exception>
+#include "textBox.hpp"
 #include <chrono>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35

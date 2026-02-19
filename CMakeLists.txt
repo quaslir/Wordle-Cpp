@@ -22,6 +22,7 @@ set(SOURCES
     src/timer.cpp
     src/wordleDraw.cpp
     src/wordleUsername.cpp
+    src/textBox.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 
