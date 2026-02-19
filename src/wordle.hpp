@@ -15,6 +15,7 @@
 #include <map>
 #include "timer.hpp"
 #include <exception>
+#include <chrono>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -35,7 +36,13 @@ bool autoplay;
 Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false), autoplay(false) {}
 };
 
-
+enum gameState_t {
+    MAIN_MENU,
+    AUTOPLAY,
+    DAILY_CHALLENGE,
+    PRACTICE,
+    EMPTY_USERNAME
+};
 class Wordly {
     private :
     std::unordered_set<std::string> dictionary;
@@ -58,13 +65,16 @@ class Wordly {
     bool pendingGameOver = false;
     float botTimer = 0.0f;
     Timer mainTimer;
+    gameState_t state;
+    std::string username;
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
     bool handleInput(std::string_view word) const;
 
         void initKeyboard(void);
-
+    int centerTextByX(const std::string & text, int fontSize, int width, int marginX) const;
     void getRandomWord(void);
+    void getRandomWordDayChallenge(void);
     void writeKey(void);
     void parseFile(void);
     void renderKeyBoard(void) ;
@@ -83,10 +93,14 @@ class Wordly {
     void drawTimer(void) const;
     void drawGuessDistribution(const Rectangle & rec) const;
     ParserJSON usersHistory {"../history.json"};
-
+    void drawFrontScreen(void);
+    void drawLogo(void) const;
+    void drawUsername(void) const;
+    void setUsername(void);
+    void trim(std::string & text) const;
     public :
-            Config config;
-        bool wordChecker(void);
+    Config config;
+     bool wordChecker(void);
 
     Wordly(std::istream & s); 
 
