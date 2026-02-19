@@ -48,6 +48,7 @@ void Wordly::initHistoryFile(void) {
     main.insert("wins", 0);
     main.insert("username", "");
     main.insert("daily_challenge_active", true);
+    main.insert("total_xp", 0);
     ParserJSON submain;
     submain.insert("1", 0);
     submain.insert("2", 0);
@@ -254,6 +255,15 @@ for(int i = 0; i < layout.size(); i++) {
         }
         else if(toCheck == word) {
             try {
+                int totalXP = 1000;
+                totalXP /= attempts;
+                int timeBonus = (mainTimer.getMins() * 60 + mainTimer.getSeconds()) / 10;
+                if(timeBonus > 1) 
+                totalXP /= timeBonus;
+                if(usersHistory.exists("total_xp")) {
+                    usersHistory.updateValue<std::string>("total_xp",
+                   std::to_string(usersHistory.getValue<int>("total_xp").value() + totalXP));
+                }
               if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));

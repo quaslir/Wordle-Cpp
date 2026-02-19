@@ -100,6 +100,7 @@ class Wordly {
     void drawUsername(void) const;
     void setUsername(void);
     void trim(std::string & text) const;
+    void drawTotalXp(const std::string & xp, const Rectangle & panel) const;
     public :
     Config config;
      bool wordChecker(void);
