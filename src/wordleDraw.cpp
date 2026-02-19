@@ -11,7 +11,7 @@ void Wordly::drawLogo(void) const {
     int space = 10;
     int squareSize = 50;
         int x = (GetScreenWidth() / 2) - (((6 * squareSize) + (5 * space)) / 2);
-        int y = 30;
+        int y = 15;
         int fontSize = 40;
     static std::string buffer;
     Color squareColor = {83, 141, 78, 255};
@@ -19,7 +19,7 @@ void Wordly::drawLogo(void) const {
         buffer.clear();
         buffer += text[i];
         int currentX = x + (i * (squareSize + space));
-   DrawRectangle(currentX, 30, squareSize, squareSize, squareColor);
+   DrawRectangle(currentX, y, squareSize, squareSize, squareColor);
    int textWidth = MeasureText(buffer.c_str(), fontSize);
 
    int textX  = currentX + (squareSize - textWidth) / 2;
@@ -54,7 +54,8 @@ void Wordly::drawFrontScreen(void) {
             switch (i) {
             case 0 :    
             if(activeDailyChallenge) {
-                state = DAILY_CHALLENGE;
+                state = DAILY_CHALLENGE; 
+                mainTimer.start();
                 getRandomWordDayChallenge();
             }
                 break;
@@ -65,6 +66,7 @@ void Wordly::drawFrontScreen(void) {
                 break;
             case 2 :
             state = AUTOPLAY;
+             mainTimer.start();
             getRandomWord();
             this->config.autoplay = true;
             break;
@@ -81,7 +83,9 @@ void Wordly::drawError(const std::string & msg) const {
     }
 void Wordly::drawTimer(void) const {
         std::string text = mainTimer.getCurrentTime();
-        DrawText(text.c_str(), 465, 25, 23, GREEN);
+        int fontSize = 20;
+        int x = MeasureText(text.c_str(), 20);
+        DrawText(text.c_str(), (GetScreenWidth() - x) / 2, 70, fontSize, LIGHTGRAY);
     }
     void Wordly::drawGuessDistribution(const Rectangle & rec) const {
         int startY = rec.y + 200;
@@ -148,13 +152,14 @@ void Wordly::drawTimer(void) const {
         shakeTimer -= GetFrameTime();
         offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
     }
+    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
        for(size_t i = 0; i < 6; i++) {
         float currentRowOffset = i == activeY ? offset : 0.0f;
         for(size_t j = 0; j < 5; j++) {
             buf.clear();
             auto c = this->history[i][j];
             buf += c.c;
-        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + 75) + currentRowOffset;
+        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
         float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
         Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
             Vector2 textSize = MeasureTextEx(GetFontDefault(), buf.c_str(), 40.f, 2);
@@ -277,7 +282,7 @@ void Wordly::gameOverScreenRenderer(void) {
 
 void Wordly::renderKeyBoard(void) {
 int posY = 8 * SQUARE_SIZE + SQUARE_SIZE / 3;
-int posX = 60;
+int posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
 std::string character;
 for(auto & x : keyboard) {
     character.clear();
@@ -306,12 +311,20 @@ for(auto & x : keyboard) {
 
     if(x.c == "p" || x.c == "l") {
         posY += CELL_SIZE + 6;
-        posX = 60;
+        posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
     }
 
 }
 }
 
 void Wordly::drawUsername(void) const {
-    DrawText(username.c_str(), 10, 15, 25, DARKGREEN);
+    int fontSize = 25;
+    int paddingX = 15;
+    
+    int width = MeasureText(this->username.c_str(), fontSize);
+    int x = GetScreenWidth() - width - paddingX;
+    int y = paddingX;
+    Rectangle rec = {(float) x - 10, (float) y - 5, (float) width + 20, (float) fontSize + 10};
+    DrawRectangleRounded(rec, 0.5f, 10, ColorAlpha(BLACK, 0.3f));
+    DrawText(this->username.c_str(), x, y, fontSize, RAYWHITE);
 }
