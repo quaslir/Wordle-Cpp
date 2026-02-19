@@ -437,3 +437,14 @@ target = generateTheMostAccurateWord();
     else botTimer = 0.8f;
 }
 }
+
+void Wordly::getRandomWordDayChallenge(void) {
+    auto now = std::chrono::system_clock::now();
+    time_t formatted = std::chrono::system_clock::to_time_t(now);
+    
+    struct tm * parts = std::localtime(&formatted);
+
+    long id = (parts->tm_year + 1900) * 1000 + (parts->tm_mon + 1) * 100 + parts->tm_mday; 
+
+    this->word = rs[id % rs.size()];
+}

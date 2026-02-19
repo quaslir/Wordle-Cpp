@@ -15,6 +15,7 @@
 #include <map>
 #include "timer.hpp"
 #include <exception>
+#include <chrono>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -73,6 +74,7 @@ class Wordly {
         void initKeyboard(void);
     int centerTextByX(const std::string & text, int fontSize, int width, int marginX) const;
     void getRandomWord(void);
+    void getRandomWordDayChallenge(void);
     void writeKey(void);
     void parseFile(void);
     void renderKeyBoard(void) ;
@@ -93,6 +95,7 @@ class Wordly {
     ParserJSON usersHistory {"../history.json"};
     void drawFrontScreen(void);
     void drawLogo(void) const;
+    void drawUsername(void) const;
     void setUsername(void);
     void trim(std::string & text) const;
     public :

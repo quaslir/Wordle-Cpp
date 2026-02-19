@@ -7,51 +7,51 @@ return marginX + (width - textWidth) / 2;
 }
 
 void Wordly::drawLogo(void) const {
-    int x = centerTextByX("WORDLE", 50, GetScreenWidth());
-    DrawText("WORDLE", x, 10, 50, VIOLET);
+    const std::string text = "WORDLE";
+    int x = centerTextByX(text, 50, GetScreenWidth());
+    DrawText(text.c_str(), x + 2, 32, 50, BLACK);
+    DrawText(text.c_str(), x, 30, 50, RAYWHITE);
 }
 
 void Wordly::drawFrontScreen(void) {
+    ClearBackground({18, 19, 19, 255});
     drawLogo();
-    Rectangle rec = {160, 200, 200, 30};
-    Rectangle rec2 = rec;
-    rec2.y += 40;
-    Rectangle rec3 = rec2;
-    rec3.y += 40;
-    Rectangle rec4 = rec3;
-    rec4.y += 40;
-    static Color dailyChColor = GREEN;
-    static Color practiceColor = GREEN;
-    static Color BotShowCaseColor = GREEN;
-    static Color exitColor = GREEN;
-    Button dailyCh = drawBtn(rec, "Daily challenge", dailyChColor);
-    Button practice = drawBtn(rec2, "Practice mode", practiceColor);
-    Button BotShowCase = drawBtn(rec3, "Autoplay showcase", BotShowCaseColor);
-    Button exit = drawBtn(rec4, "Exit", exitColor);
-    dailyChColor = dailyCh.checkHover(GetMousePosition()) ? DARKGREEN : GREEN;
-    practiceColor = practice.checkHover(GetMousePosition()) ? DARKGREEN : GREEN;
-    BotShowCaseColor = BotShowCase.checkHover(GetMousePosition()) ? DARKGREEN : GREEN;
-    exitColor = exit.checkHover(GetMousePosition()) ? DARKGREEN : GREEN;
+    const int numButtons = 4;
+    std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Exit"};
+    float btnW = 280.f;
+    float btnH  = 40.f;
+    float startX = (GetScreenWidth() - (float) btnW) / 2;
+    float startY = 200;
+    float spacing = 15;
+    for(int i = 0; i < buttons.size(); i++) {
+        Rectangle rec = {startX, startY + i * (btnH + spacing), btnW, btnH};
+        bool isHovered = (CheckCollisionPointRec(GetMousePosition(), rec));
+        Color color = isHovered ? DARKGREEN : GREEN;
+        Button btn = drawBtn(rec, buttons[i], color);
 
-    if(exit.checkClick(GetMousePosition())) {
-        std::exit(0);
+        if(btn.checkClick(GetMousePosition())) {
+
+            switch (i) {
+            case 0 :    
+                state = DAILY_CHALLENGE;
+                getRandomWordDayChallenge();
+                break;
+            case 1 :
+                state = PRACTICE;
+                mainTimer.start();
+                getRandomWord();
+                break;
+            case 2 :
+            state = AUTOPLAY;
+            getRandomWord();
+            this->config.autoplay = true;
+            break;
+
+            case 3: 
+            std::exit(0);
+        }
     }
-    else if(dailyCh.checkClick(GetMousePosition())) {
-        state = DAILY_CHALLENGE;
-        this->getRandomWord();
-        mainTimer.start();
-    }
-    else if(practice.checkClick(GetMousePosition())) {
-        state = DAILY_CHALLENGE;
-        this->getRandomWord();
-        mainTimer.start();
-    }
-    else if(BotShowCase.checkClick(GetMousePosition())) {
-        state = AUTOPLAY;
-        this->getRandomWord();
-        mainTimer.start();
-        this->config.autoplay = true;
-    }
+}
 }
 
 void Wordly::drawError(const std::string & msg) const {
@@ -104,6 +104,7 @@ void Wordly::drawTimer(void) const {
     mainTimer.update();
     drawTimer();
     drawLogo();
+        drawUsername();
     if(!gameOver) {
     std::string buf;
     float offset = 0.0f;
@@ -156,6 +157,7 @@ void Wordly::drawTimer(void) const {
 }
 else {
     drawFrontScreen();
+    drawUsername();
 }
  }
 
@@ -286,4 +288,8 @@ for(auto & x : keyboard) {
     }
 
 }
+}
+
+void Wordly::drawUsername(void) const {
+    DrawText(username.c_str(), 10, 15, 25, DARKGREEN);
 }
