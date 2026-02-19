@@ -17,7 +17,7 @@ void Wordly::drawFrontScreen(void) {
     ClearBackground({18, 19, 19, 255});
     drawLogo();
     const int numButtons = 4;
-    std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Exit"};
+    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Exit"};
     float btnW = 280.f;
     float btnH  = 40.f;
     float startX = (GetScreenWidth() - (float) btnW) / 2;
@@ -26,15 +26,20 @@ void Wordly::drawFrontScreen(void) {
     for(int i = 0; i < buttons.size(); i++) {
         Rectangle rec = {startX, startY + i * (btnH + spacing), btnW, btnH};
         bool isHovered = (CheckCollisionPointRec(GetMousePosition(), rec));
-        Color color = isHovered ? DARKGREEN : GREEN;
+        Color color = isHovered ? Color{106,170,100,255} : Color{83, 141, 78, 255};
+        if(!activeDailyChallenge && i == 0) {
+            color = DARKGREEN;
+        }
         Button btn = drawBtn(rec, buttons[i], color);
 
         if(btn.checkClick(GetMousePosition())) {
 
             switch (i) {
             case 0 :    
+            if(activeDailyChallenge) {
                 state = DAILY_CHALLENGE;
                 getRandomWordDayChallenge();
+            }
                 break;
             case 1 :
                 state = PRACTICE;

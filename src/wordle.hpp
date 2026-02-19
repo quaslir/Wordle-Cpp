@@ -67,10 +67,12 @@ class Wordly {
     Timer mainTimer;
     gameState_t state;
     std::string username;
+    bool activeDailyChallenge = true;
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
     bool handleInput(std::string_view word) const;
-
+    void updateDailyChallengeStatus(void);
+    void checkUsername(std::string & buffer);
         void initKeyboard(void);
     int centerTextByX(const std::string & text, int fontSize, int width, int marginX) const;
     void getRandomWord(void);

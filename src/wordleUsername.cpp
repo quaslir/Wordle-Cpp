@@ -1,20 +1,12 @@
 #include "wordle.hpp" 
 void Wordly::trim(std::string & text) const {
+
 text.erase(0, text.find_first_not_of(" \t\r\n"));
 text.erase(text.find_last_not_of(" \t\r\n") + 1);
+
 }
-void Wordly::setUsername(void) {
-    static std::string buffer{""};
-    Rectangle rec = {170, 300, 180, 30};
-    Rectangle rec2 = rec;
-    rec2.y += rec.height + 15;
-    drawTextBox(rec, 2.0f, DARKGRAY, 20, buffer);
-    static Color color = PURPLE;
-    Button btn = drawBtn(rec2, "Set username", color);
-    if(btn.checkHover(GetMousePosition())) color = DARKPURPLE;
-    else color = PURPLE;
-    if(btn.checkClick(GetMousePosition())) {
-        trim(buffer);
+void Wordly::checkUsername(std::string & buffer) {
+            trim(buffer);
             if(buffer.empty()) return;
             this->username = buffer;
             state = MAIN_MENU;
@@ -25,6 +17,29 @@ void Wordly::setUsername(void) {
                 std::cerr << "Json data was corrupted, could not update username" << std::endl;
             }
             buffer.clear();
+}
+
+void Wordly::setUsername(void) {
+    float boxW = 200.0f;
+    float boxH = 40.0f;
+    float startX = (GetScreenWidth() - boxW) / 2.0f;
+    float startY = GetScreenHeight() / 2.0f - 50.0f;
+
+    static std::string buffer{""};
+
+    Rectangle rec = {startX, startY, boxW, boxH};
+    Rectangle rec2 = {startX, startY + boxH + 15, boxW, boxH};
+
+    DrawText("ENTER YOUR NAME", centerTextByX("ENTER YOUR NAME", 20, GetScreenWidth(), 0), startY - 40, 20, LIGHTGRAY);
+    Color boxColor = buffer.size() > 0 ? RAYWHITE : GRAY;
+    drawTextBox(rec, 2.0f, boxColor, 20, buffer);
+    bool toSubmit = !buffer.empty();
+    Color btnColor = toSubmit ? Color{83,141,78, 255} : DARKGRAY;
+
+    Button btn = drawBtn(rec2, "Set username", btnColor);
+
+    if(toSubmit && btn.checkClick(GetMousePosition())) {
+            checkUsername(buffer);
     }
     int key = GetCharPressed();
         while(key > 0) {
@@ -41,17 +56,7 @@ void Wordly::setUsername(void) {
         }
 
         if(IsKeyPressed(KEY_ENTER)) {
-            trim(buffer);
-            if(buffer.empty()) return;
-            this->username = buffer;
-            state = MAIN_MENU;
-            try {
-               usersHistory.updateValue<std::string>("username", username);
-               usersHistory.stringify();
-            } catch(...) {
-                std::cerr << "Json data was corrupted, could not update username" << std::endl;
-            }
-            buffer.clear();
+           checkUsername(buffer);
         }
 
 }

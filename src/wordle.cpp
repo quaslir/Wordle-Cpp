@@ -20,7 +20,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             std::cerr << err.what() << std::endl;
         }
         
-       
+       if(usersHistory.exists("daily_challenge_active")) {
+        auto x = usersHistory.getValue<bool>("daily_challenge_active");
+        if(x.has_value()) {
+            activeDailyChallenge = x.value();
+        }
+       }
         this->initKeyboard();
            
         mainTimer.start();
@@ -42,6 +47,7 @@ void Wordly::initHistoryFile(void) {
     main.insert("current_streak", 0);
     main.insert("wins", 0);
     main.insert("username", "");
+    main.insert("daily_challenge_active", true);
     ParserJSON submain;
     submain.insert("1", 0);
     submain.insert("2", 0);
@@ -248,6 +254,7 @@ for(int i = 0; i < layout.size(); i++) {
         }
         else if(toCheck == word) {
             try {
+              if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
             auto best = usersHistory.getValue<int>("best_streak");
@@ -284,6 +291,7 @@ for(int i = 0; i < layout.size(); i++) {
     } 
         else if(attempts == 6) {
             try {
+                if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto x  = usersHistory.getValue<int>("total_games");
             auto y = usersHistory.getValue<int>("losses");
             auto current = usersHistory.getValue<int>("current_streak");
@@ -447,4 +455,13 @@ void Wordly::getRandomWordDayChallenge(void) {
     long id = (parts->tm_year + 1900) * 1000 + (parts->tm_mon + 1) * 100 + parts->tm_mday; 
 
     this->word = rs[id % rs.size()];
+}
+
+
+void Wordly::updateDailyChallengeStatus(void) {
+    try {
+    usersHistory.updateValue<std::string>("daily_challenge_active", "false");
+    } catch(...) {
+        std::cerr << "Json file was corrupted" << std::endl;
+    } 
 }
