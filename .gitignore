@@ -1,10 +1,7 @@
-build
-./build
-/build
+build/
+raylib/
+vendor/
+.env
+node_modules/
 history.json
-./raylib
-.raylib
-raylib
-vendor
-./vendor
-/vendor
+.vs-code
