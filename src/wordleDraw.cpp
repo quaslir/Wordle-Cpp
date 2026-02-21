@@ -6,29 +6,6 @@ int textWidth = MeasureText(text.c_str(), fontSize);
 return marginX + (width - textWidth) / 2;
 }
 
-void Wordly::drawLogo(void) const {
-    const std::string text = "WORDLE";
-    int space = 10;
-    int squareSize = 50;
-        int x = (GetScreenWidth() / 2) - (((6 * squareSize) + (5 * space)) / 2);
-        int y = 15;
-        int fontSize = 40;
-    static std::string buffer;
-    Color squareColor = {83, 141, 78, 255};
-    for(int i = 0; i < text.size(); i++) {
-        buffer.clear();
-        buffer += text[i];
-        int currentX = x + (i * (squareSize + space));
-   DrawRectangle(currentX, y, squareSize, squareSize, squareColor);
-   int textWidth = MeasureText(buffer.c_str(), fontSize);
-
-   int textX  = currentX + (squareSize - textWidth) / 2;
-   int textY = y + (squareSize - fontSize) / 2;
-      DrawText(buffer.c_str(), textX + 2, textY + 2, fontSize, BLACK);
-    DrawText(buffer.c_str(), textX, textY, fontSize, RAYWHITE);
-    } 
-    
-}
 
 void Wordly::drawFrontScreen(void) {
     ClearBackground({18, 19, 19, 255});
@@ -159,7 +136,7 @@ void Wordly::drawTimer(void) const {
     }
 }
 else if(state == LEADERBOARD) {
-    loadLeaderboard();
+    leaderboard.loadLeaderboard();
 }
 else {
     drawFrontScreen();
@@ -222,24 +199,4 @@ void Wordly::drawUsername(void) const {
     Rectangle rec = {(float) x - 10, (float) y - 5, (float) width + 20, (float) fontSize + 10};
     DrawRectangleRounded(rec, 0.5f, 10, ColorAlpha(BLACK, 0.3f));
     DrawText(this->username.c_str(), x, y, fontSize, RAYWHITE);
-}
-
-void Wordly::renderLeaderboard(const std::vector<std::pair<std::string, size_t>> & leaderboard) const {
-    DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
-    drawLogo();
-
-int x = 10;
-int y = 100;
-    for(int i = 0; i < leaderboard.size(); i++) {
-        DrawText(std::to_string(i).c_str(), x, y, 20, RAYWHITE);
-        x += 30;
-        DrawText(leaderboard[i].first.c_str(), x, y, 20, RAYWHITE);
-
-        x = GetScreenWidth() - 100;
-
-        DrawText(std::to_string((int) leaderboard[i].second).c_str(), x, y, 20, RAYWHITE);
-
-        y += 30;
-        x = 10;
-    }
 }

@@ -1,22 +1,15 @@
 #include <iostream>
-#include <string>
-#include <string_view>
-#include <sstream>
+#include "leaderboard.hpp"
 #include <fstream>
-#include <vector>
 #include <random>
 #include <array>
-#include <unistd.h>
 #include <unordered_set>
-#include <algorithm>
-#include "../json-parser-c/parser.hpp"
 #include "keyboard.hpp"
 #include <unordered_map>
 #include "timer.hpp"
 #include <exception>
 #include "textBox.hpp"
 #include <chrono>
-#include <curl/curl.h>
 #define SQUARE_SIZE 65
 #define CELL_SIZE 35
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
@@ -69,8 +62,9 @@ class Wordly {
     Timer mainTimer;
     gameState_t state;
     std::string username;
-     std::pair<bool, long> dailyChallenge;
+    std::pair<bool, long> dailyChallenge;
     size_t totalXp = 0;
+    Leaderboard leaderboard;
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
     bool handleInput(std::string_view word) const;
@@ -95,14 +89,12 @@ class Wordly {
     void drawGuessDistribution(const Rectangle & rec) const;
     ParserJSON usersHistory;
     void drawFrontScreen(void);
-    void drawLogo(void) const;
     void drawUsername(void) const;
     void setUsername(void);
     void trim(std::string & text) const;
     void drawTotalXp( const Rectangle & panel) const;
     void clearVariables(void);
-    void loadLeaderboard(void) const;
-    void renderLeaderboard(const std::vector<std::pair<std::string, size_t>> & leaderboard) const;
+    
     public :
     Config config;
      bool wordChecker(void);

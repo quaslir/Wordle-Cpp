@@ -26,6 +26,7 @@ set(SOURCES
     src/textBox.cpp
     src/drawStats.cpp
     src/leaderboard.cpp
+
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
 

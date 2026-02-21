@@ -1,5 +1,4 @@
-#include "wordle.hpp"
-
+#include "leaderboard.hpp"
 size_t leaderboardCallback(void * contents, size_t size, size_t number, std::string * result) {
     size_t totalSize = size * number;
     result->append((char *) contents, totalSize);
@@ -7,7 +6,7 @@ size_t leaderboardCallback(void * contents, size_t size, size_t number, std::str
 }
 
 
-void Wordly::loadLeaderboard(void) const {
+void Leaderboard::loadLeaderboard(void) const {
     CURL * curl = curl_easy_init();
     if(!curl) {
         throw std::runtime_error("HTTP request failed");
@@ -36,6 +35,30 @@ void Wordly::loadLeaderboard(void) const {
         size_t xp = x.getValue<size_t>("xp").value();
         leaderboard.push_back({username, xp});
     }
+    std::sort(leaderboard.begin(), leaderboard.end(), [](const std::pair<std::string, size_t> & first, 
+    const std::pair<std::string, size_t> & second) {
+        return first.second > second.second;
+    });
     renderLeaderboard(leaderboard);
     curl_easy_cleanup(curl);
+}
+
+void Leaderboard::renderLeaderboard(const std::vector<std::pair<std::string, size_t>> & leaderboard) const {
+    DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
+    drawLogo();
+
+int x = 10;
+int y = 100;
+    for(int i = 0; i < leaderboard.size(); i++) {
+        DrawText(std::to_string(i + 1).c_str(), x, y, 20, RAYWHITE);
+        x += 30;
+        DrawText(leaderboard[i].first.c_str(), x, y, 20, RAYWHITE);
+
+        x = GetScreenWidth() - 100;
+
+        DrawText(std::to_string((int) leaderboard[i].second).c_str(), x, y, 20, RAYWHITE);
+
+        y += 30;
+        x = 10;
+    }
 }
