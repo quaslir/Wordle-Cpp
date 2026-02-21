@@ -23,8 +23,19 @@ void Wordly::loadLeaderboard(void) const {
     if(result != CURLE_OK) {
         throw std::runtime_error(std::string("Error: " + std::to_string((int) result)));
     }
-    ParserJSON ps ("../test.json");
-    ps.parse();
-    ps.listKeys();
+    ParserJSON ps;
+    std::stringstream ss (buffer);
+
+    ps.parse(ss);
+            
+    size_t size = ps.getSize();
+    std::vector<std::pair<std::string, size_t>> leaderboard;
+    for(size_t i = 0; i < size; i++) {
+        auto x = ps.getObject(std::to_string(i)).value();
+        std::string username = x.getValue<std::string>("username").value();
+        size_t xp = x.getValue<size_t>("xp").value();
+        leaderboard.push_back({username, xp});
+    }
+    renderLeaderboard(leaderboard);
     curl_easy_cleanup(curl);
 }

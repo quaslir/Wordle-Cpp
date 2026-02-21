@@ -42,7 +42,8 @@ enum gameState_t {
     AUTOPLAY,
     DAILY_CHALLENGE,
     PRACTICE,
-    EMPTY_USERNAME
+    EMPTY_USERNAME,
+    LEADERBOARD
 };
 class Wordly {
     private :
@@ -92,7 +93,7 @@ class Wordly {
     void initHistory(void);
     void drawTimer(void) const;
     void drawGuessDistribution(const Rectangle & rec) const;
-    ParserJSON usersHistory {"../history.json"};
+    ParserJSON usersHistory;
     void drawFrontScreen(void);
     void drawLogo(void) const;
     void drawUsername(void) const;
@@ -101,6 +102,7 @@ class Wordly {
     void drawTotalXp( const Rectangle & panel) const;
     void clearVariables(void);
     void loadLeaderboard(void) const;
+    void renderLeaderboard(const std::vector<std::pair<std::string, size_t>> & leaderboard) const;
     public :
     Config config;
      bool wordChecker(void);

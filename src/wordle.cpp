@@ -3,7 +3,6 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 Wordly::Wordly(std::istream & s) : ss(s) {
-    loadLeaderboard();
     this->state = MAIN_MENU;
     this->initHistoryFile();
      this->initHistory();
@@ -50,7 +49,8 @@ void Wordly::initHistoryFile(void) {
 
     std::ifstream historyCheck("../history.json");
         if(historyCheck.is_open()) return;      
-    ParserJSON main ("../history.json");
+        std::ofstream history("../history.json");
+    ParserJSON main;
     main.insert("total_games", 0);
     main.insert("best_streak", 0);
     main.insert("last_played_date", "");
@@ -107,7 +107,8 @@ for(int i = 0; i < layout.size(); i++) {
     }
 
     void Wordly::initHistory(void) {
-        this->usersHistory.parse();
+        std::ifstream file ("../history.json");
+        this->usersHistory.parse(file);
     }
     void Wordly::getRandomWord(void)  {
         std::uniform_int_distribution<> dis(0, rs.size() - 1);

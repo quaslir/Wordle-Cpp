@@ -21,9 +21,9 @@ const connectDb = async() => {
     }
 }
 connectDb();
-
+console.log(await User.find());
 app.get("/leaderboard", async(req, res) => {
-return res.json({leaderboard: await User.find().select("username xp")});
+return res.json(await User.find().select("username xp"));
 });
 
 app.listen(3000, ()=> console.log("Server is working on 3000 port"));

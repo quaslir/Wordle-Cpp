@@ -34,7 +34,7 @@ void Wordly::drawFrontScreen(void) {
     ClearBackground({18, 19, 19, 255});
     drawLogo();
     const int numButtons = 4;
-    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Exit"};
+    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "Exit"};
     float btnW = 280.f;
     float btnH  = 40.f;
     float startX = (GetScreenWidth() - (float) btnW) / 2;
@@ -74,7 +74,12 @@ void Wordly::drawFrontScreen(void) {
             this->config.autoplay = true;
             break;
 
-            case 3: 
+            case 3:
+
+            state = LEADERBOARD;
+            break;
+
+            case 4: 
             std::exit(0);
         }
     }
@@ -153,6 +158,9 @@ void Wordly::drawTimer(void) const {
         drawError(errorMessage);
     }
 }
+else if(state == LEADERBOARD) {
+    loadLeaderboard();
+}
 else {
     drawFrontScreen();
     drawUsername();
@@ -216,3 +224,22 @@ void Wordly::drawUsername(void) const {
     DrawText(this->username.c_str(), x, y, fontSize, RAYWHITE);
 }
 
+void Wordly::renderLeaderboard(const std::vector<std::pair<std::string, size_t>> & leaderboard) const {
+    DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
+    drawLogo();
+
+int x = 10;
+int y = 100;
+    for(int i = 0; i < leaderboard.size(); i++) {
+        DrawText(std::to_string(i).c_str(), x, y, 20, RAYWHITE);
+        x += 30;
+        DrawText(leaderboard[i].first.c_str(), x, y, 20, RAYWHITE);
+
+        x = GetScreenWidth() - 100;
+
+        DrawText(std::to_string((int) leaderboard[i].second).c_str(), x, y, 20, RAYWHITE);
+
+        y += 30;
+        x = 10;
+    }
+}
