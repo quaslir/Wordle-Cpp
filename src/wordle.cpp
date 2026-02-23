@@ -524,6 +524,14 @@ else if(state == LEADERBOARD) {
     } else leaderboard.renderLeaderboard();
     
 }
+
+else if(state == PVP) {
+if(!manager.connected()) {
+manager.connect("ws://localhost:8000");
+}
+else manager.sendmsg("test test");
+}
+
 else {
     drawFrontScreen();
     drawUsername();

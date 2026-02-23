@@ -9,6 +9,7 @@
 #include "timer.hpp"
 #include <exception>
 #include "textBox.hpp"
+#include "./NetworkProtocol/network.hpp"
 #include <chrono>
 #include <thread>
 #define SQUARE_SIZE 65
@@ -37,7 +38,8 @@ enum gameState_t {
     DAILY_CHALLENGE,
     PRACTICE,
     EMPTY_USERNAME,
-    LEADERBOARD
+    LEADERBOARD,
+    PVP
 };
 class Wordly {
     private :
@@ -66,6 +68,7 @@ class Wordly {
     std::pair<bool, long> dailyChallenge;
     size_t totalXp = 0;
     Leaderboard leaderboard;
+    NetworkManager manager;
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
     bool handleInput(std::string_view word) const;

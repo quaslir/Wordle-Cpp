@@ -23,7 +23,7 @@ void Wordly::drawFrontScreen(void) {
     drawLogo();
     drawPattern();
     const int numButtons = 4;
-    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "Exit"};
+    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
     float btnH  = 40.f;
     float startX = (GetScreenWidth() - (float) btnW) / 2;
@@ -74,7 +74,11 @@ void Wordly::drawFrontScreen(void) {
             state = LEADERBOARD;
             break;
 
-            case 4: 
+            case 4:
+            state = PVP;
+            break;
+
+            case 5: 
             std::exit(0);
         }
     }
@@ -150,7 +154,7 @@ mainTimer.update();
     if(!gameOver) {
     float offset = 0.0f;
     if(pendingGameOver) {
-            mainTimer.stop();
+        mainTimer.stop();
         timer -= GetFrameTime();
 
         if(timer <= 0) {
@@ -195,3 +199,4 @@ mainTimer.update();
         drawError(errorMessage);
     }
 }
+

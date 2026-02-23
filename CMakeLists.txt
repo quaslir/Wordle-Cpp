@@ -11,6 +11,20 @@ endif()
 
 find_package(CURL REQUIRED)
 
+
+include(FetchContent)
+
+FetchContent_Declare(
+    ixwebsocket
+    GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+    GIT_TAG master
+)
+
+set(IXWEBSOCKET_INSTALL OFF CACHE BOOL "" FORCE)
+set(USE_TLS ON CACHE BOOL "" FORCE) 
+
+FetchContent_MakeAvailable(ixwebsocket)
+
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
@@ -26,6 +40,7 @@ set(SOURCES
     src/textBox.cpp
     src/drawStats.cpp
     src/leaderboard.cpp
+    src/NetworkProtocol/network.cpp
 
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -34,7 +49,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/raylib/src)
 
 
-target_link_libraries(${PROJECT_NAME} raylib CURL::libcurl)
+target_link_libraries(${PROJECT_NAME} raylib CURL::libcurl ixwebsocket)
 
 
 if(APPLE) 

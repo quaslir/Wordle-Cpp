@@ -3,12 +3,34 @@ import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
 import { User } from "../src/models/user.js"
+import { WebSocket, WebSocketServer } from "ws"
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 
 app.use(cors());
+
+const ws = new WebSocketServer({port: 8000});
+
+
+ws.on('connection', (ws: WebSocket) => {
+    console.log("New player connected!");
+
+    ws.on('message', (msg: string) => {
+        console.log(msg.toString());
+    })
+
+    ws.send("test test");
+});
+
+ws.on('close', () => {
+    console.log("Player disconnected");
+});
+
+ws.on('error', console.error);
+
+
 
 const url:string = process.env.MONGO_URL as string;
 const connectDb = async() => {
