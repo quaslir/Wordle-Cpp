@@ -102,7 +102,8 @@ class Wordly {
      void update(void);
      void drawPvp(void);
      void drawGrid(const float offset);
-     void readKey(void);
+     void readKey(bool pvpMode);
+     void updateKeyStatus(void);
     public :
     Config config;
      bool wordChecker(void);

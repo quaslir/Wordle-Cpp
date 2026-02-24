@@ -77,7 +77,6 @@ void Wordly::drawFrontScreen(void) {
             case 4:
             state = PVP;
             manager.connect("ws://localhost:8000");
-            std::cout << "CONNECTING" << std::endl;
             break;
 
             case 5: 

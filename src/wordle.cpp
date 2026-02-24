@@ -46,6 +46,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
        leaderboard.getUsername = [this]() {
         return this->username;
        };
+ 
 }
 bool Wordly::isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
@@ -157,33 +158,8 @@ for(int i = 0; i < layout.size(); i++) {
     }
     size_t Wordly::getLength(const std::string & str) const {return str.length();}
     
-
-      bool Wordly::wordChecker(void) {
-            if(!lengthChecker()) return false;
-            std::string toCheck;
-         for(const auto & c : history[activeY]) {
-            toCheck += c.c;
-         }
-         if(this->config.hardMode) {
-            for(const char &c : this->mustUsedChars) {
-                if(toCheck.find(c) == std::string::npos) {
-                    renderErrorMessage = true;
-                    errorMessage = "You must use ";
-                    errorMessage += " letter";
-                    errorMessage += c;
-                    errorMessage += " in your word";
-                    return false;
-                }
-            }
-         }
-         if(!dictionary.contains(toCheck)) {
-            errorMessage = "This word does not exists in our database";
-            renderErrorMessage = true;
-            shakeTimer = 0.5f;
-            return false;
-         }
-         renderErrorMessage = false;
-        size_t idx = 0;
+void Wordly::updateKeyStatus(void) {
+    size_t idx = 0;
         for(auto & c : history[activeY]) {
             if(this->word.find(c.c) == std::string::npos) {
                 c.type = NOT_IN;
@@ -223,6 +199,33 @@ for(int i = 0; i < layout.size(); i++) {
             }
             idx++;
         }
+}
+      bool Wordly::wordChecker(void) {
+            if(!lengthChecker()) return false;
+            std::string toCheck;
+         for(const auto & c : history[activeY]) {
+            toCheck += c.c;
+         }
+         if(this->config.hardMode) {
+            for(const char &c : this->mustUsedChars) {
+                if(toCheck.find(c) == std::string::npos) {
+                    renderErrorMessage = true;
+                    errorMessage = "You must use ";
+                    errorMessage += " letter";
+                    errorMessage += c;
+                    errorMessage += " in your word";
+                    return false;
+                }
+            }
+         }
+         if(!dictionary.contains(toCheck)) {
+            errorMessage = "This word does not exists in our database";
+            renderErrorMessage = true;
+            shakeTimer = 0.5f;
+            return false;
+         }
+         renderErrorMessage = false;
+         updateKeyStatus();
         activeX = 0;
         if(activeY < 6) {
              activeY++;
@@ -507,7 +510,7 @@ if(state == EMPTY_USERNAME) {
         gameOverScreenRenderer();
     }
 }
-void Wordly::readKey(void) {
+void Wordly::readKey(bool pvpMode) {
     if(config.autoplay) {
         } else {
         int key = GetCharPressed();
@@ -522,14 +525,19 @@ void Wordly::readKey(void) {
             backspace();
         }
         if(IsKeyPressed(KEY_ENTER)){
+            if(!pvpMode) {
         wordChecker();
+            }
+            else {
+                updateKeyStatus();
+            }
         }
     }
 }
 void Wordly::play(void) {
 update();
 if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
-    readKey();
+    readKey(false);
     drawOriginalStateGame();
 }
 else if(state == LEADERBOARD) {
@@ -550,9 +558,15 @@ if(manager.connected()) {
 
     manager.receive();
     if(manager.getStatus()) {
+        
+        this->word = manager.packet.word;
+        std::cout << manager.packet.turn << std::endl;
         if(manager.packet.turn) {
-            readKey();
+            readKey(true);
         }
+    }
+    else {
+        DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
 }
 }

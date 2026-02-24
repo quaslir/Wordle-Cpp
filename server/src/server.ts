@@ -16,12 +16,16 @@ const ws = new WebSocketServer({port: 8000});
 
 const queue : WebSocket[] = [];
 
-interface Packet {
+interface startPacket {
 turn: boolean,
 word: string,
 roomId:string
 };
 
+interface receivedGamePacket {
+    targetWord: string,
+    guessWord: string,
+}
 
 const activeRooms = new Map<string, any>();
 
@@ -37,13 +41,13 @@ ws.on('connection', (ws: WebSocket) => {
         console.log("STARTING GAME...");
         const player1Starts:boolean = Math.round(Math.random()) == 1;
         const roomId:string = uuidv4();
-        const packet1:Packet = {
+        const packet1:startPacket = {
             turn: player1Starts,
             word: "test",
             roomId: roomId
         };
 
-        const packet2:Packet = {
+        const packet2:startPacket = {
             turn: !player1Starts,
             word: "test",
             roomId: roomId
