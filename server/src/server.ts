@@ -22,17 +22,24 @@ word: string,
 roomId:string
 };
 
-interface receivedGamePacket {
-    targetWord: string,
-    guessWord: string,
-}
 
-const activeRooms = new Map<string, any>();
+interface gamePacket {
+    player1:WebSocket,
+    player2:WebSocket,
+    word:string
+};
+
+
+interface receivedPacket{
+    id: string,
+    word:string
+};
+
+const activeRooms = new Map<string, gamePacket>();
 
 
 ws.on('connection', (ws: WebSocket) => {
     console.log("New player connected!");
-    console.log(queue);  
     queue.push(ws);
     if(queue.length >= 2) {
         const p1 = queue.shift();
@@ -52,6 +59,11 @@ ws.on('connection', (ws: WebSocket) => {
             word: "test",
             roomId: roomId
         };
+        activeRooms.set(roomId, {
+            player1: p1!,
+            player2: p2!,
+            word: "test"
+        });
         setTimeout(() => {
         if(p1?.readyState === WebSocket.OPEN) {
         p1?.send(JSON.stringify({...packet1}), (error) => {
@@ -75,6 +87,8 @@ ws.on('connection', (ws: WebSocket) => {
         }, 200);
     }
 
+
+
     ws.on('message', (msg: string) => {
         console.log(msg.toString());
         if(msg.toString() === "STOP") {
@@ -84,6 +98,17 @@ ws.on('connection', (ws: WebSocket) => {
             }
             ws.close();
         }
+
+        else {
+            const packet:receivedPacket = JSON.parse(msg.toString());
+            const room = activeRooms.get(packet.id);
+            if(!room) return;
+            const currentUser:WebSocket = ws == room.player1 ? room.player1 : room.player2;
+            const nextUser:WebSocket = currentUser == room.player1 ? room.player2 : room.player1;
+            nextUser.send(JSON.stringify({word: packet.word, turn: true}));
+            currentUser.send(JSON.stringify({turn: false}));
+        }
+
     });
 
 });

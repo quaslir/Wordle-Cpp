@@ -46,7 +46,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
        leaderboard.getUsername = [this]() {
         return this->username;
        };
- 
+       manager.setOnWord([this] (const std::string & word) {
+        for(int i = 0; i < 5; i++) {
+        history[activeY][activeX++].c = word[i];  
+    }
+    updateKeyStatus();
+       });
 }
 bool Wordly::isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
@@ -199,6 +204,11 @@ void Wordly::updateKeyStatus(void) {
             }
             idx++;
         }
+                activeX = 0;
+        if(activeY < 6) {
+             activeY++;
+        }  
+        attempts++;
 }
       bool Wordly::wordChecker(void) {
             if(!lengthChecker()) return false;
@@ -226,11 +236,7 @@ void Wordly::updateKeyStatus(void) {
          }
          renderErrorMessage = false;
          updateKeyStatus();
-        activeX = 0;
-        if(activeY < 6) {
-             activeY++;
-        }  
-        attempts++;
+
         if(this->config.autoplay && (toCheck == word || attempts == 6)) {
             pendingGameOver = true;
             timer = 2.0f;
@@ -529,7 +535,12 @@ void Wordly::readKey(bool pvpMode) {
         wordChecker();
             }
             else {
+                std::string usersWord;
+                for(const auto & x : history[activeY]) {
+                    usersWord += x.c;
+                }
                 updateKeyStatus();
+                manager.sendGamePacket(usersWord);
             }
         }
     }
@@ -554,13 +565,13 @@ else if(state == LEADERBOARD) {
 
 else if(state == PVP) {
     drawPvp();
+    std::cout << manager.packet.activeY << std::endl;
 if(manager.connected()) {
 
     manager.receive();
     if(manager.getStatus()) {
         
         this->word = manager.packet.word;
-        std::cout << manager.packet.turn << std::endl;
         if(manager.packet.turn) {
             readKey(true);
         }
