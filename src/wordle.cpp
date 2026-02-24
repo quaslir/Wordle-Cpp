@@ -507,10 +507,29 @@ if(state == EMPTY_USERNAME) {
         gameOverScreenRenderer();
     }
 }
-
+void Wordly::readKey(void) {
+    if(config.autoplay) {
+        } else {
+        int key = GetCharPressed();
+        while(key > 0) {
+            if((key >= 32) && (key <= 125)) {
+            updateCurrentWord((char) key);
+   
+            }
+            key = GetCharPressed();
+        }
+        if(IsKeyPressed(KEY_BACKSPACE)) {
+            backspace();
+        }
+        if(IsKeyPressed(KEY_ENTER)){
+        wordChecker();
+        }
+    }
+}
 void Wordly::play(void) {
 update();
 if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
+    readKey();
     drawOriginalStateGame();
 }
 else if(state == LEADERBOARD) {
@@ -526,10 +545,16 @@ else if(state == LEADERBOARD) {
 }
 
 else if(state == PVP) {
-if(!manager.connected()) {
-manager.connect("ws://localhost:8000");
+    drawPvp();
+if(manager.connected()) {
+
+    manager.receive();
+    if(manager.getStatus()) {
+        if(manager.packet.turn) {
+            readKey();
+        }
+    }
 }
-else manager.sendmsg("test test");
 }
 
 else {

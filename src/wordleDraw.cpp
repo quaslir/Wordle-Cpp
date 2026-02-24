@@ -76,6 +76,8 @@ void Wordly::drawFrontScreen(void) {
 
             case 4:
             state = PVP;
+            manager.connect("ws://localhost:8000");
+            std::cout << "CONNECTING" << std::endl;
             break;
 
             case 5: 
@@ -146,6 +148,26 @@ void Wordly::drawUsername(void) const {
 }
 
 
+void Wordly::drawGrid(const float offset) {
+    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
+       for(size_t i = 0; i < 6; i++) {
+        float currentRowOffset = i == activeY ? offset : 0.0f;
+        for(size_t j = 0; j < 5; j++) {
+            auto c = this->history[i][j];
+        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
+        float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
+        Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
+            Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), 40.f, 2);
+            float textX = box.x + (box.width / 2) - (textSize.x / 2);
+            float textY = box.y + (box.height / 2) - (textSize.y / 2);
+            DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, 40, getColor(c.type));
+        float thickness = 3.0f;
+
+        DrawRectangleLinesEx(box, thickness, this->config.grid_color);
+       }
+       }
+}
+
 void Wordly::drawOriginalStateGame(void) {
 mainTimer.update();
     drawTimer();
@@ -172,24 +194,8 @@ mainTimer.update();
         shakeTimer -= GetFrameTime();
         offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
     }
-    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
-       for(size_t i = 0; i < 6; i++) {
-        float currentRowOffset = i == activeY ? offset : 0.0f;
-        for(size_t j = 0; j < 5; j++) {
-            auto c = this->history[i][j];
-        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
-        float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
-        Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
-            Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), 40.f, 2);
-            float textX = box.x + (box.width / 2) - (textSize.x / 2);
-            float textY = box.y + (box.height / 2) - (textSize.y / 2);
-            DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, 40, getColor(c.type));
-        float thickness = 3.0f;
 
-        DrawRectangleLinesEx(box, thickness, this->config.grid_color);
-       }
-       }
-
+    drawGrid(offset);
        renderKeyBoard();
     } else {
         gameOverScreenRenderer();
@@ -200,3 +206,22 @@ mainTimer.update();
     }
 }
 
+
+void Wordly::drawPvp(void) {
+
+    Button btn;
+    Rectangle rec = {(float) GetScreenWidth() / 2 - 60, (float) GetScreenHeight() - 80, 120, 40};
+     Color colorBtn = DARKGRAY;
+    if(CheckCollisionPointRec(GetMousePosition(), rec)) {
+        colorBtn = LIGHTGRAY;
+    }
+    btn = btn.drawBtn(rec, "Back", colorBtn);
+    if(btn.checkClick(GetMousePosition())) {
+        state = MAIN_MENU;
+        manager.disconnect();
+    }
+    if(manager.getStatus()) {
+          drawGrid(0);
+    }
+  
+}

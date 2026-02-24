@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import mongoose from "mongoose"
 import { User } from "../src/models/user.js"
 import { WebSocket, WebSocketServer } from "ws"
+import { v4 as uuidv4 } from "uuid"
 dotenv.config();
 const app = express();
 
@@ -13,19 +14,82 @@ app.use(cors());
 
 const ws = new WebSocketServer({port: 8000});
 
+const queue : WebSocket[] = [];
+
+interface Packet {
+turn: boolean,
+word: string,
+roomId:string
+};
+
+
+const activeRooms = new Map<string, any>();
+
 
 ws.on('connection', (ws: WebSocket) => {
     console.log("New player connected!");
+    console.log(queue);  
+    queue.push(ws);
+    if(queue.length >= 2) {
+        const p1 = queue.shift();
+        const p2 = queue.shift();
+
+        console.log("STARTING GAME...");
+        const player1Starts:boolean = Math.round(Math.random()) == 1;
+        const roomId:string = uuidv4();
+        const packet1:Packet = {
+            turn: player1Starts,
+            word: "test",
+            roomId: roomId
+        };
+
+        const packet2:Packet = {
+            turn: !player1Starts,
+            word: "test",
+            roomId: roomId
+        };
+        setTimeout(() => {
+        if(p1?.readyState === WebSocket.OPEN) {
+        p1?.send(JSON.stringify({...packet1}), (error) => {
+            if(error) {
+                console.error(error);
+            }
+            else console.log("Message was successfully sent!");
+        });
+        }
+        else console.log("PLAYER 1 IS NOT CONNECTED");
+
+       if(p2?.readyState === WebSocket.OPEN) {
+        p2?.send(JSON.stringify({...packet2}), (error) => {
+            if(error) {
+                console.error(error);
+            }
+            else console.log("Message was successfully sent!");
+        });
+        }
+        else console.log("PLAYER 2 IS NOT CONNECTED");
+        }, 200);
+    }
 
     ws.on('message', (msg: string) => {
         console.log(msg.toString());
-    })
+        if(msg.toString() === "STOP") {
+            const index:number = queue.indexOf(ws);
+            if(index !== -1) {
+                queue.splice(index, 1);
+            }
+            ws.close();
+        }
+    });
 
-    ws.send("test test");
 });
 
-ws.on('close', () => {
+ws.on('close', (ws: WebSocket) => {
     console.log("Player disconnected");
+    const index:number = queue.indexOf(ws);
+            if(index !== -1) {
+                queue.splice(index, 1);
+            }
 });
 
 ws.on('error', console.error);

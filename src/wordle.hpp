@@ -100,6 +100,9 @@ class Wordly {
     void clearVariables(void);
     void drawOriginalStateGame(void);
      void update(void);
+     void drawPvp(void);
+     void drawGrid(const float offset);
+     void readKey(void);
     public :
     Config config;
      bool wordChecker(void);

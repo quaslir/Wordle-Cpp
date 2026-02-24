@@ -25,23 +25,6 @@ int main(int argc, char * argv[]) {
         BeginDrawing();
             ClearBackground(wordly.config.bg_color);
        wordly.play();
-        if(autoplay) {
-        } else {
-        int key = GetCharPressed();
-        while(key > 0) {
-            if((key >= 32) && (key <= 125)) {
-            wordly.updateCurrentWord((char) key);
-   
-            }
-            key = GetCharPressed();
-        }
-        if(IsKeyPressed(KEY_BACKSPACE)) {
-            wordly.backspace();
-        }
-        if(IsKeyPressed(KEY_ENTER)){
-        wordly.wordChecker();
-        }
-    }
         EndDrawing();
 }
 CloseWindow();
