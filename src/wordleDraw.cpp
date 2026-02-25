@@ -217,10 +217,24 @@ void Wordly::drawPvp(void) {
     btn = btn.drawBtn(rec, "Back", colorBtn);
     if(btn.checkClick(GetMousePosition())) {
         state = MAIN_MENU;
+        clearVariables();
         manager.disconnect();
     }
     if(manager.getStatus()) {
           drawGrid(0);
     }
   
+}
+
+
+void Wordly::drawPvpWin(void) const {
+    DrawText("You won!", 200, 200, 40, GOLD);
+}
+
+void Wordly::drawPvpLose(void) const {
+    DrawText("You lost", 200, 200, 40, RED);
+}
+
+void Wordly::drawPvpDraw(void) const {
+    DrawText("It's a draw", 200, 200, 40, LIGHTGRAY);
 }

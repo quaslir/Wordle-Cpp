@@ -26,6 +26,7 @@ void NetworkManager::disconnect(void) {
     _socket.send("STOP");
     _socket.stop();
     this->_connected = false;
+    this->gameStarted = false;
 }
 
 void NetworkManager::receive(void) {
@@ -58,6 +59,22 @@ void NetworkManager::receive(void) {
             if(word.has_value()) {
                 onWord(word.value());
             }
+
+            if(parser.exists("win")) {
+                auto winStatus = parser.getValue<bool>("win");
+                if(winStatus.has_value()) {
+                    packet.win = winStatus.value();
+                    if(!packet.win) {
+                        auto drawStatus = parser.getValue<bool>("draw");
+                        if(drawStatus.has_value()) {
+                            packet.draw = drawStatus.value();
+                        }
+                    }
+                    this->_connected = false;
+                    this->gameStarted = false;
+                }
+                
+            }
             parser.print();
 
         }
@@ -72,10 +89,8 @@ return gameStarted;
 }
 
 void NetworkManager::sendGamePacket(const std::string & str) {
-        packet.attempts++;
     parser.insert("word",str);
     parser.insert("id", this->packet.roomId);
-    parser.insert("attempts", packet.attempts);
     std::string formatted = parser.toString();
     if(_connected) {
     _socket.send(formatted);

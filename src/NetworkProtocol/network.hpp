@@ -4,7 +4,8 @@ struct Packet {
     std::string word = "";
     bool turn = false;
     std::string roomId = "";
-    int attempts = 0;
+    bool win = false;
+    bool draw = false;
     Packet(std::string_view w, bool t, std::string_view id) : word(w), turn(t), roomId(id) {}
 
     Packet() {}

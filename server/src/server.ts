@@ -26,7 +26,8 @@ roomId:string
 interface gamePacket {
     player1:WebSocket,
     player2:WebSocket,
-    word:string
+    word:string,
+    totalAttempts: number
 };
 
 
@@ -34,6 +35,10 @@ interface receivedPacket{
     id: string,
     word:string
 };
+
+interface LastPacket {
+
+}
 
 const activeRooms = new Map<string, gamePacket>();
 
@@ -50,19 +55,20 @@ ws.on('connection', (ws: WebSocket) => {
         const roomId:string = uuidv4();
         const packet1:startPacket = {
             turn: player1Starts,
-            word: "test",
+            word: "bober",
             roomId: roomId
         };
 
         const packet2:startPacket = {
             turn: !player1Starts,
-            word: "test",
+            word: "bober",
             roomId: roomId
         };
         activeRooms.set(roomId, {
             player1: p1!,
             player2: p2!,
-            word: "test"
+            word: "bober",
+            totalAttempts: 1
         });
         setTimeout(() => {
         if(p1?.readyState === WebSocket.OPEN) {
@@ -105,8 +111,21 @@ ws.on('connection', (ws: WebSocket) => {
             if(!room) return;
             const currentUser:WebSocket = ws == room.player1 ? room.player1 : room.player2;
             const nextUser:WebSocket = currentUser == room.player1 ? room.player2 : room.player1;
+
+            if(packet.word === room.word) {
+                    currentUser.send(JSON.stringify({turn: false, win: true, gameOver: true}));
+                    nextUser.send(JSON.stringify({turn: false, win:false, gameOver: true, draw: false}));
+                }
+            else if(room.totalAttempts === 6) {
+                    currentUser.send(JSON.stringify({turn: false, win: false, gameOver: true, draw: true}));
+                    nextUser.send(JSON.stringify({turn: false, win:false, gameOver: true, draw: true}));
+            }
+            else {
+            room.totalAttempts++;
+            
             nextUser.send(JSON.stringify({word: packet.word, turn: true}));
             currentUser.send(JSON.stringify({turn: false}));
+            }
         }
 
     });

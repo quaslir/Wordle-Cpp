@@ -563,10 +563,12 @@ else if(state == LEADERBOARD) {
     
 }
 
-else if(state == PVP) {
+else if(state == PVP) { 
     drawPvp();
-    std::cout << manager.packet.activeY << std::endl;
-if(manager.connected()) {
+    if(manager.connected()) {
+   if(0);
+    else {
+
 
     manager.receive();
     if(manager.getStatus()) {
@@ -580,6 +582,19 @@ if(manager.connected()) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
 }
+    }
+
+        else if(manager.packet.win || (!manager.packet.win && !manager.getStatus())) {
+        if(manager.packet.win) {
+            drawPvpWin();
+        }
+        else if(!manager.packet.win && !manager.packet.draw) {
+            drawPvpLose();
+        }
+        else drawPvpDraw();
+
+        clearVariables();
+    } 
 }
 
 else {
