@@ -7,13 +7,15 @@ struct Packet {
     bool win = false;
     bool draw = false;
     Packet(std::string_view w, bool t, std::string_view id) : word(w), turn(t), roomId(id) {}
-
+    bool error = false;
+    bool received = false;
     Packet() {}
 };
 
 class NetworkManager {
     public: 
-
+        bool isWaitingForServer = false;
+        bool wordReceved = false;
         Packet packet; 
     NetworkManager() {}
     bool connected(void) const;

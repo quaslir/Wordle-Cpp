@@ -107,6 +107,7 @@ class Wordly {
      void drawPvpWin(void) const;
      void drawPvpLose(void) const;
      void drawPvpDraw(void) const;
+     void updatePvp(void);
     public :
     Config config;
      bool wordChecker(void);

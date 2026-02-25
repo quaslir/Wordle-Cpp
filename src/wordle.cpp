@@ -523,7 +523,10 @@ void Wordly::readKey(bool pvpMode) {
         while(key > 0) {
             if((key >= 32) && (key <= 125)) {
             updateCurrentWord((char) key);
-   
+                if(manager.packet.error) {
+                    manager.packet.error = false;
+                    errorMessage.clear();
+                }
             }
             key = GetCharPressed();
         }
@@ -535,16 +538,47 @@ void Wordly::readKey(bool pvpMode) {
         wordChecker();
             }
             else {
+                if(!manager.isWaitingForServer) {
+                    std::cout << "Sending..." << std::endl;
                 std::string usersWord;
                 for(const auto & x : history[activeY]) {
                     usersWord += x.c;
                 }
-                updateKeyStatus();
                 manager.sendGamePacket(usersWord);
+                manager.isWaitingForServer = true;    
             }
+        }
         }
     }
 }
+
+void Wordly::updatePvp(void) {
+    manager.receive();
+
+    if(manager.packet.received) {
+        if(manager.isWaitingForServer) {
+        manager.isWaitingForServer = false;
+
+        if(manager.packet.error) {
+                    while(activeX > 0) backspace();
+                    errorMessage = "Incorrect word";
+        }
+        else {
+                 updateKeyStatus();
+        }
+        }   
+        if(!manager.wordReceved) {
+        this->word = manager.packet.word;
+        manager.wordReceved = true;
+    }
+        
+
+        manager.packet.received = false;
+               
+    }
+}
+
+
 void Wordly::play(void) {
 update();
 if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
@@ -566,22 +600,14 @@ else if(state == LEADERBOARD) {
 else if(state == PVP) { 
     drawPvp();
     if(manager.connected()) {
-   if(0);
-    else {
-
-
-    manager.receive();
-    if(manager.getStatus()) {
         
-        this->word = manager.packet.word;
+    updatePvp();
         if(manager.packet.turn) {
             readKey(true);
-        }
     }
-    else {
+    if(!manager.getStatus()) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
-}
     }
 
         else if(manager.packet.win || (!manager.packet.win && !manager.getStatus())) {

@@ -228,13 +228,34 @@ void Wordly::drawPvp(void) {
 
 
 void Wordly::drawPvpWin(void) const {
-    DrawText("You won!", 200, 200, 40, GOLD);
+    const char * text = "VICTORY!";
+    int fontSize = 60;
+
+    int textW = MeasureText(text, fontSize);
+    int posX = (GetScreenWidth() - textW) / 2;
+    int posY  = fontSize;
+    DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
+    DrawText(text, posX, posY, fontSize, GOLD);
 }
 
 void Wordly::drawPvpLose(void) const {
-    DrawText("You lost", 200, 200, 40, RED);
+    const char * text = "You lost";
+    int fontSize = 60;
+
+    int textW = MeasureText(text, fontSize);
+    int posX = (GetScreenWidth() - textW) / 2;
+    int posY = fontSize;
+    DrawText(text, posX + 4, posY + 4, fontSize, BLUE);
+    DrawText(text, posX, posY, fontSize, RED);
 }
 
 void Wordly::drawPvpDraw(void) const {
-    DrawText("It's a draw", 200, 200, 40, LIGHTGRAY);
+    const char * text = "DRAW";
+    int fontSize = 60;
+
+    int textW = MeasureText(text, fontSize);
+    int posX = (GetScreenWidth() - textW) / 2;
+    int posY  = fontSize;
+    DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
+    DrawText(text, posX, posY, fontSize, LIGHTGRAY);
 }

@@ -50,6 +50,10 @@ void NetworkManager::receive(void) {
 
         }
         else {
+            if(parser.exists("incorrect")) {
+                packet.error = true;
+                return;
+            }
             auto word = parser.getValue<std::string>("word");
             auto turn = parser.getValue<bool>("turn");
             if(turn.has_value()) {
@@ -80,6 +84,8 @@ void NetworkManager::receive(void) {
         }
 
                     parser.clear();
+
+                    packet.received = true;
     }
     });
 }
