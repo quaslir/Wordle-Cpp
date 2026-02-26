@@ -43,8 +43,6 @@ void NetworkManager::receive(void) {
 
             if(word.has_value() && turn.has_value() && id.has_value()) {
                 parser.print();
-                std::cout << turn.value() << std::endl;
-
                 packet = Packet(word.value(), turn.value(), id.value());
                 gameStarted = true;
             }
@@ -53,6 +51,8 @@ void NetworkManager::receive(void) {
         else {
             if(parser.exists("incorrect")) {
                 packet.error = true;
+                parser.clear();
+                packet.received = true;
                 return;
             }
             auto word = parser.getValue<std::string>("word");

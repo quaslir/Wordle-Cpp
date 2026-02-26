@@ -540,7 +540,6 @@ void Wordly::readKey(bool pvpMode) {
             }
             else {
                 if(!manager.isWaitingForServer) {
-                    std::cout << "Sending..." << std::endl;
                 std::string usersWord;
                 for(const auto & x : history[activeY]) {
                     usersWord += x.c;
@@ -564,7 +563,6 @@ void Wordly::updatePvp(void) {
         manager.isWaitingForServer = false;
 
         if(manager.packet.error) {
-                    while(activeX > 0) backspace();
                     errorMessage = "Incorrect word";
         }
         else {

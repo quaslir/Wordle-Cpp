@@ -224,6 +224,9 @@ void Wordly::drawPvp(void) {
     }
     if(manager.getStatus()) {
           drawGrid(0);
+          if(!errorMessage.empty()) {
+            drawError(errorMessage);
+          }
     }
   
 }

@@ -70,9 +70,8 @@ try {
 async function wordChecker(word: string) : Promise<boolean> {
 try {
     const res = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-    return res.data.word ? true : false;
+    return true;
 } catch(error) {
-    console.error(error);
     return false;
 }
 }
@@ -98,13 +97,11 @@ async function getWord():Promise<string> {
 
 
 ws.on('connection', async(ws: WebSocket) => {
-    console.log("New player connected!");
     queue.push(ws);
     if (queue.length >= 2) {
         const p1 = queue.shift();
         const p2 = queue.shift();
 
-        console.log("STARTING GAME...");
         const player1Starts: boolean = Math.round(Math.random()) == 1;
         const roomId: string = uuidv4();
         const word = await getWord();
@@ -151,7 +148,7 @@ ws.on('connection', async(ws: WebSocket) => {
 
 
 
-    ws.on('message', (msg: string) => {
+    ws.on('message', async(msg: string) => {
         console.log(msg.toString());
         if (msg.toString() === "STOP") {
             const index: number = queue.indexOf(ws);
@@ -163,7 +160,8 @@ ws.on('connection', async(ws: WebSocket) => {
 
         else {
             const packet: receivedPacket = JSON.parse(msg.toString());
-                if(!wordChecker(packet.word) || packet.word.trim().length !== 5) {
+            const correctSyntax = await wordChecker(packet.word);
+                if(!correctSyntax|| packet.word.trim().length !== 5) {
                 ws.send(JSON.stringify({incorrect: true}));
                 return;
             }
