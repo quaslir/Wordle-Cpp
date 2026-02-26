@@ -164,6 +164,7 @@ for(int i = 0; i < layout.size(); i++) {
     size_t Wordly::getLength(const std::string & str) const {return str.length();}
     
 void Wordly::updateKeyStatus(void) {
+
     size_t idx = 0;
         for(auto & c : history[activeY]) {
             if(this->word.find(c.c) == std::string::npos) {
@@ -553,10 +554,13 @@ void Wordly::readKey(bool pvpMode) {
 }
 
 void Wordly::updatePvp(void) {
+
     manager.receive();
 
     if(manager.packet.received) {
+
         if(manager.isWaitingForServer) {
+
         manager.isWaitingForServer = false;
 
         if(manager.packet.error) {
@@ -564,10 +568,11 @@ void Wordly::updatePvp(void) {
                     errorMessage = "Incorrect word";
         }
         else {
-                 updateKeyStatus();
+             updateKeyStatus();
         }
-        }   
-        if(!manager.wordReceved) {
+        }
+    
+        else if(!manager.wordReceved){
         this->word = manager.packet.word;
         manager.wordReceved = true;
     }

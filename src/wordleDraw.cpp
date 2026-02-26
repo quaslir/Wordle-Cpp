@@ -216,9 +216,11 @@ void Wordly::drawPvp(void) {
     }
     btn = btn.drawBtn(rec, "Back", colorBtn);
     if(btn.checkClick(GetMousePosition())) {
-        state = MAIN_MENU;
-        clearVariables();
         manager.disconnect();
+         clearVariables();
+         manager.isWaitingForServer = false;
+         manager.packet.received = false;
+        state = MAIN_MENU;
     }
     if(manager.getStatus()) {
           drawGrid(0);
