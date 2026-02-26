@@ -212,10 +212,13 @@ void Wordly::updateKeyStatus(void) {
         attempts++;
 }
       bool Wordly::wordChecker(void) {
-            if(!lengthChecker()) return false;
             std::string toCheck;
          for(const auto & c : history[activeY]) {
             toCheck += c.c;
+         }
+         if(toCheck.find(" ") != std::string::npos) {
+            shakeTimer = 0.5f;
+            return false;
          }
          if(this->config.hardMode) {
             for(const char &c : this->mustUsedChars) {
@@ -245,24 +248,6 @@ void Wordly::updateKeyStatus(void) {
         else if(toCheck == word) {
           
             try {
-               int totalXP = 1000;
-                totalXP /= attempts;
-                int timeBonus = (mainTimer.getMins() * 60 + mainTimer.getSeconds()) / 10;
-                if(timeBonus > 1) {
-                totalXP /= timeBonus;
-                } 
-                this->totalXp = totalXP;
-
-                if(usersHistory.exists("total_xp")) {
-                    
-                    size_t total = usersHistory.getValue<size_t>("total_xp").value() + totalXp;
-
-                    std::thread([this, &total] {
-                        this->leaderboard.updateLeaderboard(this->username, total);
-                    }).detach();
-                    usersHistory.updateValue<std::string>("total_xp",
-                   std::to_string(total));
-                }
               if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
@@ -339,6 +324,8 @@ activeX++;
 }
 
 void Wordly::backspace(void) {
+    renderErrorMessage = false;
+    errorMessage.clear();
     if(activeX > 0) {
         activeX--;
         history[activeY][activeX] = Character(' ', NOT_IN);
@@ -346,10 +333,10 @@ void Wordly::backspace(void) {
 
 }
 
-void Wordly::enter(bool pvpMode) {
-     if(!pvpMode) {
+void Wordly::enter(void) {
+     if(state != PVP) {
         wordChecker();
-            }
+        }
             else {
                 if(!manager.isWaitingForServer) {
                 std::string usersWord;
@@ -369,17 +356,18 @@ void Wordly::enter(bool pvpMode) {
 void Wordly::writeKey(void) {
 for(const auto & x : keyboard) {
     if(x.clickStatus()) {
+            if(!errorMessage.empty()) {
+                    errorMessage.clear();
+                    renderErrorMessage = false;
+                }
         if(x.c == "DEL") {
             if(activeX > 0) {
                 history[activeY][--activeX].c = ' ';
-                if(!errorMessage.empty()) {
-                    errorMessage.clear();
-                }
             }
         }
         else if(x.c == "ENT") {
             if(activeX == 5) {
-                enter(state == PVP);
+                enter();
             } else shakeTimer = 0.5f;
         }
         else if(activeX < 5) {
@@ -542,17 +530,19 @@ if(state == EMPTY_USERNAME) {
         gameOverScreenRenderer();
     }
 }
-void Wordly::readKey(bool pvpMode) {
+void Wordly::readKey(void){
     if(config.autoplay) {
         } else {
         int key = GetCharPressed();
         while(key > 0) {
             if((key >= 32) && (key <= 125)) {
             updateCurrentWord((char) key);
-                if(manager.packet.error) {
+            if(renderErrorMessage || !manager.packet.error) {
                     manager.packet.error = false;
                     errorMessage.clear();
-                }
+                    renderErrorMessage = false;
+
+            }
             }
             key = GetCharPressed();
         }
@@ -560,7 +550,7 @@ void Wordly::readKey(bool pvpMode) {
             backspace();
         }
         if(IsKeyPressed(KEY_ENTER)){
-            enter(pvpMode);
+            enter();
         }
     }
 }
@@ -581,6 +571,7 @@ void Wordly::updatePvp(void) {
         }
         else {
              updateKeyStatus();
+             attempts++;
         }
         }
     
@@ -595,11 +586,15 @@ void Wordly::updatePvp(void) {
     }
 }
 
+size_t Wordly::calculateXpDistribution(void) const {
+    return static_cast<size_t>(1000 / attempts);
+}
+
 
 void Wordly::play(void) {
 update();
 if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
-    readKey(false);
+    readKey();
     drawOriginalStateGame();
 }
 else if(state == LEADERBOARD) {
@@ -620,7 +615,7 @@ else if(state == PVP) {
         
     updatePvp();
         if(manager.packet.turn) {
-            readKey(true);
+            readKey();
             writeKey();
     }
     if(!manager.getStatus()) {
@@ -629,21 +624,24 @@ else if(state == PVP) {
     }
 
         else if(manager.packet.win || (!manager.packet.win && !manager.getStatus())) {
+                size_t xp = calculateXpDistribution();
         if(manager.packet.win) {
+
             drawPvpWin();
         }
         else if(!manager.packet.win && !manager.packet.draw) {
             drawPvpLose();
         }
         else drawPvpDraw();
-
-        clearVariables();
+        drawXp(!manager.packet.win ? -xp : xp);
     } 
 }
 
-else {
-    drawFrontScreen();
-    drawUsername();
+else if(state == EMPTY_USERNAME) {
+ drawUsername();
+} else {   
+     drawFrontScreen();
+    
 }
 
 }

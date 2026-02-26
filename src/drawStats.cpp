@@ -47,7 +47,6 @@ void Wordly::gameOverScreenRenderer(void) {
     drawStatRow("Losses", "losses", panel.x + 190);
     drawStatRow("Current streak", "current_streak", panel.x + 270);
     drawStatRow("Best streak", "best_streak", panel.x + 370);
-   drawTotalXp(panel);
     Rectangle box = {145, 600, 120, 30};
     std::string text = "Play again";
     Button playAgain;
@@ -67,15 +66,6 @@ void Wordly::gameOverScreenRenderer(void) {
                 clearVariables();
                 this->config.autoplay = false;
                 state = MAIN_MENU;
-    }
-}
-void Wordly::drawTotalXp(const Rectangle & panel) const {
-    if(usersHistory.exists("total_xp")) {
-        auto x = usersHistory.getValue<std::string>("total_xp");
-        if(x.has_value()) {
-            std::string text = std::string("Total XP: ") + x.value() + std::string(" (+ ")  + std::to_string(this->totalXp) + std::string(" this game)");
-            DrawText(text.c_str(), panel.x + 10, panel.y + 400, 20, LIGHTGRAY);
-        }
     }
 }
 

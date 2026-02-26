@@ -95,7 +95,7 @@ class Wordly {
     size_t getLength(const std::string & str) const;
     void drawError(const std::string & msg) const;
     void initHistory(void);
-    void enter(bool pvpMode);
+    void enter(void);
     void drawTimer(void) const;
     void drawGuessDistribution(const Rectangle & rec) const;
     ParserJSON usersHistory;
@@ -103,18 +103,19 @@ class Wordly {
     void drawUsername(void) const;
     void setUsername(void);
     void trim(std::string & text) const;
-    void drawTotalXp( const Rectangle & panel) const;
     void clearVariables(void);
     void drawOriginalStateGame(void);
      void update(void);
      void drawPvp(void);
      void drawGrid(const float offset);
-     void readKey(bool pvpMode);
+     void readKey(void);
      void updateKeyStatus(void);
      void drawPvpWin(void) const;
      void drawPvpLose(void) const;
      void drawPvpDraw(void) const;
+     void drawXp(int xp) const;
      void updatePvp(void);
+     size_t calculateXpDistribution(void) const;
     public :
     Config config;
      bool wordChecker(void);

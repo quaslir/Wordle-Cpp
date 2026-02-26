@@ -253,7 +253,7 @@ void Wordly::drawPvpWin(void) const {
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY  = fontSize;
+    int posY  = fontSize + 20;
     DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
     DrawText(text, posX, posY, fontSize, GOLD);
 }
@@ -264,7 +264,7 @@ void Wordly::drawPvpLose(void) const {
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY = fontSize;
+    int posY = fontSize + 20;
     DrawText(text, posX + 4, posY + 4, fontSize, BLUE);
     DrawText(text, posX, posY, fontSize, RED);
 }
@@ -275,7 +275,18 @@ void Wordly::drawPvpDraw(void) const {
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY  = fontSize;
+    int posY  = fontSize + 20;
     DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
     DrawText(text, posX, posY, fontSize, LIGHTGRAY);
 }
+
+void Wordly::drawXp(int xp) const {
+    if(xp < 0) xp = -xp;
+    std::string text = "Total xp: 500, (" +  std::string{std::to_string(xp)} + ")";
+    int size = MeasureText(text.c_str(), 20);
+    int posY = 150;
+    int posX = (GetScreenWidth() - size) / 2;
+
+    DrawText(text.c_str(), posX, posY, 20, RAYWHITE);
+
+}   
