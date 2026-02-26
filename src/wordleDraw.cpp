@@ -87,19 +87,22 @@ void Wordly::drawFrontScreen(void) {
 }
 
 void Wordly::drawError(const std::string & msg) const {
-        DrawText(msg.c_str(), 40, 680, 20, RED);
+    int fontSize = 20;
+        int textSize = MeasureText(msg.c_str(),fontSize);
+        float x = (GetScreenWidth() - textSize) / 2;
+        DrawText(msg.c_str(), (int) x, 680, fontSize, RED);
     }
 void Wordly::drawTimer(void) const {
         std::string text = mainTimer.getCurrentTime();
         int fontSize = 20;
-        int x = MeasureText(text.c_str(), 20);
-        DrawText(text.c_str(), (GetScreenWidth() - x) / 2, 70, fontSize, LIGHTGRAY);
+        DrawText(text.c_str(), 20, 20, fontSize, LIGHTGRAY);
     }
 
 
 void Wordly::renderKeyBoard(void) {
-int posY = 8 * SQUARE_SIZE + SQUARE_SIZE / 3;
+int posY = pos.y + SQUARE_SIZE + 30;
 int posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
+int CELL_SIZE = SQUARE_SIZE / 1.8;
 std::string character;
 for(auto & x : keyboard) {
     character.clear();
@@ -155,11 +158,14 @@ void Wordly::drawGrid(const float offset) {
             auto c = this->history[i][j];
         float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
         float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
+        if(i == 5) {
+            pos.y = (i * SQUARE_SIZE * 1.1) + 90;
+        }
         Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
-            Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), 40.f, 2);
+            Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), FONT_SIZE, 2);
             float textX = box.x + (box.width / 2) - (textSize.x / 2);
             float textY = box.y + (box.height / 2) - (textSize.y / 2);
-            DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, 40, getColor(c.type));
+            DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, FONT_SIZE, getColor(c.type));
         float thickness = 3.0f;
 
         DrawRectangleLinesEx(box, thickness, this->config.grid_color);
@@ -207,8 +213,22 @@ mainTimer.update();
 
 
 void Wordly::drawPvp(void) {
-
-    Button btn;
+    drawLogo();
+    drawUsername();
+      if(manager.getStatus()) {
+        float offset = 0.0f;
+         if(shakeTimer > 0) {
+        shakeTimer -= GetFrameTime();
+        offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
+    }
+          drawGrid(offset);
+          renderKeyBoard();
+          if(!errorMessage.empty()) {
+            drawError(errorMessage);
+          }
+    }
+    else {
+          Button btn;
     Rectangle rec = {(float) GetScreenWidth() / 2 - 60, (float) GetScreenHeight() - 80, 120, 40};
      Color colorBtn = DARKGRAY;
     if(CheckCollisionPointRec(GetMousePosition(), rec)) {
@@ -222,11 +242,6 @@ void Wordly::drawPvp(void) {
          manager.packet.received = false;
         state = MAIN_MENU;
     }
-    if(manager.getStatus()) {
-          drawGrid(0);
-          if(!errorMessage.empty()) {
-            drawError(errorMessage);
-          }
     }
   
 }

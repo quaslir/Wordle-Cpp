@@ -346,17 +346,40 @@ void Wordly::backspace(void) {
 
 }
 
+void Wordly::enter(bool pvpMode) {
+     if(!pvpMode) {
+        wordChecker();
+            }
+            else {
+                if(!manager.isWaitingForServer) {
+                std::string usersWord;
+                for(const auto & x : history[activeY]) {
+                    usersWord += x.c;
+                }
+                if(usersWord.length() != 5) {
+                    shakeTimer = 0.5f;
+                    return; 
+                }
+                manager.sendGamePacket(usersWord);
+                manager.isWaitingForServer = true;    
+            }
+        }
+}
+
 void Wordly::writeKey(void) {
 for(const auto & x : keyboard) {
     if(x.clickStatus()) {
         if(x.c == "DEL") {
             if(activeX > 0) {
                 history[activeY][--activeX].c = ' ';
+                if(!errorMessage.empty()) {
+                    errorMessage.clear();
+                }
             }
         }
         else if(x.c == "ENT") {
             if(activeX == 5) {
-                wordChecker();
+                enter(state == PVP);
             } else shakeTimer = 0.5f;
         }
         else if(activeX < 5) {
@@ -511,7 +534,9 @@ if(state == EMPTY_USERNAME) {
             autoBotPlay();
         }
     }
+    if(state == DAILY_CHALLENGE || state == PRACTICE) {
     writeKey();
+    }
     
 } else {
         gameOverScreenRenderer();
@@ -535,19 +560,7 @@ void Wordly::readKey(bool pvpMode) {
             backspace();
         }
         if(IsKeyPressed(KEY_ENTER)){
-            if(!pvpMode) {
-        wordChecker();
-            }
-            else {
-                if(!manager.isWaitingForServer) {
-                std::string usersWord;
-                for(const auto & x : history[activeY]) {
-                    usersWord += x.c;
-                }
-                manager.sendGamePacket(usersWord);
-                manager.isWaitingForServer = true;    
-            }
-        }
+            enter(pvpMode);
         }
     }
 }
@@ -564,6 +577,7 @@ void Wordly::updatePvp(void) {
 
         if(manager.packet.error) {
                     errorMessage = "Incorrect word";
+                    shakeTimer = 0.5f;
         }
         else {
              updateKeyStatus();
@@ -607,6 +621,7 @@ else if(state == PVP) {
     updatePvp();
         if(manager.packet.turn) {
             readKey(true);
+            writeKey();
     }
     if(!manager.getStatus()) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);

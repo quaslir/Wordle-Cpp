@@ -13,7 +13,8 @@
 #include <chrono>
 #include <thread>
 #define SQUARE_SIZE 65
-#define CELL_SIZE 35
+#define FONT_SIZE 30
+
 enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
 
 struct Character {
@@ -21,6 +22,10 @@ struct Character {
 Type type;
 Character(char ch, Type t) : c(ch),type(t) {}
 Character() : c(' '), type(NOT_IN) {}
+};
+
+struct Coordinates {
+    int x, y;
 };
 
 struct Config {
@@ -69,6 +74,7 @@ class Wordly {
     size_t totalXp = 0;
     Leaderboard leaderboard;
     NetworkManager manager;
+    Coordinates pos = {0, 0};
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
     bool handleInput(std::string_view word) const;
@@ -89,6 +95,7 @@ class Wordly {
     size_t getLength(const std::string & str) const;
     void drawError(const std::string & msg) const;
     void initHistory(void);
+    void enter(bool pvpMode);
     void drawTimer(void) const;
     void drawGuessDistribution(const Rectangle & rec) const;
     ParserJSON usersHistory;
