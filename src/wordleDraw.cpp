@@ -22,6 +22,7 @@ void Wordly::drawFrontScreen(void) {
     ClearBackground({18, 19, 19, 255});
     drawLogo();
     drawPattern();
+    drawUsername();
     const int numButtons = 4;
     static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
@@ -281,8 +282,15 @@ void Wordly::drawPvpDraw(void) const {
 }
 
 void Wordly::drawXp(int xp) const {
-    if(xp < 0) xp = -xp;
-    std::string text = "Total xp: 500, (" +  std::string{std::to_string(xp)} + ")";
+    std::string score;
+    if(manager.packet.win) {
+       score +=  " (+" + std::string{std::to_string(xp)} + ")";
+    }
+    else if(!manager.packet.win && !manager.packet.draw) {
+       score += " (-" + std::string{std::to_string(xp)} + ")";
+    }
+
+    std::string text = "Total xp: " + std::to_string((int) totalXp + xp) + score;
     int size = MeasureText(text.c_str(), 20);
     int posY = 150;
     int posX = (GetScreenWidth() - size) / 2;

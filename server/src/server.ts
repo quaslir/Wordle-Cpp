@@ -248,4 +248,21 @@ app.post("/update-leaderboard", async (req, res) => {
     }
 });
 
+interface userXp {
+    username: string
+};
+
+app.post("/getUsersXp", async(req, res) => {
+    const {username}:userXp = req.body;
+    if(!username) return res.status(404);
+    try {
+    const target = await User.find({username: username});
+
+    if(!target) return res.status(404);
+    return res.json({xp: target[0]?.xp});
+    }catch(error) {
+        return res.status(500);
+    }
+});
+
 app.listen(3000, () => console.log("Server is working on 3000 port"));

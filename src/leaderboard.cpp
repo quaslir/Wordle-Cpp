@@ -8,7 +8,6 @@ size_t leaderboardCallback(void * contents, size_t size, size_t number, std::str
 
 
 void Leaderboard::loadLeaderboard(void) {
-    std::cout << "Sending request" << std::endl;
     CURL * curl = curl_easy_init();
     if(!curl) {
         throw std::runtime_error("HTTP request failed");
@@ -43,6 +42,7 @@ void Leaderboard::loadLeaderboard(void) {
     leaderboardLoaded = true;
 
     curl_easy_cleanup(curl);
+
 }
 
 
@@ -115,4 +115,44 @@ DrawText("TOTAL XP", x + panelWidth - 110, y - 33, 20, GOLD);
         changeState();
     }
 
+}
+
+void Leaderboard::receiveUsersXp(const std::string & username) {
+CURL * curl = curl_easy_init();
+
+if(!curl) {
+    throw std::runtime_error("HTTP request failed");
+}
+
+CURLcode result;
+std::string buffer;
+    ParserJSON data;
+data.insert<std::string>("username", username);
+
+std::string dataFormatted = data.toString();
+struct curl_slist * headers = NULL;
+headers = curl_slist_append(headers, "Content-Type: application/json");
+curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:3000/getUsersXp");
+curl_easy_setopt(curl, CURLOPT_HTTPHEADER,headers);
+curl_easy_setopt(curl, CURLOPT_POSTFIELDS, dataFormatted.c_str());
+curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, leaderboardCallback);
+curl_easy_setopt(curl, CURLOPT_WRITEDATA, & buffer);
+curl_easy_perform(curl);
+
+
+
+    ParserJSON ps;
+    std::stringstream ss (buffer);
+    ps.parse(ss);
+
+    if(!ps.exists("xp")) return;
+
+    auto x = ps.getValue<int>("xp");
+
+    if(!x.has_value()) return;
+
+
+    getXp(x.value());
+
+        curl_easy_cleanup(curl);
 }

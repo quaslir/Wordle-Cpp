@@ -13,8 +13,14 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         if(username.empty()) this->state = EMPTY_USERNAME;
     }
     else this->state = EMPTY_USERNAME;
-        this->parseFile();  
 
+    if(state != EMPTY_USERNAME) {
+        leaderboard.getXp = [this](int xp) {
+        this->totalXp = xp;
+       };
+        leaderboard.receiveUsersXp(username);
+    }
+        this->parseFile();  
        if(usersHistory.exists("daily_challenge")) {
 
         auto x = usersHistory.getObject("daily_challenge");
@@ -76,7 +82,6 @@ void Wordly::initHistoryFile(void) {
     dailyCh.insert("daily_challenge_active", "false");
     dailyCh.insert("daily_challenge_id", 0);
     main.updateValue<std::string>("daily_challenge", dailyCh.toString());
-    main.insert("total_xp", 0);
     ParserJSON submain;
     submain.insert("1", 0);
     submain.insert("2", 0);
@@ -490,12 +495,13 @@ void Wordly::updateDailyChallengeStatus(void) {
 void Wordly::clearVariables(void) {
                 gameOver = false;
                 clearHistory();
-                totalXp = 0;
                 activeX = 0;
                 activeY = 0;
                 attempts = 0;
                 errorMessage = "";
                 renderErrorMessage = false;
+                leaderboard.leaderboardUpdated = false;
+                leaderboard.leaderboardLoaded = false;
                 mustUsedChars.clear();
                 initKeyboard();
 }
@@ -537,7 +543,7 @@ void Wordly::readKey(void){
         while(key > 0) {
             if((key >= 32) && (key <= 125)) {
             updateCurrentWord((char) key);
-            if(renderErrorMessage || !manager.packet.error) {
+            if(renderErrorMessage || manager.packet.error) {
                     manager.packet.error = false;
                     errorMessage.clear();
                     renderErrorMessage = false;
@@ -625,6 +631,15 @@ else if(state == PVP) {
 
         else if(manager.packet.win || (!manager.packet.win && !manager.getStatus())) {
                 size_t xp = calculateXpDistribution();
+                if(leaderboard.leaderboardUpdated) {
+                    if(manager.packet.win) {
+                        leaderboard.updateLeaderboard(username, totalXp + xp);
+                    }
+                    else if(!manager.packet.win && !manager.packet.draw) {
+                    leaderboard.updateLeaderboard(username, totalXp - xp);
+                    }
+                    leaderboard.leaderboardUpdated = true;
+                }
         if(manager.packet.win) {
 
             drawPvpWin();
@@ -633,7 +648,7 @@ else if(state == PVP) {
             drawPvpLose();
         }
         else drawPvpDraw();
-        drawXp(!manager.packet.win ? -xp : xp);
+        drawXp(xp);
     } 
 }
 
