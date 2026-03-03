@@ -241,6 +241,10 @@ void Wordly::drawPvp(void) {
          clearVariables();
          manager.isWaitingForServer = false;
          manager.packet.received = false;
+         manager.packet.win = false;
+         manager.packet.draw = false;
+         manager.gameOver = false;
+         leaderboard.leaderboardUpdated = false;
         state = MAIN_MENU;
     }
     }

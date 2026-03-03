@@ -75,8 +75,8 @@ void NetworkManager::receive(void) {
                             packet.draw = drawStatus.value();
                         }
                     }
-                    this->_connected = false;
                     this->gameStarted = false;
+                    this->gameOver = true;
                 }
                 
             }
@@ -85,7 +85,6 @@ void NetworkManager::receive(void) {
         }
 
                     parser.clear();
-
                     packet.received = true;
     }
     });

@@ -83,7 +83,7 @@ async function getWord():Promise<string> {
     try {
         const reply = await getLLMData(`Generate a common 5-letter English word that starts with the letter '${randomChar}'. 
     Output ONLY the word in lowercase.`);
-        if(reply.length !== 5 || (!wordChecker(reply))) {
+        if(reply.length !== 5 || (await !wordChecker(reply))) {
             return getWord();
         }
         return reply;
@@ -161,7 +161,7 @@ ws.on('connection', async(ws: WebSocket) => {
         else {
             const packet: receivedPacket = JSON.parse(msg.toString());
             const correctSyntax = await wordChecker(packet.word);
-                if(!correctSyntax|| packet.word.trim().length !== 5) {
+                if(!correctSyntax || packet.word.trim().length !== 5) {
                 ws.send(JSON.stringify({incorrect: true}));
                 return;
             }

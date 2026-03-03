@@ -215,6 +215,7 @@ void Wordly::updateKeyStatus(void) {
              activeY++;
         }  
         attempts++;
+
 }
       bool Wordly::wordChecker(void) {
             std::string toCheck;
@@ -352,8 +353,9 @@ void Wordly::enter(void) {
                     shakeTimer = 0.5f;
                     return; 
                 }
-                manager.sendGamePacket(usersWord);
                 manager.isWaitingForServer = true;    
+                manager.sendGamePacket(usersWord);
+                
             }
         }
 }
@@ -568,16 +570,14 @@ void Wordly::updatePvp(void) {
     if(manager.packet.received) {
 
         if(manager.isWaitingForServer) {
-
         manager.isWaitingForServer = false;
-
         if(manager.packet.error) {
+            renderErrorMessage = true;
                     errorMessage = "Incorrect word";
                     shakeTimer = 0.5f;
         }
         else {
              updateKeyStatus();
-             attempts++;
         }
         }
     
@@ -617,26 +617,34 @@ else if(state == LEADERBOARD) {
 
 else if(state == PVP) { 
     drawPvp();
-    if(manager.connected()) {
+
         
     updatePvp();
         if(manager.packet.turn) {
+            if(!renderErrorMessage) {
+            errorMessage = "Your turn";
+            }
             readKey();
             writeKey();
-    }
-    if(!manager.getStatus()) {
+    } else errorMessage.clear();
+    if(!manager.getStatus() && !manager.gameOver) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
-    }
+    
 
-        else if(manager.packet.win || (!manager.packet.win && !manager.getStatus())) {
+        if(manager.gameOver) {
                 size_t xp = calculateXpDistribution();
-                if(leaderboard.leaderboardUpdated) {
+                std::cout << xp << std::endl;
+                if(!leaderboard.leaderboardUpdated) {
                     if(manager.packet.win) {
-                        leaderboard.updateLeaderboard(username, totalXp + xp);
+                        std::thread([&] {
+                            leaderboard.updateLeaderboard(username, totalXp + xp);
+                        }).detach();
                     }
                     else if(!manager.packet.win && !manager.packet.draw) {
-                    leaderboard.updateLeaderboard(username, totalXp - xp);
+                   std::thread([&] {
+                            leaderboard.updateLeaderboard(username, totalXp - xp);
+                        }).detach();
                     }
                     leaderboard.leaderboardUpdated = true;
                 }

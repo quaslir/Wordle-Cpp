@@ -17,6 +17,7 @@ class NetworkManager {
         bool isWaitingForServer = false;
         bool wordReceved = false;
         Packet packet; 
+        bool gameOver = false;
     NetworkManager() {}
     bool connected(void) const;
     void disconnect(void);
