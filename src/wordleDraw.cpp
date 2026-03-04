@@ -294,7 +294,8 @@ void Wordly::drawXp(int xp) const {
        score += " (-" + std::string{std::to_string(xp)} + ")";
     }
 
-    std::string text = "Total xp: " + std::to_string((int) totalXp + xp) + score;
+    std::string text = "Total xp: " + std::to_string((int) totalXp + 
+    (manager.packet.win ? xp : !manager.packet.win && !manager.packet.draw ? -xp : 0)) + score;
     int size = MeasureText(text.c_str(), 20);
     int posY = 150;
     int posX = (GetScreenWidth() - size) / 2;

@@ -634,7 +634,6 @@ else if(state == PVP) {
 
         if(manager.gameOver) {
                 size_t xp = calculateXpDistribution();
-                std::cout << xp << std::endl;
                 if(!leaderboard.leaderboardUpdated) {
                     if(manager.packet.win) {
                         std::thread([&] {
@@ -647,6 +646,7 @@ else if(state == PVP) {
                         }).detach();
                     }
                     leaderboard.leaderboardUpdated = true;
+                    leaderboard.receiveUsersXp(this->username);
                 }
         if(manager.packet.win) {
 

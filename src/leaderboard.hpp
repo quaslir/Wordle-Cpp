@@ -6,6 +6,7 @@
 #include <sstream>
 #include "../json-parser-c/parser.hpp"
 #include "drawLogo.hpp"
+#include <functional>
 class Leaderboard {
     public :
     std::function<void(int)> getXp;
