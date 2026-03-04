@@ -1,119 +1,10 @@
 #include "wordle.hpp"
-std::random_device rd;
-std::mt19937 gen(rd());
 
-Wordly::Wordly(std::istream & s) : ss(s) {
-    this->state = MAIN_MENU;
-    this->initHistoryFile();
-     this->initHistory();
-    if(usersHistory.exists("username")) {
-        username = usersHistory.getValue<std::string>("username").value();
-        if(username.empty()) this->state = EMPTY_USERNAME;
-        trim(username);
-        if(username.empty()) this->state = EMPTY_USERNAME;
-    }
-    else this->state = EMPTY_USERNAME;
 
-    if(state != EMPTY_USERNAME) {
-        leaderboard.getXp = [this](int xp) {
-        this->totalXp = xp;
-       };
-        leaderboard.receiveUsersXp(username);
-    }
-        this->parseFile();  
-       if(usersHistory.exists("daily_challenge")) {
-
-        auto x = usersHistory.getObject("daily_challenge");
-        if(x.has_value()) {
-                            
-        auto first = x.value().getValue<bool>("daily_challenge_active");
-        auto second = x.value().getValue<long>("daily_challenge_id");
-        if(first.has_value() && second.has_value()) {
-
-            dailyChallenge.first = first.value();
-            dailyChallenge.second = second.value();
-            if(!dailyChallenge.first) {
-                long current = generateDayId();
-                if(current != dailyChallenge.second) {
-                    dailyChallenge.first = true;
-                    dailyChallenge.second = current;
-                    usersHistory.stringify("../history.json");
-                }
-            }
-        }
-    }
-       }
-        this->initKeyboard();
-           
-       leaderboard.changeState = [this]() {
-        this->state = MAIN_MENU;
-       };
-       
-       leaderboard.getUsername = [this]() {
-        return this->username;
-       };
-       manager.setOnWord([this] (const std::string & word) {
-        for(int i = 0; i < 5; i++) {
-        history[activeY][activeX++].c = word[i];  
-    }
-    updateKeyStatus();
-       });
-}
 bool Wordly::isEmpty(std::string_view str) const{
         return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
 }
 
-void Wordly::initHistoryFile(void) {
-
-    std::ifstream historyCheck("../history.json");
-        if(historyCheck.is_open()) return;      
-        std::ofstream history("../history.json");
-    ParserJSON main;
-    main.insert("total_games", 0);
-    main.insert("best_streak", 0);
-    main.insert("last_played_date", "");
-    main.insert("losses", 0);
-    main.insert("guess_distribution", "");
-    main.insert("current_streak", 0);
-    main.insert("wins", 0);
-    main.insert("username", "");
-    main.insert("daily_challenge", "");
-    ParserJSON dailyCh;
-    dailyCh.insert("daily_challenge_active", "false");
-    dailyCh.insert("daily_challenge_id", 0);
-    main.updateValue<std::string>("daily_challenge", dailyCh.toString());
-    ParserJSON submain;
-    submain.insert("1", 0);
-    submain.insert("2", 0);
-    submain.insert("3", 0);
-    submain.insert("4", 0);
-    submain.insert("5", 0);
-    submain.insert("6", 0);
-
-    main.updateValue<std::string>("guess_distribution", submain.toString());
-
-    main.stringify("../history.json");
-}
-
-void Wordly::initKeyboard(void) {
-keyboard.clear();
-std::string layout{"qwertyuiopasdfghjklDELzxcvbnmENT"};
-std::string buffer;
-for(int i = 0; i < layout.size(); i++) {
-    buffer.clear();
-    if(layout[i] == 'D') {
-        while(layout[i] != 'z') buffer += layout[i++];
-    }
-    else if(layout[i] == 'E') {
-        while(layout[i]) buffer += layout[i++];
-    }
-    else {
-         buffer += layout[i];
-    }
-   
-    keyboard.push_back({buffer, NOT_CHECKED});
-}
-}
     bool Wordly::handleInput(std::string_view word) const{
         if(word.length() != 5) return false;
 
@@ -123,14 +14,6 @@ for(int i = 0; i < layout.size(); i++) {
         return true;
     }
 
-    void Wordly::initHistory(void) {
-        std::ifstream file ("../history.json");
-        this->usersHistory.parse(file);
-    }
-    void Wordly::getRandomWord(void)  {
-        std::uniform_int_distribution<> dis(0, rs.size() - 1);
-         this->word = rs[dis(gen)];
-    }
             void Wordly::parseFile(void) {
         std::string buffer;
         while(getline(ss, buffer)) {
@@ -168,55 +51,7 @@ for(int i = 0; i < layout.size(); i++) {
     }
     size_t Wordly::getLength(const std::string & str) const {return str.length();}
     
-void Wordly::updateKeyStatus(void) {
 
-    size_t idx = 0;
-        for(auto & c : history[activeY]) {
-            if(this->word.find(c.c) == std::string::npos) {
-                c.type = NOT_IN;
-                auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
-                    return target.c[0] == c.c;
-                });
-
-                if(it != keyboard.end()) {
-                    it->status = INVALID;
-                }
-            }
-            else if(this->word[idx] == c.c) {
-                 c.type  = CORRECT_POS;
-                 if(this->config.hardMode) {
-                    this->mustUsedChars.insert(c.c);
-                 }
-                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
-                    return target.c[0] == c.c;
-                });
-
-                if(it != keyboard.end()) {
-                    it->status = CORRECT;
-                }
-            }
-            else  {
-                c.type = INCORRECT_POS;
-                 if(this->config.hardMode) {
-                    this->mustUsedChars.insert(c.c);
-                 }
-                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
-                    return target.c[0] == c.c;
-                });
-
-                if(it != keyboard.end()) {
-                    it->status = INCORRECT;
-                }
-            }
-            idx++;
-        }
-                activeX = 0;
-        if(activeY < 6) {
-             activeY++;
-        }  
-        attempts++;
-
-}
       bool Wordly::wordChecker(void) {
             std::string toCheck;
          for(const auto & c : history[activeY]) {
@@ -383,88 +218,7 @@ for(const auto & x : keyboard) {
     }
 }
 }
-bool Wordly::getAutoplayStatus(void) const {
-    return this->config.autoplay;
-}
-std::string Wordly::generateTheMostAccurateWord(void) const {
-std::string notInWord;
-std::unordered_map<int, char> incorrectPosition;
-std::unordered_map<int, char> correct;
-std::vector<std::string> total;
-std::string buffer;
-for(const auto & row : history) {
 
-        buffer.clear();
-    for(int i = 0; i < row.size(); i++) {
-        buffer += row[i].c;
-        if(row[i].type == NOT_IN) {
-            bool needed = false;
-            for(const auto & cell : row) {
-                if((cell.c == row[i].c) && (cell.type == INCORRECT_POS || cell.type == CORRECT_POS)) needed = true;
-            }
-            if(notInWord.find(row[i].c) == std::string::npos &&!needed ) {
-                 notInWord += row[i].c;
-            }
-
-           
-        }
-        else if(row[i].type == INCORRECT_POS) {
-            if(!incorrectPosition.contains(row[i].c)) {
-            incorrectPosition.insert({i, row[i].c});
-        }
-    }
-        else if(row[i].type == CORRECT_POS) {
-           correct.insert({i, row[i].c});
-        }
-    }
-    total.push_back(buffer);
-}
-
-auto mostProbableWord = std::find_if(rs.begin(), rs.end(), [notInWord, incorrectPosition, correct, total] (const std::string &w) {
-    for(const auto c : total) {
-        if(w == c) return false;
-    }
-for(const char & c : notInWord) {
-    if(w.find(c) != std::string::npos) return false;
-}
-
-for(const auto & c : incorrectPosition) {
-    if(w.find(c.second) == std::string::npos || w[c.first] == c.second) return false;
-}
-
-for(auto & c : correct) {
-    if(w[c.first] != c.second) return false;
-}
-
-return true;
-
-});
-if(mostProbableWord != rs.end())  return *mostProbableWord;
-return "";
-}
-void Wordly::autoBotPlay(void) {
-    if(activeY == 6 || pendingGameOver) return;
-    if(botTimer >= 0) {
-        botTimer -= GetFrameTime();
-        return;
-    }
-    std::string target;
-    if(activeY ==0) {
-        std::uniform_int_distribution<> dis(0, rs.size());
-        target = rs[dis(gen)];
-    }
-    else {
-target = generateTheMostAccurateWord();
-    }
-    std::uniform_int_distribution<> dis(0, rs.size());
-    if(activeX == 0) {
-    for(int i = 0; i < 5; i++) {
-    history[activeY][activeX++].c = target[i];  
-    }
-    if(wordChecker());
-    else botTimer = 0.8f;
-}
-}
 
 long Wordly::generateDayId(void) const {
     auto now = std::chrono::system_clock::now();
@@ -481,18 +235,6 @@ void Wordly::getRandomWordDayChallenge(void) {
 }
 
 
-void Wordly::updateDailyChallengeStatus(void) {
-    try {
-        auto dailyCh = usersHistory.getObject("daily_challenge").value();
-    dailyCh.updateValue<std::string>("daily_challenge_active", "false");
-    dailyCh.updateValue<std::string>("daily_challenge_id", std::to_string(generateDayId()));
-    usersHistory.updateValue<std::string>("daily_challenge", dailyCh.toString());
-    dailyChallenge.first = false;
-    } catch(...) {
-        std::cerr << "Json file was corrupted" << std::endl;
-    } 
-}
-
 
 void Wordly::clearVariables(void) {
                 gameOver = false;
@@ -508,36 +250,7 @@ void Wordly::clearVariables(void) {
                 initKeyboard();
 }
 
-void Wordly::update(void) {
-if(state == EMPTY_USERNAME) {
-        drawLogo();
-        setUsername();
-        return;
-    }
-    if(!gameOver) {
-    if(pendingGameOver) {
-            mainTimer.stop();
-        timer -= GetFrameTime();
 
-        if(timer <= 0) {
-            pendingGameOver = false;
-            gameOver = true;
-            timer  =0;
-        }
-    }
-    else {
-        if(this->config.autoplay) {
-            autoBotPlay();
-        }
-    }
-    if(state == DAILY_CHALLENGE || state == PRACTICE) {
-    writeKey();
-    }
-    
-} else {
-        gameOverScreenRenderer();
-    }
-}
 void Wordly::readKey(void){
     if(config.autoplay) {
         } else {
@@ -563,108 +276,9 @@ void Wordly::readKey(void){
     }
 }
 
-void Wordly::updatePvp(void) {
 
-    manager.receive();
-
-    if(manager.packet.received) {
-
-        if(manager.isWaitingForServer) {
-        manager.isWaitingForServer = false;
-        if(manager.packet.error) {
-            renderErrorMessage = true;
-                    errorMessage = "Incorrect word";
-                    shakeTimer = 0.5f;
-        }
-        else {
-             updateKeyStatus();
-        }
-        }
-    
-        else if(!manager.wordReceved){
-        this->word = manager.packet.word;
-        manager.wordReceved = true;
-    }
-        
-
-        manager.packet.received = false;
-               
-    }
-}
 
 size_t Wordly::calculateXpDistribution(void) const {
     return static_cast<size_t>(1000 / attempts);
 }
 
-
-void Wordly::play(void) {
-update();
-if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
-    readKey();
-    drawOriginalStateGame();
-}
-else if(state == LEADERBOARD) {
-    if(!leaderboard.leaderboardLoaded) {
-        try {
-    leaderboard.loadLeaderboard();
-        } catch(const std::exception & error) {
-            std::cerr << error.what() << std::endl;
-            state = MAIN_MENU;
-        }
-    } else leaderboard.renderLeaderboard();
-    
-}
-
-else if(state == PVP) { 
-    drawPvp();
-
-        
-    updatePvp();
-        if(manager.packet.turn) {
-            if(!renderErrorMessage) {
-            errorMessage = "Your turn";
-            }
-            readKey();
-            writeKey();
-    } else errorMessage.clear();
-    if(!manager.getStatus() && !manager.gameOver) {
-        DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
-    }
-    
-
-        if(manager.gameOver) {
-                size_t xp = calculateXpDistribution();
-                if(!leaderboard.leaderboardUpdated) {
-                    if(manager.packet.win) {
-                        std::thread([&] {
-                            leaderboard.updateLeaderboard(username, totalXp + xp);
-                        }).detach();
-                    }
-                    else if(!manager.packet.win && !manager.packet.draw) {
-                   std::thread([&] {
-                            leaderboard.updateLeaderboard(username, totalXp - xp);
-                        }).detach();
-                    }
-                    leaderboard.leaderboardUpdated = true;
-                    leaderboard.receiveUsersXp(this->username);
-                }
-        if(manager.packet.win) {
-
-            drawPvpWin();
-        }
-        else if(!manager.packet.win && !manager.packet.draw) {
-            drawPvpLose();
-        }
-        else drawPvpDraw();
-        drawXp(xp);
-    } 
-}
-
-else if(state == EMPTY_USERNAME) {
- drawUsername();
-} else {   
-     drawFrontScreen();
-    
-}
-
-}

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "leaderboard.hpp"
+#include "leaderboard/leaderboard.hpp"
 #include <fstream>
 #include <random>
 #include <array>
@@ -9,7 +9,7 @@
 #include "timer.hpp"
 #include <exception>
 #include "textBox.hpp"
-#include "./NetworkProtocol/network.hpp"
+#include "./pvp/network.hpp"
 #include <chrono>
 #include <thread>
 #define SQUARE_SIZE 65

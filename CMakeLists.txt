@@ -32,15 +32,18 @@ add_subdirectory(vendor/raylib)
 set(SOURCES
     src/main.cpp        
     src/wordle.cpp
-    src/button.cpp
+    src/draw/button.cpp
     src/keyboard.cpp
     src/timer.cpp
-    src/wordleDraw.cpp
+    src/draw/wordleDraw.cpp
     src/wordleUsername.cpp
     src/textBox.cpp
-    src/drawStats.cpp
-    src/leaderboard.cpp
-    src/NetworkProtocol/network.cpp
+    src/draw/drawStats.cpp
+    src/leaderboard/leaderboard.cpp
+    src/pvp/network.cpp
+    src/logic/wordleInit.cpp
+    src/logic/autoplay.cpp
+    src/logic/wordleUpdate.cpp
 
 )
 add_executable(${PROJECT_NAME} ${SOURCES})

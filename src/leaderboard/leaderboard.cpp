@@ -1,5 +1,5 @@
 #include "leaderboard.hpp"
-#include "button.hpp"
+#include "../draw/button.hpp"
 size_t leaderboardCallback(void * contents, size_t size, size_t number, std::string * result) {
     size_t totalSize = size * number;
     result->append((char *) contents, totalSize);

@@ -1,4 +1,4 @@
-#include "wordle.hpp"
+#include "../wordle.hpp"
 
 int Wordly::centerTextByX(const std::string & text, int fontSize, int width, int marginX = 0) const {
 int textWidth = MeasureText(text.c_str(), fontSize);

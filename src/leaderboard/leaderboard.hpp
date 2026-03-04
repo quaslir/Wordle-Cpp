@@ -4,8 +4,8 @@
 #include <algorithm>
 #include "raylib.h"
 #include <sstream>
-#include "../json-parser-c/parser.hpp"
-#include "drawLogo.hpp"
+#include "../../json-parser-c/parser.hpp"
+#include "../draw/drawLogo.hpp"
 #include <functional>
 class Leaderboard {
     public :

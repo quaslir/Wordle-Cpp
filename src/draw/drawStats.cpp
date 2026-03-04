@@ -1,4 +1,4 @@
-#include "wordle.hpp"
+#include "../wordle.hpp"
 
 void Wordly::gameOverScreenRenderer(void) {
 
