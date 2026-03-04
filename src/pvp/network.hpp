@@ -1,5 +1,5 @@
 #include <ixwebsocket/IXWebSocket.h>
-#include "../../json-parser-c/parser.hpp"
+#include "parser.hpp"
 struct Packet {
     std::string word = "";
     bool turn = false;

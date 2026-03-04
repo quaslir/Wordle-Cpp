@@ -23,7 +23,7 @@ int main(int argc, char * argv[]) {
     bool autoplay = wordly.getAutoplayStatus();
     while(!WindowShouldClose()) {
         BeginDrawing();
-            ClearBackground(wordly.config.bg_color);
+            ClearBackground(BLACK);
        wordly.play();
         EndDrawing();
 }

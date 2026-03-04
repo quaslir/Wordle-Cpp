@@ -4,9 +4,9 @@
 #include <algorithm>
 #include "raylib.h"
 #include <sstream>
-#include "../../json-parser-c/parser.hpp"
 #include "../draw/drawLogo.hpp"
 #include <functional>
+#include "parser.hpp"
 class Leaderboard {
     public :
     std::function<void(int)> getXp;

@@ -1,3 +1,6 @@
 [submodule "vendor/raylib"]
 	path = vendor/raylib
 	url = https://github.com/raysan5/raylib.git
+[submodule "vendor/json-parser"]
+	path = vendor/json-parser
+	url = https://gitlab.com/main845804/json-parser-c

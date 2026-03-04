@@ -7,7 +7,7 @@ void Wordly::gameOverScreenRenderer(void) {
     Rectangle panel = {40, 100, (float) GetScreenWidth() - 80, (float) GetScreenHeight() - 120};
 
     DrawRectangleRec(panel, ColorAlpha(DARKGRAY, 0.9f));
-    DrawRectangleLinesEx(panel,2 , config.grid_color);
+    DrawRectangleLinesEx(panel,2 , GREEN);
     if(userWon) {
     DrawText("WELL DONE!", panel.x + 20, panel.y + 20, 32, GREEN); 
     std::string usersTime = this->mainTimer.getCurrentTime();

@@ -29,6 +29,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(vendor/raylib)
+add_subdirectory(vendor/json-parser)
 set(SOURCES
     src/main.cpp        
     src/wordle.cpp
@@ -49,10 +50,10 @@ set(SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 
-target_include_directories(${PROJECT_NAME} PRIVATE vendor/raylib/src)
+target_include_directories(${PROJECT_NAME} PRIVATE vendor/raylib/src vendor/json-parser/)
 
 
-target_link_libraries(${PROJECT_NAME} raylib CURL::libcurl ixwebsocket)
+target_link_libraries(${PROJECT_NAME} json-parser raylib CURL::libcurl ixwebsocket)
 
 
 if(APPLE) 

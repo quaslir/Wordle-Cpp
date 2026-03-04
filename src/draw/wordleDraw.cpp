@@ -141,13 +141,21 @@ for(auto & x : keyboard) {
 void Wordly::drawUsername(void) const {
     int fontSize = 25;
     int paddingX = 15;
-    
+    const float targetWidth = 50.0f;
     int width = MeasureText(this->username.c_str(), fontSize);
-    int x = GetScreenWidth() - width - paddingX;
-    int y = paddingX;
-    Rectangle rec = {(float) x - 10, (float) y - 5, (float) width + 20, (float) fontSize + 10};
+    int finalFontSize = fontSize;
+    int finalWidth = width;
+    if(targetWidth < width) {
+        finalFontSize = static_cast<int>(fontSize * (targetWidth / width));
+        finalWidth = MeasureText(this->username.c_str(), finalFontSize);
+    }
+
+    
+    int x = GetScreenWidth() - finalWidth - paddingX;
+    int y = (15 + (SQUARE_SIZE - finalFontSize)) / 2.0f;
+    Rectangle rec = {(float) x - 10, (float) y - 5, (float) finalWidth + 20, (float) finalFontSize + 10};
     DrawRectangleRounded(rec, 0.5f, 10, ColorAlpha(BLACK, 0.3f));
-    DrawText(this->username.c_str(), x, y, fontSize, RAYWHITE);
+    DrawText(this->username.c_str(), x, y, finalFontSize, RAYWHITE);
 }
 
 
@@ -169,7 +177,7 @@ void Wordly::drawGrid(const float offset) {
             DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, FONT_SIZE, getColor(c.type));
         float thickness = 3.0f;
 
-        DrawRectangleLinesEx(box, thickness, this->config.grid_color);
+        DrawRectangleLinesEx(box, thickness, GREEN);
        }
        }
 }

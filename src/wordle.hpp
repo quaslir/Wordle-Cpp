@@ -29,12 +29,8 @@ struct Coordinates {
 };
 
 struct Config {
-Color bg_color;
-Color grid_color;
-Color text_color;
 bool hardMode;
 bool autoplay;
-Config() : bg_color(BLACK), grid_color(GREEN), text_color(GREEN), hardMode(false), autoplay(false) {}
 };
 
 enum gameState_t {
