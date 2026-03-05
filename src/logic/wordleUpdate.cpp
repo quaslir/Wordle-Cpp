@@ -61,8 +61,9 @@ void Wordly::updatePvp(void) {
 }
 
 void Wordly::play(void) {
+
 update();
-if(state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) {
+if((state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) && !openSettings) {
     readKey();
     drawOriginalStateGame();
 }
@@ -130,6 +131,12 @@ else if(state == EMPTY_USERNAME) {
     
 }
 
+
+if(openSettings) {
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), ColorAlpha(BLACK, 0.5f));
+
+    settings.drawSettings();
+}
 }
 
 void Wordly::updateDailyChallengeStatus(void) {

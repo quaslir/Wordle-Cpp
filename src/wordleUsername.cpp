@@ -36,8 +36,8 @@ void Wordly::setUsername(void) {
     bool toSubmit = !buffer.empty();
     Color btnColor = toSubmit ? Color{83,141,78, 255} : DARKGRAY;
 
-    Button btn;
-    btn = btn.drawBtn(rec2, "Set username", btnColor);
+    Button btn (rec2, btnColor, "Set username");
+     btn.drawBtn();
 
     if(toSubmit && btn.checkClick(GetMousePosition())) {
             checkUsername(buffer);

@@ -45,6 +45,7 @@ set(SOURCES
     src/logic/wordleInit.cpp
     src/logic/autoplay.cpp
     src/logic/wordleUpdate.cpp
+    src/settings/settings.cpp
 
 )
 add_executable(${PROJECT_NAME} ${SOURCES})

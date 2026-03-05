@@ -23,6 +23,7 @@ void Wordly::drawFrontScreen(void) {
     drawLogo();
     drawPattern();
     drawUsername();
+    if(openSettings) return;
     const int numButtons = 4;
     static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
@@ -42,8 +43,8 @@ void Wordly::drawFrontScreen(void) {
             rec.height += 3;
             rec.x += 4;
         }
-        Button btn;
-        btn = btn.drawBtn(rec, buttons[i], color);
+        Button btn (rec, color, buttons[i]);
+        btn.drawBtn();
 
         if(btn.checkClick(GetMousePosition())) {
 
@@ -138,7 +139,7 @@ for(auto & x : keyboard) {
 }
 }
 
-void Wordly::drawUsername(void) const {
+void Wordly::drawUsername(void) {
     int fontSize = 25;
     int paddingX = 15;
     const float targetWidth = 50.0f;
@@ -156,6 +157,13 @@ void Wordly::drawUsername(void) const {
     Rectangle rec = {(float) x - 10, (float) y - 5, (float) finalWidth + 20, (float) finalFontSize + 10};
     DrawRectangleRounded(rec, 0.5f, 10, ColorAlpha(BLACK, 0.3f));
     DrawText(this->username.c_str(), x, y, finalFontSize, RAYWHITE);
+
+    if(CheckCollisionPointRec(GetMousePosition(), rec)) {
+        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        openSettings = !openSettings;
+    }
+} 
 }
 
 
@@ -237,13 +245,16 @@ void Wordly::drawPvp(void) {
           }
     }
     else {
-          Button btn;
+         
     Rectangle rec = {(float) GetScreenWidth() / 2 - 60, (float) GetScreenHeight() - 80, 120, 40};
+     
      Color colorBtn = DARKGRAY;
+ 
     if(CheckCollisionPointRec(GetMousePosition(), rec)) {
         colorBtn = LIGHTGRAY;
     }
-    btn = btn.drawBtn(rec, "Back", colorBtn);
+        Button btn (rec, colorBtn, "Back");
+    btn.drawBtn();
     if(btn.checkClick(GetMousePosition())) {
         manager.disconnect();
          clearVariables();

@@ -102,13 +102,14 @@ DrawText("TOTAL XP", x + panelWidth - 110, y - 33, 20, GOLD);
 
     }
 
-    Button btn;
+ 
     Rectangle rec = {(float) screenWidth / 2 - 60, (float) GetScreenHeight() - 80, 120, 40};
      Color colorBtn = DARKGRAY;
     if(CheckCollisionPointRec(GetMousePosition(), rec)) {
         colorBtn = LIGHTGRAY;
     }
-    btn = btn.drawBtn(rec, "Back", colorBtn);
+       Button btn (rec, colorBtn, "Back");
+    btn.drawBtn();
     if(btn.checkClick(GetMousePosition())) {
         leaderboardLoaded = false;
         leaderboard.clear();

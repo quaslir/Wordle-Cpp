@@ -11,6 +11,7 @@
 #include "textBox.hpp"
 #include "./pvp/network.hpp"
 #include <chrono>
+#include "settings/settings.hpp"
 #include <thread>
 #define SQUARE_SIZE 65
 #define FONT_SIZE 30
@@ -70,6 +71,8 @@ class Wordly {
     size_t totalXp = 0;
     Leaderboard leaderboard;
     NetworkManager manager;
+    bool openSettings = false;
+    Settings settings;
     Coordinates pos = {0, 0};
     bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
@@ -96,7 +99,7 @@ class Wordly {
     void drawGuessDistribution(const Rectangle & rec) const;
     ParserJSON usersHistory;
     void drawFrontScreen(void);
-    void drawUsername(void) const;
+    void drawUsername(void);
     void setUsername(void);
     void trim(std::string & text) const;
     void clearVariables(void);

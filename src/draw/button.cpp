@@ -10,15 +10,18 @@ bool Button::checkClick(const Vector2 & pos)const{
     }
 bool Button::checkHover(const Vector2 & pos) const {
 if(CheckCollisionPointRec(pos, btn)) {
+    //SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
     return true;
 }
 return false;
 }
 
-Button Button::drawBtn(const Rectangle & box, const std::string & text, const Color & color) const{
-    Button btn (box, color, text);
+void Button::drawBtn(void) const{
 
-    DrawRectangle(btn.btn.x, btn.btn.y, btn.btn.width, btn.btn.height, btn.color);
-    DrawText(btn.text.c_str(),btn.btn.x + 10, btn.btn.y + 5, 20, BLACK);
-    return btn;
+    DrawRectangleRounded(btn, 0.2f, 10, color);
+    const int fontSize = 20;
+    int width = MeasureText(text.c_str(),fontSize);
+    int x = btn.x + (btn.width - width) / 2.0f;
+    int y = btn.y + (btn.height - fontSize) / 2.0f;
+    DrawText(text.c_str(),x, y, 20, BLACK);
 }

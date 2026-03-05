@@ -49,8 +49,8 @@ void Wordly::gameOverScreenRenderer(void) {
     drawStatRow("Best streak", "best_streak", panel.x + 370);
     Rectangle box = {145, 600, 120, 30};
     std::string text = "Play again";
-    Button playAgain;
-    playAgain = playAgain.drawBtn(box, text, PINK);
+    Button playAgain (box, PINK, text);
+    playAgain.drawBtn();
         if(playAgain.checkClick(GetMousePosition())) {
         clearVariables();
     getRandomWord();
@@ -59,8 +59,8 @@ void Wordly::gameOverScreenRenderer(void) {
 
     Rectangle box2 =  {280, 600, 120, 30};
     std::string text2 = "Exit";
-    Button exit;
-    exit = exit.drawBtn(box2, text2, PINK);
+    Button exit (box2, PINK, text2);
+    exit.drawBtn();
 
     if(exit.checkClick(GetMousePosition())) {
                 clearVariables();
