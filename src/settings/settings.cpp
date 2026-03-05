@@ -37,4 +37,34 @@ void Settings::drawSettings(void) {
     if(hardMode) {
         DrawRectangle(checkHardModeRec.x + 5, checkHardModeRec.y + 5, 15, 15, GREEN);
     }
+
+
+    float btnWidth = 200.0f;
+    float btnHeight = 40.0f;
+
+    Rectangle btnBack = {
+        rec.x + (rec.width - btnWidth) / 2.0f,
+        rec.y + rec.height - 60.0f,
+        btnWidth,
+        btnHeight
+    };
+
+
+    bool isHoveredBtnBack = CheckCollisionPointRec(GetMousePosition(), btnBack);
+
+    Color currentBtnBackColor = isHoveredBtnBack ? DARKGRAY : GRAY;
+    std::string text = "MAIN MENU";
+        Button backBtn (btnBack, currentBtnBackColor, text);
+        backBtn.drawBtn();
+    int fontSize = 20;
+
+    float textX = btnBack.x + (btnBack.width - MeasureText(text.c_str(), fontSize)) / 2.0f;
+    float textY = btnBack.y + (btnBack.height - fontSize) / 2.0f;
+
+    DrawText(text.c_str(), (int)textX, (int) textY, fontSize, RAYWHITE);
+
+    if(backBtn.checkClick(GetMousePosition())) {
+        onState();
+        onClose();
+    }
 }

@@ -18,7 +18,7 @@ if(state == EMPTY_USERNAME) {
         }
     }
     else {
-        if(this->config.autoplay) {
+        if(state == AUTOPLAY) {
             autoBotPlay();
         }
     }
@@ -168,7 +168,7 @@ void Wordly::updateKeyStatus(void) {
             }
             else if(this->word[idx] == c.c) {
                  c.type  = CORRECT_POS;
-                 if(this->config.hardMode) {
+                 if(settings.hardMode) {
                     this->mustUsedChars.insert(c.c);
                  }
                  auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
@@ -181,7 +181,7 @@ void Wordly::updateKeyStatus(void) {
             }
             else  {
                 c.type = INCORRECT_POS;
-                 if(this->config.hardMode) {
+                 if(settings.hardMode) {
                     this->mustUsedChars.insert(c.c);
                  }
                  auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {

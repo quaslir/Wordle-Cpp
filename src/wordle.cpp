@@ -61,14 +61,15 @@ bool Wordly::isEmpty(std::string_view str) const{
             shakeTimer = 0.5f;
             return false;
          }
-         if(this->config.hardMode) {
+         if(settings.hardMode) {
             for(const char &c : this->mustUsedChars) {
                 if(toCheck.find(c) == std::string::npos) {
                     renderErrorMessage = true;
                     errorMessage = "You must use ";
-                    errorMessage += " letter";
+                    errorMessage += "letter ";
                     errorMessage += c;
                     errorMessage += " in your word";
+                    shakeTimer = 0.5f;
                     return false;
                 }
             }
@@ -82,7 +83,7 @@ bool Wordly::isEmpty(std::string_view str) const{
          renderErrorMessage = false;
          updateKeyStatus();
 
-        if(this->config.autoplay && (toCheck == word || attempts == 6)) {
+        if(state == AUTOPLAY && (toCheck == word || attempts == 6)) {
             pendingGameOver = true;
             timer = 2.0f;
         }
@@ -252,7 +253,7 @@ void Wordly::clearVariables(void) {
 
 
 void Wordly::readKey(void){
-    if(config.autoplay) {
+    if(state == AUTOPLAY) {
         } else {
         int key = GetCharPressed();
         while(key > 0) {

@@ -1,7 +1,7 @@
 #include "../wordle.hpp"
 
 bool Wordly::getAutoplayStatus(void) const {
-    return this->config.autoplay;
+    return state == AUTOPLAY;
 }
 std::string Wordly::generateTheMostAccurateWord(void) const {
 std::string notInWord;

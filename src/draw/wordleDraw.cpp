@@ -68,7 +68,6 @@ void Wordly::drawFrontScreen(void) {
             state = AUTOPLAY;
              mainTimer.start();
             getRandomWord();
-            this->config.autoplay = true;
             break;
 
             case 3:
@@ -208,7 +207,7 @@ mainTimer.update();
         }
     }
     else {
-        if(this->config.autoplay) {
+        if(state == AUTOPLAY) {
             autoBotPlay();
         }
     }

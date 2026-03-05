@@ -29,10 +29,6 @@ struct Coordinates {
     int x, y;
 };
 
-struct Config {
-bool hardMode;
-bool autoplay;
-};
 
 enum gameState_t {
     MAIN_MENU,
@@ -116,7 +112,6 @@ class Wordly {
      void updatePvp(void);
      size_t calculateXpDistribution(void) const;
     public :
-    Config config;
      bool wordChecker(void);
 
     Wordly(std::istream & s); 

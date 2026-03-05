@@ -58,6 +58,14 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     }
     updateKeyStatus();
        });
+
+    settings.onState = [this] () {
+        state = MAIN_MENU;
+    };
+
+    settings.onClose = [this] () {
+        openSettings = false;
+    };
 }
 
 void Wordly::initHistoryFile(void) {

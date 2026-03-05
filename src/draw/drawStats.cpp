@@ -64,7 +64,6 @@ void Wordly::gameOverScreenRenderer(void) {
 
     if(exit.checkClick(GetMousePosition())) {
                 clearVariables();
-                this->config.autoplay = false;
                 state = MAIN_MENU;
     }
 }
