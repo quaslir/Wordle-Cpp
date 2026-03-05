@@ -1,7 +1,5 @@
 build/
-raylib/
-vendor/
 .env
 node_modules/
 history.json
-.vs-code
+.vscode
