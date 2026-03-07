@@ -23,7 +23,9 @@ void NetworkManager::sendmsg(const std::string & msg) {
 }
 
 void NetworkManager::disconnect(void) {
-    _socket.send("STOP");
+    parser.insert("STOP", packet.roomId);
+    sendmsg(parser.toString());
+    parser.clear();
     _socket.stop();
     this->_connected = false;
     this->gameStarted = false;

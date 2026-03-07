@@ -1,6 +1,7 @@
 #include "../wordle.hpp"
 
 void Wordly::update(void) {
+    if(openSettings) return;
 if(state == EMPTY_USERNAME) {
         drawLogo();
         setUsername();

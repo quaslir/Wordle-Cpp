@@ -47,7 +47,6 @@ void Wordly::drawFrontScreen(void) {
         btn.drawBtn();
 
         if(btn.checkClick(GetMousePosition())) {
-
             switch (i) {
             case 0 :    
             if(dailyChallenge.first) {
@@ -158,7 +157,6 @@ void Wordly::drawUsername(void) {
     DrawText(this->username.c_str(), x, y, finalFontSize, RAYWHITE);
 
     if(CheckCollisionPointRec(GetMousePosition(), rec)) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         openSettings = !openSettings;
     }

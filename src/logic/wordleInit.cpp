@@ -60,7 +60,11 @@ Wordly::Wordly(std::istream & s) : ss(s) {
        });
 
     settings.onState = [this] () {
+        if(state == PVP) {
+            manager.disconnect();
+        }
         state = MAIN_MENU;
+        clearVariables();
     };
 
     settings.onClose = [this] () {

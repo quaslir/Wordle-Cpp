@@ -7,6 +7,7 @@ import { WebSocket, WebSocketServer } from "ws"
 import { v4 as uuidv4 } from "uuid"
 import Groq from "groq-sdk"
 import axios from "axios"
+import { json } from "node:stream/consumers"
 dotenv.config();
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROK_KEY });
@@ -36,6 +37,10 @@ interface gamePacket {
 interface receivedPacket {
     id: string,
     word: string
+};
+
+interface stopPacket {
+    id:string
 };
 
 const activeRooms = new Map<string, gamePacket>();
@@ -150,15 +155,10 @@ ws.on('connection', async(ws: WebSocket) => {
 
     ws.on('message', async(msg: string) => {
         console.log(msg.toString());
-        if (msg.toString() === "STOP") {
-            const index: number = queue.indexOf(ws);
-            if (index !== -1) {
-                queue.splice(index, 1);
-            }
-            ws.close();
-        }
 
-        else {
+
+
+        try {
             const packet: receivedPacket = JSON.parse(msg.toString());
             const correctSyntax = await wordChecker(packet.word);
                 if(!correctSyntax || packet.word.trim().length !== 5) {
@@ -185,6 +185,24 @@ ws.on('connection', async(ws: WebSocket) => {
                 nextUser.send(JSON.stringify({ word: packet.word, turn: true }));
                 currentUser.send(JSON.stringify({ turn: false }));
             }
+        } catch(error) {
+            try {
+            const targetId:stopPacket = JSON.parse(msg.toString());
+            const index: number = queue.indexOf(ws);
+            if (index !== -1) {
+                queue.splice(index, 1);
+            }
+
+            let player2 = activeRooms.get(targetId.id)?.player1;
+            if(player2 === ws) {
+                player2 = activeRooms.get(targetId.id)?.player2;
+            }
+            ws.close();
+            player2?.close();
+            
+        } catch(error) {
+            console.error(error);
+        }
         }
 
     });

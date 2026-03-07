@@ -12,13 +12,18 @@ void Settings::drawSettings(void) {
 
     DrawRectangleRounded(rec, 0.1f, 10, modalBg);
     DrawRectangleRoundedLines(rec, 0.1f, 10,borderColor);
-
-    DrawText("SETTINGS", (int) rec.x + 20, (int) rec.y + 20, 25, RAYWHITE);
+    Rectangle exitSettingsRec = {rec.x + 20, rec.y + 20, 28, 28};
+    Color colorExitSettingsBtn = CheckCollisionPointRec(GetMousePosition(), exitSettingsRec) ? DARKGRAY : LIGHTGRAY;
+    Button exitSettingsBtn (exitSettingsRec, colorExitSettingsBtn, "<-");
+    exitSettingsBtn.drawBtn();
+    if(exitSettingsBtn.checkClick(GetMousePosition())) {
+        onClose();
+    }
+    DrawText("SETTINGS", (int) rec.x + 65, (int) rec.y + 22, 25, RAYWHITE);
 
     DrawLine(rec.x + 20, rec.y + 55, rec.x + width - 20, rec.y + 55, borderColor);
 
     float startY = rec.y + 80;
-
     DrawText("Hard Mode", rec.x + 30, startY, 20, RAYWHITE);
 
     Rectangle checkHardModeRec = {rec.x + rec.width - 60, startY, 25, 25};
