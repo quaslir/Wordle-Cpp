@@ -18,7 +18,9 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         leaderboard.getXp = [this](int xp) {
         this->totalXp = xp;
        };
+       std::thread([this] {
         leaderboard.receiveUsersXp(username);
+    }).detach();
     }
         this->parseFile();  
        if(usersHistory.exists("daily_challenge")) {
@@ -131,6 +133,10 @@ void Wordly::initHistory(void) {
     }
 
     void Wordly::getRandomWord(void)  {
+        if(!settings.offlineMode) {
+            getRandomWordFromServer();
+            return;
+        }
         std::uniform_int_distribution<> dis(0, rs.size() - 1);
          this->word = rs[dis(gen)];
     }

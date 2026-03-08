@@ -111,3 +111,5 @@ void NetworkManager::sendGamePacket(const std::string & str) {
 void NetworkManager::setOnWord(std::function<void(const std::string &)> callback) {
 onWord = callback;
 }
+
+

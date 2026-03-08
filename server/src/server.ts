@@ -284,4 +284,15 @@ app.post("/getUsersXp", async(req, res) => {
     }
 });
 
+app.get("/word-gen", (req, res) => {
+    return res.json({word: getWord()});
+});
+interface word_check {
+    word:string
+};
+app.post("/word-check", (req, res) => {
+    const {word}:word_check = req.body;
+    return res.json({exists: EnglishDictionary.has(word)});
+});
+
 app.listen(3000, () => console.log("Server is working on 3000 port"));

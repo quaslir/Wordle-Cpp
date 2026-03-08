@@ -1,5 +1,5 @@
 #include "settings.hpp"
-
+#include <array>
 void Settings::drawSettings(void) {
     Color modalBg = {39, 39, 42, 255};
     Color borderColor = {63, 63, 70, 255};
@@ -22,31 +22,44 @@ void Settings::drawSettings(void) {
     DrawText("SETTINGS", (int) rec.x + 65, (int) rec.y + 22, 25, RAYWHITE);
 
     DrawLine(rec.x + 20, rec.y + 55, rec.x + width - 20, rec.y + 55, borderColor);
+       constexpr static std::array<std::string, 2> options = {"Hard Mode", "Offline mode"};
+    for(int i = 0; i < options.size(); i++) {
+    
+    float startY = (rec.y + 80) + i * (50);
+    DrawText(options[i].c_str(), rec.x + 30, startY, 20, RAYWHITE);
 
-    float startY = rec.y + 80;
-    DrawText("Hard Mode", rec.x + 30, startY, 20, RAYWHITE);
+    Rectangle checkOptins = {rec.x + rec.width - 60, startY, 25, 25};
 
-    Rectangle checkHardModeRec = {rec.x + rec.width - 60, startY, 25, 25};
-
-    if(CheckCollisionPointRec(GetMousePosition(), checkHardModeRec)) {
-        DrawRectangleLinesEx(checkHardModeRec, 2, YELLOW);
+    if(CheckCollisionPointRec(GetMousePosition(), checkOptins)) {
+        DrawRectangleLinesEx(checkOptins, 2, YELLOW);
 
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            hardMode = !hardMode;
+            switch(i) {
+                case 0 :
+                 hardMode = !hardMode;
+                 break;
+                 case 1:
+                 offlineMode = !offlineMode;
+                 break;
+            }
+           
         }
 
     } else {
-        DrawRectangleLinesEx(checkHardModeRec, 2, GRAY);
+        DrawRectangleLinesEx(checkOptins, 2, GRAY);
     }
 
-    if(hardMode) {
-        DrawRectangle(checkHardModeRec.x + 5, checkHardModeRec.y + 5, 15, 15, GREEN);
+    if(i == 0 && hardMode) {
+        DrawRectangle(checkOptins.x + 5, checkOptins.y + 5, 15, 15, GREEN);
     }
 
+    else if(i == 1 && offlineMode) {
+        DrawRectangle(checkOptins.x + 5, checkOptins.y + 5, 15, 15, GREEN);
+    }
 
+}
     float btnWidth = 200.0f;
     float btnHeight = 40.0f;
-
     Rectangle btnBack = {
         rec.x + (rec.width - btnWidth) / 2.0f,
         rec.y + rec.height - 60.0f,

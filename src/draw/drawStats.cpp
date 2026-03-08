@@ -53,7 +53,7 @@ void Wordly::gameOverScreenRenderer(void) {
     playAgain.drawBtn();
         if(playAgain.checkClick(GetMousePosition())) {
         clearVariables();
-    getRandomWord();
+        getRandomWord();
         mainTimer.start();
     }
 

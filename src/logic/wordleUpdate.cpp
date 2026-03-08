@@ -71,7 +71,9 @@ if((state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) && !open
 else if(state == LEADERBOARD) {
     if(!leaderboard.leaderboardLoaded) {
         try {
-    leaderboard.loadLeaderboard();
+
+        leaderboard.loadLeaderboard();
+
         } catch(const std::exception & error) {
             std::cerr << error.what() << std::endl;
             state = MAIN_MENU;

@@ -25,7 +25,7 @@ void Wordly::drawFrontScreen(void) {
     drawUsername();
     if(openSettings) return;
     const int numButtons = 4;
-    static const std::vector<std::string> buttons = {"Daily challenge", "Pratice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
+    static const std::vector<std::string> buttons = {"Daily challenge", "Practice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
     float btnH  = 40.f;
     float startX = (GetScreenWidth() - (float) btnW) / 2;
@@ -70,11 +70,12 @@ void Wordly::drawFrontScreen(void) {
             break;
 
             case 3:
-
+            if(settings.offlineMode) break;
             state = LEADERBOARD;
             break;
 
             case 4:
+            if(settings.offlineMode) break;
             state = PVP;
             manager.connect("ws://localhost:8000");
             break;
@@ -182,7 +183,7 @@ void Wordly::drawGrid(const float offset) {
             DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, FONT_SIZE, getColor(c.type));
         float thickness = 3.0f;
 
-        DrawRectangleLinesEx(box, thickness, GREEN);
+        DrawRectangleLinesEx(box, thickness, LIGHTGRAY);
        }
        }
 }

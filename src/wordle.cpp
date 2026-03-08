@@ -74,10 +74,12 @@ bool Wordly::isEmpty(std::string_view str) const{
                 }
             }
          }
-         if(!dictionary.contains(toCheck)) {
-            errorMessage = "This word does not exists in our database";
-            renderErrorMessage = true;
-            shakeTimer = 0.5f;
+         if(settings.offlineMode && !dictionary.contains(toCheck)) {
+           wordCheckerHelpFunctionForError();
+           return false;
+         }
+         else if(!settings.offlineMode && !wordCheckerFromServer(toCheck)) {
+             wordCheckerHelpFunctionForError();
             return false;
          }
          renderErrorMessage = false;
@@ -283,3 +285,42 @@ size_t Wordly::calculateXpDistribution(void) const {
     return static_cast<size_t>(1000 / attempts);
 }
 
+bool Wordly::wordCheckerFromServer(const std::string & toCheck) {
+    ParserJSON data;
+    data.insert("word", toCheck);
+    std::string dataFormatted = data.toString();
+    std::string result = postRequest("http://localhost:3000/word-check", dataFormatted);
+    data.clear();
+    std::stringstream ss (result);
+    data.parse(ss);
+
+    if(data.exists("exists")) {
+        auto x = data.getValue<bool>("exists");
+        if(x.has_value()) {
+            return x.value();
+        }
+    }
+
+    return false;
+}
+
+
+void Wordly::getRandomWordFromServer(void) {
+    std::string raw = getRequest("http://localhost:3000/word-gen");
+    ParserJSON parser;
+    std::stringstream ss (raw);
+    parser.parse(ss);
+
+    if(parser.exists("word")) {
+        auto x  = parser.getValue<std::string>("word");
+        if(x.has_value()) {
+            word = x.value();
+        }
+    }
+ }
+
+ void Wordly::wordCheckerHelpFunctionForError(void) {
+ errorMessage = "This word does not exists in our database";
+            renderErrorMessage = true;
+            shakeTimer = 0.5f;
+ }

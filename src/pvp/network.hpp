@@ -1,4 +1,5 @@
 #include <ixwebsocket/IXWebSocket.h>
+#include <curl/curl.h>
 #include "parser.hpp"
 struct Packet {
     std::string word = "";
@@ -29,8 +30,6 @@ class NetworkManager {
 
     void sendGamePacket(const std::string & str);
     void receive(void);
-
-
          private:
              std::function<void(const std::string &)> onWord;
     ix::WebSocket _socket;

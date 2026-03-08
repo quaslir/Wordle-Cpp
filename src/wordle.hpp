@@ -13,6 +13,7 @@
 #include <chrono>
 #include "settings/settings.hpp"
 #include <thread>
+#include "post.hpp"
 #define SQUARE_SIZE 65
 #define FONT_SIZE 30
 
@@ -78,6 +79,7 @@ class Wordly {
         void initKeyboard(void);
     int centerTextByX(const std::string & text, int fontSize, int width, int marginX) const;
     void getRandomWord(void);
+    void getRandomWordFromServer(void);
     void getRandomWordDayChallenge(void);
     void writeKey(void);
     void parseFile(void);
@@ -110,6 +112,7 @@ class Wordly {
      void drawPvpDraw(void) const;
      void drawXp(int xp) const;
      void updatePvp(void);
+     void wordCheckerHelpFunctionForError(void);
      size_t calculateXpDistribution(void) const;
     public :
      bool wordChecker(void);
@@ -123,5 +126,5 @@ bool getAutoplayStatus(void) const;
 void backspace(void);
 void play(void);
 void gameOverScreenRenderer(void);
-
+bool wordCheckerFromServer(const std::string & toCheck);
 };
