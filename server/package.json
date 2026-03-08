@@ -28,6 +28,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "fs": "^0.0.1-security",
     "groq-sdk": "^0.37.0",
     "mongoose": "^9.2.1",
     "uuid": "^13.0.0",

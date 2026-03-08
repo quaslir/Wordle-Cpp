@@ -82,7 +82,18 @@ else if(state == LEADERBOARD) {
 
 else if(state == PVP) { 
     drawPvp();
-
+    if(manager.gameOver && !manager.connected()) {
+        clearVariables();
+        manager.disconnect();
+        state = MAIN_MENU;
+        manager.isWaitingForServer = false;
+         manager.packet.received = false;
+         manager.packet.win = false;
+         manager.packet.draw = false;
+         manager.gameOver = false;
+         leaderboard.leaderboardUpdated = false;
+        return;
+    }
         
     updatePvp();
         if(manager.packet.turn) {

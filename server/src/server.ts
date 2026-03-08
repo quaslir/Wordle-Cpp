@@ -7,7 +7,9 @@ import { WebSocket, WebSocketServer } from "ws"
 import { v4 as uuidv4 } from "uuid"
 import Groq from "groq-sdk"
 import axios from "axios"
-import { json } from "node:stream/consumers"
+import fs from "fs"
+import { dirname, join } from "path"
+import { fileURLToPath } from "url"
 dotenv.config();
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROK_KEY });
@@ -40,11 +42,17 @@ interface receivedPacket {
 };
 
 interface stopPacket {
-    id:string
+    STOP:string
 };
 
 const activeRooms = new Map<string, gamePacket>();
 
+const __filename:string = fileURLToPath(import.meta.url);
+const __dirname:string = dirname(__filename);
+const filePath = join(__dirname, "../assets/sgb-words.txt");
+
+const words:string[] = fs.readFileSync(filePath, 'utf-8').split('\n');
+const EnglishDictionary = new Set(words.map(w => w.trim().toLowerCase()));
 
 async function getLLMData(prompt: string): Promise<string> {
 try {
@@ -72,30 +80,14 @@ try {
 }
 
 
-async function wordChecker(word: string) : Promise<boolean> {
-try {
-    const res = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-    return true;
-} catch(error) {
-    return false;
-}
+function wordChecker(word: string) : boolean {
+return EnglishDictionary.has(word);
 }
 
+const EnglishDictionaryToArray:string[] = Array.from(EnglishDictionary);
 
-async function getWord():Promise<string> {
-    const alphabet:string = "abcdefghijklmnopqrstuvwxyz";
-    const randomChar:string = alphabet[Math.floor(Math.random() * alphabet.length)]!;
-    try {
-        const reply = await getLLMData(`Generate a common 5-letter English word that starts with the letter '${randomChar}'. 
-    Output ONLY the word in lowercase.`);
-        if(reply.length !== 5 || (await !wordChecker(reply))) {
-            return getWord();
-        }
-        return reply;
-    } catch(error) {
-        console.error(error);
-        return "";
-    }
+function getWord():string {
+    return EnglishDictionaryToArray[Math.floor(Math.random() * EnglishDictionaryToArray.length)] ?? "";
 }
 
 
@@ -103,13 +95,14 @@ async function getWord():Promise<string> {
 
 ws.on('connection', async(ws: WebSocket) => {
     queue.push(ws);
+    console.log(queue.length);
     if (queue.length >= 2) {
         const p1 = queue.shift();
         const p2 = queue.shift();
 
         const player1Starts: boolean = Math.round(Math.random()) == 1;
         const roomId: string = uuidv4();
-        const word = await getWord();
+        const word = getWord();
         console.log(word);
         const packet1: startPacket = {
             turn: player1Starts,
@@ -137,7 +130,10 @@ ws.on('connection', async(ws: WebSocket) => {
                     else console.log("Message was successfully sent!");
                 });
             }
-            else console.log("PLAYER 1 IS NOT CONNECTED");
+            else {
+                console.error("PLAYER 1 IS NOT CONNECTED");
+                return;
+            }
 
             if (p2?.readyState === WebSocket.OPEN) {
                 p2?.send(JSON.stringify({ ...packet2 }), (error) => {
@@ -156,11 +152,32 @@ ws.on('connection', async(ws: WebSocket) => {
     ws.on('message', async(msg: string) => {
         console.log(msg.toString());
 
+        if(msg.toString().includes("STOP")) {
+            const targetId:stopPacket = JSON.parse(msg.toString());
+            const index: number = queue.indexOf(ws);
+            if (index !== -1) {
+                queue.splice(index, 1);
+            }
 
+            const room = activeRooms.get(targetId.STOP);
+            if(room) {
+                const opponent = room.player1 === ws ? room.player2 : room.player1;
 
-        try {
+                if(opponent && opponent.readyState === 1) {
+                    
+                    opponent.send(JSON.stringify({exit: true}));
+
+                    setTimeout(() => {
+                        opponent.close();
+                        activeRooms.delete(targetId.STOP);
+                    }, 100);
+                }
+            }
+            ws.close();
+        } else {
+
             const packet: receivedPacket = JSON.parse(msg.toString());
-            const correctSyntax = await wordChecker(packet.word);
+            const correctSyntax = wordChecker(packet.word);
                 if(!correctSyntax || packet.word.trim().length !== 5) {
                 ws.send(JSON.stringify({incorrect: true}));
                 return;
@@ -185,25 +202,9 @@ ws.on('connection', async(ws: WebSocket) => {
                 nextUser.send(JSON.stringify({ word: packet.word, turn: true }));
                 currentUser.send(JSON.stringify({ turn: false }));
             }
-        } catch(error) {
-            try {
-            const targetId:stopPacket = JSON.parse(msg.toString());
-            const index: number = queue.indexOf(ws);
-            if (index !== -1) {
-                queue.splice(index, 1);
-            }
 
-            let player2 = activeRooms.get(targetId.id)?.player1;
-            if(player2 === ws) {
-                player2 = activeRooms.get(targetId.id)?.player2;
-            }
-            ws.close();
-            player2?.close();
-            
-        } catch(error) {
-            console.error(error);
         }
-        }
+        
 
     });
 

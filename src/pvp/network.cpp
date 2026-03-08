@@ -35,6 +35,7 @@ void NetworkManager::receive(void) {
     if(!this->_connected) return;
 
     _socket.setOnMessageCallback([this] (const ix::WebSocketMessagePtr & msg) {
+        std::cout << msg->str << std::endl;
         if(msg->type == ix::WebSocketMessageType::Message) {
             std::stringstream ss (msg->str);
             parser.parse(ss);
@@ -55,6 +56,11 @@ void NetworkManager::receive(void) {
                 parser.clear();
                 packet.received = true;
                 return;
+            }
+            if(parser.exists("exit")) {
+            gameOver = true;
+            _connected = false;
+            return;
             }
             auto word = parser.getValue<std::string>("word");
             auto turn = parser.getValue<bool>("turn");
