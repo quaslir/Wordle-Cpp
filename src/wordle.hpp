@@ -16,56 +16,30 @@
 #include "post.hpp"
 #define SQUARE_SIZE 65
 #define FONT_SIZE 30
-
-enum Type {CORRECT_POS, INCORRECT_POS, NOT_IN};
-
-struct Character {
-    char c;
-Type type;
-Character(char ch, Type t) : c(ch),type(t) {}
-Character() : c(' '), type(NOT_IN) {}
-};
+#include "gameState.hpp"
+#include "view.hpp"
+#include "profile.hpp"
 
 struct Coordinates {
     int x, y;
 };
 
 
-enum gameState_t {
-    MAIN_MENU,
-    AUTOPLAY,
-    DAILY_CHALLENGE,
-    PRACTICE,
-    EMPTY_USERNAME,
-    LEADERBOARD,
-    PVP
-};
+
 class Wordly {
     private :
     std::unordered_set<std::string> dictionary;
     std::vector<std::string> rs;
     std::istream & ss;
-    size_t attempts = 0;
-    std::array<std::array<Character, 5>, 6> history;
     std::vector<Key> keyboard;
-    int activeX = 0;
-    int activeY = 0;
-    bool renderErrorMessage = false;
-    std::string errorMessage = "";
-    bool gameOver = false;
-    std::string word;
-    bool userWon;
-    std::unordered_set<char> mustUsedChars;
-    float shakeTimer = 0.0f;
-    float shakeIntensity = 10.f;
+    ViewContext view;
+    GameState gameState;
+    std::optional<ParserJSON> cachedDistribution;
     float timer = 0.0f;
    bool pendingGameOver = false;
     float botTimer = 0.0f;
     Timer mainTimer;
-    gameState_t state;
-    std::string username;
-    std::pair<bool, long> dailyChallenge;
-    size_t totalXp = 0;
+    Profile user;
     Leaderboard leaderboard;
     NetworkManager manager;
     bool openSettings = false;
@@ -90,14 +64,12 @@ class Wordly {
     void clearHistory(void);
     long generateDayId(void) const;
     size_t getLength(const std::string & str) const;
-    void drawError(const std::string & msg) const;
     void initHistory(void);
     void enter(void);
-    void drawTimer(void) const;
-    void drawGuessDistribution(const Rectangle & rec) const;
+
+    
     ParserJSON usersHistory;
-    void drawFrontScreen(void);
-    void drawUsername(void);
+
     void setUsername(void);
     void trim(std::string & text) const;
     void clearVariables(void);
@@ -107,10 +79,6 @@ class Wordly {
      void drawGrid(const float offset);
      void readKey(void);
      void updateKeyStatus(void);
-     void drawPvpWin(void) const;
-     void drawPvpLose(void) const;
-     void drawPvpDraw(void) const;
-     void drawXp(int xp) const;
      void updatePvp(void);
      void wordCheckerHelpFunctionForError(void);
      size_t calculateXpDistribution(void) const;
@@ -122,9 +90,9 @@ class Wordly {
 
 void autoBotPlay(void);
 void updateCurrentWord(const char & c);
-bool getAutoplayStatus(void) const;
+
 void backspace(void);
 void play(void);
-void gameOverScreenRenderer(void);
+
 bool wordCheckerFromServer(const std::string & toCheck);
 };

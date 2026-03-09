@@ -20,7 +20,6 @@ int main(int argc, char * argv[]) {
     Wordly wordly (file);
     InitWindow(540, 730, "Worldy-C++");
     SetTargetFPS(120);
-    bool autoplay = wordly.getAutoplayStatus();
     while(!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(BLACK);

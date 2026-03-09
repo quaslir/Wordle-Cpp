@@ -2,33 +2,33 @@
 
 void Wordly::update(void) {
     if(openSettings) return;
-if(state == EMPTY_USERNAME) {
+if(gameState.state == EMPTY_USERNAME) {
         drawLogo();
         setUsername();
         return;
     }
-    if(!gameOver) {
+    if(!gameState.gameOver) {
     if(pendingGameOver) {
             mainTimer.stop();
         timer -= GetFrameTime();
 
         if(timer <= 0) {
             pendingGameOver = false;
-            gameOver = true;
+            gameState.gameOver = true;
             timer  =0;
         }
     }
     else {
-        if(state == AUTOPLAY) {
+        if(gameState.state == AUTOPLAY) {
             autoBotPlay();
         }
     }
-    if(state == DAILY_CHALLENGE || state == PRACTICE) {
+    if(gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE) {
     writeKey();
     }
     
 } else {
-        gameOverScreenRenderer();
+        view.gameOverScreenRenderer();
     }
 }
 
@@ -41,9 +41,9 @@ void Wordly::updatePvp(void) {
         if(manager.isWaitingForServer) {
         manager.isWaitingForServer = false;
         if(manager.packet.error) {
-            renderErrorMessage = true;
-                    errorMessage = "Incorrect word";
-                    shakeTimer = 0.5f;
+            view.renderErrorMessage = true;
+                    view.errorMessage = "Incorrect word";
+                    view.shakeTimer = 0.5f;
         }
         else {
              updateKeyStatus();
@@ -51,7 +51,7 @@ void Wordly::updatePvp(void) {
         }
     
         else if(!manager.wordReceved){
-        this->word = manager.packet.word;
+        gameState.word = manager.packet.word;
         manager.wordReceved = true;
     }
         
@@ -64,11 +64,11 @@ void Wordly::updatePvp(void) {
 void Wordly::play(void) {
 
 update();
-if((state == DAILY_CHALLENGE || state == PRACTICE || state == AUTOPLAY) && !openSettings) {
+if((gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE || gameState.state == AUTOPLAY) && !openSettings) {
     readKey();
     drawOriginalStateGame();
 }
-else if(state == LEADERBOARD) {
+else if(gameState.state == LEADERBOARD) {
     if(!leaderboard.leaderboardLoaded) {
         try {
 
@@ -76,18 +76,18 @@ else if(state == LEADERBOARD) {
 
         } catch(const std::exception & error) {
             std::cerr << error.what() << std::endl;
-            state = MAIN_MENU;
+            gameState.state = MAIN_MENU;
         }
     } else leaderboard.renderLeaderboard();
     
 }
 
-else if(state == PVP) { 
+else if(gameState.state == PVP) { 
     drawPvp();
     if(manager.gameOver && !manager.connected()) {
         clearVariables();
         manager.disconnect();
-        state = MAIN_MENU;
+        gameState.state = MAIN_MENU;
         manager.isWaitingForServer = false;
          manager.packet.received = false;
          manager.packet.win = false;
@@ -99,12 +99,12 @@ else if(state == PVP) {
         
     updatePvp();
         if(manager.packet.turn) {
-            if(!renderErrorMessage) {
-            errorMessage = "Your turn";
+            if(!view.renderErrorMessage) {
+            view.errorMessage = "Your turn";
             }
             readKey();
             writeKey();
-    } else errorMessage.clear();
+    } else view.errorMessage.clear();
     if(!manager.getStatus() && !manager.gameOver) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
@@ -115,33 +115,33 @@ else if(state == PVP) {
                 if(!leaderboard.leaderboardUpdated) {
                     if(manager.packet.win) {
                         std::thread([&] {
-                            leaderboard.updateLeaderboard(username, totalXp + xp);
+                            leaderboard.updateLeaderboard(user.username, user.totalXp + xp);
                         }).detach();
                     }
                     else if(!manager.packet.win && !manager.packet.draw) {
                    std::thread([&] {
-                            leaderboard.updateLeaderboard(username, totalXp - xp);
+                            leaderboard.updateLeaderboard(user.username, user.totalXp - xp);
                         }).detach();
                     }
                     leaderboard.leaderboardUpdated = true;
-                    leaderboard.receiveUsersXp(this->username);
+                    leaderboard.receiveUsersXp(user.username);
                 }
         if(manager.packet.win) {
 
-            drawPvpWin();
+            view.drawPvpWin();
         }
         else if(!manager.packet.win && !manager.packet.draw) {
-            drawPvpLose();
+            view.drawPvpLose();
         }
-        else drawPvpDraw();
-        drawXp(xp);
+        else view.drawPvpDraw();
+        view.drawXp(xp, manager.packet.win, manager.packet.draw);
     } 
 }
 
-else if(state == EMPTY_USERNAME) {
- drawUsername();
+else if(gameState.state == EMPTY_USERNAME) {
+ view.drawUsername();
 } else {   
-     drawFrontScreen();
+     view.drawFrontScreen();
     
 }
 
@@ -159,7 +159,7 @@ void Wordly::updateDailyChallengeStatus(void) {
     dailyCh.updateValue<std::string>("daily_challenge_active", "false");
     dailyCh.updateValue<std::string>("daily_challenge_id", std::to_string(generateDayId()));
     usersHistory.updateValue<std::string>("daily_challenge", dailyCh.toString());
-    dailyChallenge.first = false;
+    user.dailyChallenge.first = false;
     } catch(...) {
         std::cerr << "Json file was corrupted" << std::endl;
     } 
@@ -169,8 +169,8 @@ void Wordly::updateDailyChallengeStatus(void) {
 void Wordly::updateKeyStatus(void) {
 
     size_t idx = 0;
-        for(auto & c : history[activeY]) {
-            if(this->word.find(c.c) == std::string::npos) {
+        for(auto & c : gameState.history[view.activeY]) {
+            if(gameState.word.find(c.c) == std::string::npos) {
                 c.type = NOT_IN;
                 auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
                     return target.c[0] == c.c;
@@ -180,10 +180,10 @@ void Wordly::updateKeyStatus(void) {
                     it->status = INVALID;
                 }
             }
-            else if(this->word[idx] == c.c) {
+            else if(gameState.word[idx] == c.c) {
                  c.type  = CORRECT_POS;
                  if(settings.hardMode) {
-                    this->mustUsedChars.insert(c.c);
+                    gameState.mustUsedChars.insert(c.c);
                  }
                  auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
                     return target.c[0] == c.c;
@@ -196,7 +196,7 @@ void Wordly::updateKeyStatus(void) {
             else  {
                 c.type = INCORRECT_POS;
                  if(settings.hardMode) {
-                    this->mustUsedChars.insert(c.c);
+                    gameState.mustUsedChars.insert(c.c);
                  }
                  auto it = std::find_if(keyboard.begin(), keyboard.end(), [c](const Key & target) {
                     return target.c[0] == c.c;
@@ -208,10 +208,10 @@ void Wordly::updateKeyStatus(void) {
             }
             idx++;
         }
-                activeX = 0;
-        if(activeY < 6) {
-             activeY++;
+                view.activeX = 0;
+        if(view.activeY < 6) {
+             view.activeY++;
         }  
-        attempts++;
+        gameState.attempts++;
 
 }

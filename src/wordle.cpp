@@ -25,7 +25,7 @@ bool Wordly::isEmpty(std::string_view str) const{
 
     }
     bool Wordly::lengthChecker(void) const {
-        for(const auto &c : history[activeY]) {
+        for(const auto &c : gameState.history[view.activeY]) {
             if(!isalpha(c.c)) return false;
         }
 
@@ -45,7 +45,7 @@ bool Wordly::isEmpty(std::string_view str) const{
         return GRAY;
     }
     void Wordly::clearHistory(void) {
-        std::for_each(history.begin(), history.end(), [] (std::array<Character, 5> & arr) {
+        std::for_each(gameState.history.begin(), gameState.history.end(), [] (std::array<Character, 5> & arr) {
             return arr.fill(Character(' ', NOT_IN));
         });
     }
@@ -54,22 +54,22 @@ bool Wordly::isEmpty(std::string_view str) const{
 
       bool Wordly::wordChecker(void) {
             std::string toCheck;
-         for(const auto & c : history[activeY]) {
+         for(const auto & c : gameState.history[view.activeY]) {
             toCheck += c.c;
          }
          if(toCheck.find(" ") != std::string::npos) {
-            shakeTimer = 0.5f;
+            view.shakeTimer = 0.5f;
             return false;
          }
          if(settings.hardMode) {
-            for(const char &c : this->mustUsedChars) {
+            for(const char &c : gameState.mustUsedChars) {
                 if(toCheck.find(c) == std::string::npos) {
-                    renderErrorMessage = true;
-                    errorMessage = "You must use ";
-                    errorMessage += "letter ";
-                    errorMessage += c;
-                    errorMessage += " in your word";
-                    shakeTimer = 0.5f;
+                    view.renderErrorMessage = true;
+                    view.errorMessage = "You must use ";
+                    view.errorMessage += "letter ";
+                    view.errorMessage += c;
+                    view.errorMessage += " in your word";
+                    view.shakeTimer = 0.5f;
                     return false;
                 }
             }
@@ -82,17 +82,17 @@ bool Wordly::isEmpty(std::string_view str) const{
              wordCheckerHelpFunctionForError();
             return false;
          }
-         renderErrorMessage = false;
+         view.renderErrorMessage = false;
          updateKeyStatus();
 
-        if(state == AUTOPLAY && (toCheck == word || attempts == 6)) {
+        if(gameState.state == AUTOPLAY && (toCheck == gameState.word || gameState.attempts == 6)) {
             pendingGameOver = true;
             timer = 2.0f;
         }
-        else if(toCheck == word) {
+        else if(toCheck == gameState.word) {
           
             try {
-              if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
+              if(gameState.state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
             auto best = usersHistory.getValue<int>("best_streak");
@@ -111,9 +111,9 @@ bool Wordly::isEmpty(std::string_view str) const{
             }
             auto guessDistribution = usersHistory.getObject("guess_distribution");
             if(guessDistribution.has_value()) {
-                auto currentValue =  guessDistribution.value().getValue<int>(std::to_string(attempts));
+                auto currentValue =  guessDistribution.value().getValue<int>(std::to_string(gameState.attempts));
                 if(currentValue.has_value()) {
-                    guessDistribution.value().updateValue<std::string>(std::to_string(attempts), std::to_string(currentValue.value() + 1));
+                    guessDistribution.value().updateValue<std::string>(std::to_string(gameState.attempts), std::to_string(currentValue.value() + 1));
                     usersHistory.updateValue<std::string>("guess_distribution", guessDistribution->toString());
                 }
                 
@@ -127,9 +127,9 @@ bool Wordly::isEmpty(std::string_view str) const{
             std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
         }
     } 
-        else if(attempts == 6) {
+        else if(gameState.attempts == 6) {
             try {
-                if(state == DAILY_CHALLENGE) updateDailyChallengeStatus();
+                if(gameState.state == DAILY_CHALLENGE) updateDailyChallengeStatus();
             auto x  = usersHistory.getValue<int>("total_games");
             auto y = usersHistory.getValue<int>("losses");
             auto current = usersHistory.getValue<int>("current_streak");
@@ -155,40 +155,40 @@ bool Wordly::isEmpty(std::string_view str) const{
             std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
         }
         }
-        userWon = toCheck == word;
-        return toCheck == word;
+        gameState.userWon = toCheck == gameState.word;
+        return toCheck == gameState.word;
     }
 
 void Wordly::updateCurrentWord(const char & c) {
-if(activeX < 5 && activeY < 6) {
-history[activeY][activeX] = Character(c, NOT_IN);
-activeX++;
+if(view.activeX < 5 && view.activeY < 6) {
+gameState.history[view.activeY][view.activeX] = Character(c, NOT_IN);
+view.activeX++;
 }
 
 }
 
 void Wordly::backspace(void) {
-    renderErrorMessage = false;
-    errorMessage.clear();
-    if(activeX > 0) {
-        activeX--;
-        history[activeY][activeX] = Character(' ', NOT_IN);
+    view.renderErrorMessage = false;
+    view.errorMessage.clear();
+    if(view.activeX > 0) {
+        view.activeX--;
+        gameState.history[view.activeY][view.activeX] = Character(' ', NOT_IN);
     }
 
 }
 
 void Wordly::enter(void) {
-     if(state != PVP) {
+     if(gameState.state != PVP) {
         wordChecker();
         }
             else {
                 if(!manager.isWaitingForServer) {
                 std::string usersWord;
-                for(const auto & x : history[activeY]) {
+                for(const auto & x : gameState.history[view.activeY]) {
                     usersWord += x.c;
                 }
                 if(usersWord.length() != 5) {
-                    shakeTimer = 0.5f;
+                    view.shakeTimer = 0.5f;
                     return; 
                 }
                 manager.isWaitingForServer = true;    
@@ -201,22 +201,22 @@ void Wordly::enter(void) {
 void Wordly::writeKey(void) {
 for(const auto & x : keyboard) {
     if(x.clickStatus()) {
-            if(!errorMessage.empty()) {
-                    errorMessage.clear();
-                    renderErrorMessage = false;
+            if(!view.errorMessage.empty()) {
+                    view.errorMessage.clear();
+                    view.renderErrorMessage = false;
                 }
         if(x.c == "DEL") {
-            if(activeX > 0) {
-                history[activeY][--activeX].c = ' ';
+            if(view.activeX > 0) {
+                gameState.history[view.activeY][--view.activeX].c = ' ';
             }
         }
         else if(x.c == "ENT") {
-            if(activeX == 5) {
+            if(view.activeX == 5) {
                 enter();
-            } else shakeTimer = 0.5f;
+            } else view.shakeTimer = 0.5f;
         }
-        else if(activeX < 5) {
-            history[activeY][activeX++].c = x.c[0];
+        else if(view.activeX < 5) {
+            gameState.history[view.activeY][view.activeX++].c = x.c[0];
         }
     }
 }
@@ -234,37 +234,37 @@ long Wordly::generateDayId(void) const {
 
 void Wordly::getRandomWordDayChallenge(void) {
     long id = generateDayId();
-    this->word = rs[id % rs.size()];
+    gameState.word = rs[id % rs.size()];
 }
 
 
 
 void Wordly::clearVariables(void) {
-                gameOver = false;
+                gameState.gameOver = false;
                 clearHistory();
-                activeX = 0;
-                activeY = 0;
-                attempts = 0;
-                errorMessage = "";
-                renderErrorMessage = false;
+                view.activeX = 0;
+                view.activeY = 0;
+                gameState.attempts = 0;
+                view.errorMessage = "";
+                view.renderErrorMessage = false;
                 leaderboard.leaderboardUpdated = false;
                 leaderboard.leaderboardLoaded = false;
-                mustUsedChars.clear();
+                gameState.mustUsedChars.clear();
                 initKeyboard();
 }
 
 
 void Wordly::readKey(void){
-    if(state == AUTOPLAY) {
+    if(gameState.state == AUTOPLAY) {
         } else {
         int key = GetCharPressed();
         while(key > 0) {
             if((key >= 32) && (key <= 125)) {
             updateCurrentWord((char) key);
-            if(renderErrorMessage || manager.packet.error) {
+            if(view.renderErrorMessage || manager.packet.error) {
                     manager.packet.error = false;
-                    errorMessage.clear();
-                    renderErrorMessage = false;
+                    view.errorMessage.clear();
+                    view.renderErrorMessage = false;
 
             }
             }
@@ -282,7 +282,7 @@ void Wordly::readKey(void){
 
 
 size_t Wordly::calculateXpDistribution(void) const {
-    return static_cast<size_t>(1000 / attempts);
+    return static_cast<size_t>(1000 / gameState.attempts);
 }
 
 bool Wordly::wordCheckerFromServer(const std::string & toCheck) {
@@ -314,13 +314,13 @@ void Wordly::getRandomWordFromServer(void) {
     if(parser.exists("word")) {
         auto x  = parser.getValue<std::string>("word");
         if(x.has_value()) {
-            word = x.value();
+            gameState.word = x.value();
         }
     }
  }
 
  void Wordly::wordCheckerHelpFunctionForError(void) {
- errorMessage = "This word does not exists in our database";
-            renderErrorMessage = true;
-            shakeTimer = 0.5f;
+ view.errorMessage = "This word does not exists in our database";
+            view.renderErrorMessage = true;
+            view.shakeTimer = 0.5f;
  }

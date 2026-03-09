@@ -1,5 +1,5 @@
+#include "../view.hpp"
 #include "../wordle.hpp"
-
 int Wordly::centerTextByX(const std::string & text, int fontSize, int width, int marginX = 0) const {
 int textWidth = MeasureText(text.c_str(), fontSize);
 
@@ -18,12 +18,12 @@ void drawPattern(void) {
     }
 }
 
-void Wordly::drawFrontScreen(void) {
+void ViewContext::drawFrontScreen(void) {
     ClearBackground({18, 19, 19, 255});
     drawLogo();
     drawPattern();
     drawUsername();
-    if(openSettings) return;
+    //if(openSettings) return;
     const int numButtons = 4;
     static const std::vector<std::string> buttons = {"Daily challenge", "Practice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
@@ -36,7 +36,7 @@ void Wordly::drawFrontScreen(void) {
         Rectangle rec = {startX, startY + i * (btnH + spacing), btnW, btnH};
         bool isHovered = (CheckCollisionPointRec(GetMousePosition(), rec));
         Color color = isHovered ? Color{106,170,100,255} : Color{83, 141, 78, 255};
-        if(!dailyChallenge.first && i == 0) {
+        if(!onDailyChallenge() && i == 0) {
             color = Fade(WHITE, 0.05f);
         }
         if(isHovered) {
@@ -47,59 +47,17 @@ void Wordly::drawFrontScreen(void) {
         btn.drawBtn();
 
         if(btn.checkClick(GetMousePosition())) {
-            switch (i) {
-            case 0 :    
-            if(dailyChallenge.first) {
-                state = DAILY_CHALLENGE; 
-                mainTimer.start();
-                getRandomWordDayChallenge();
-                dailyChallenge.second = generateDayId();
-            }
-                break;
-            case 1 :
-                state = PRACTICE;
-                mainTimer.start();
-                getRandomWord();
-                std::cout << word << std::endl;
-
-                break;
-            case 2 :
-            state = AUTOPLAY;
-             mainTimer.start();
-            getRandomWord();
-            break;
-
-            case 3:
-            if(settings.offlineMode) break;
-            state = LEADERBOARD;
-            break;
-
-            case 4:
-            if(settings.offlineMode) break;
-            state = PVP;
-            manager.connect("ws://localhost:8000");
-            break;
-
-            case 5: 
-            std::exit(0);
-        }
+            onClick(i);
     }
 }
 }
 
-void Wordly::drawError(const std::string & msg) const {
+void ViewContext::drawError(const std::string & msg) const {
     int fontSize = 20;
         int textSize = MeasureText(msg.c_str(),fontSize);
         float x = (GetScreenWidth() - textSize) / 2;
         DrawText(msg.c_str(), (int) x, 680, fontSize, RED);
     }
-void Wordly::drawTimer(void) const {
-        std::string text = mainTimer.getCurrentTime();
-        int fontSize = 20;
-        DrawText(text.c_str(), 20, 20, fontSize, LIGHTGRAY);
-    }
-
-
 void Wordly::renderKeyBoard(void) {
 int posY = pos.y + SQUARE_SIZE + 30;
 int posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
@@ -138,16 +96,17 @@ for(auto & x : keyboard) {
 }
 }
 
-void Wordly::drawUsername(void) {
+void ViewContext::drawUsername(void) const{
     int fontSize = 25;
     int paddingX = 15;
     const float targetWidth = 50.0f;
-    int width = MeasureText(this->username.c_str(), fontSize);
+    std::string username = getUsername();
+    int width = MeasureText(username.c_str(), fontSize);
     int finalFontSize = fontSize;
     int finalWidth = width;
     if(targetWidth < width) {
         finalFontSize = static_cast<int>(fontSize * (targetWidth / width));
-        finalWidth = MeasureText(this->username.c_str(), finalFontSize);
+        finalWidth = MeasureText(username.c_str(), finalFontSize);
     }
 
     
@@ -155,11 +114,11 @@ void Wordly::drawUsername(void) {
     int y = (15 + (SQUARE_SIZE - finalFontSize)) / 2.0f;
     Rectangle rec = {(float) x - 10, (float) y - 5, (float) finalWidth + 20, (float) finalFontSize + 10};
     DrawRectangleRounded(rec, 0.5f, 10, ColorAlpha(BLACK, 0.3f));
-    DrawText(this->username.c_str(), x, y, finalFontSize, RAYWHITE);
+    DrawText(username.c_str(), x, y, finalFontSize, RAYWHITE);
 
     if(CheckCollisionPointRec(GetMousePosition(), rec)) {
     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        openSettings = !openSettings;
+        onSettings();
     }
 } 
 }
@@ -168,9 +127,9 @@ void Wordly::drawUsername(void) {
 void Wordly::drawGrid(const float offset) {
     int marginX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
        for(size_t i = 0; i < 6; i++) {
-        float currentRowOffset = i == activeY ? offset : 0.0f;
+        float currentRowOffset = i == view.activeY ? offset : 0.0f;
         for(size_t j = 0; j < 5; j++) {
-            auto c = this->history[i][j];
+            auto c = gameState.history[i][j];
         float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
         float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
         if(i == 5) {
@@ -189,11 +148,11 @@ void Wordly::drawGrid(const float offset) {
 }
 
 void Wordly::drawOriginalStateGame(void) {
-mainTimer.update();
-    drawTimer();
+    mainTimer.update();
+    mainTimer.drawTimer();
     drawLogo();
-        drawUsername();
-    if(!gameOver) {
+    view.drawUsername();
+    if(!gameState.gameOver) {
     float offset = 0.0f;
     if(pendingGameOver) {
         mainTimer.stop();
@@ -201,45 +160,45 @@ mainTimer.update();
 
         if(timer <= 0) {
             pendingGameOver = false;
-            gameOver = true;
+            gameState.gameOver = true;
             timer  =0;
         }
     }
     else {
-        if(state == AUTOPLAY) {
+        if(gameState.state == AUTOPLAY) {
             autoBotPlay();
         }
     }
-    if(shakeTimer > 0) {
-        shakeTimer -= GetFrameTime();
-        offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
+    if(view.shakeTimer > 0) {
+        view.shakeTimer -= GetFrameTime();
+        offset = sinf(view.shakeTimer * 60.f) * view.shakeIntensity * (view.shakeTimer / 0.5f);
     }
 
     drawGrid(offset);
        renderKeyBoard();
     } else {
-        gameOverScreenRenderer();
+        view.gameOverScreenRenderer();
     }
 
-    if(renderErrorMessage) {
-        drawError(errorMessage);
+    if(view.renderErrorMessage) {
+        view.drawError(view.errorMessage);
     }
 }
 
 
 void Wordly::drawPvp(void) {
     drawLogo();
-    drawUsername();
+    view.drawUsername();
       if(manager.getStatus()) {
         float offset = 0.0f;
-         if(shakeTimer > 0) {
-        shakeTimer -= GetFrameTime();
-        offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
+         if(view.shakeTimer > 0) {
+        view.shakeTimer -= GetFrameTime();
+        offset = sinf(view.shakeTimer * 60.f) * view.shakeIntensity * (view.shakeTimer / 0.5f);
     }
           drawGrid(offset);
           renderKeyBoard();
-          if(!errorMessage.empty()) {
-            drawError(errorMessage);
+          if(!view.errorMessage.empty()) {
+            view.drawError(view.errorMessage);
           }
     }
     else {
@@ -262,14 +221,14 @@ void Wordly::drawPvp(void) {
          manager.packet.draw = false;
          manager.gameOver = false;
          leaderboard.leaderboardUpdated = false;
-        state = MAIN_MENU;
+        gameState.state = MAIN_MENU;
     }
     }
   
 }
 
 
-void Wordly::drawPvpWin(void) const {
+void ViewContext::drawPvpWin(void) const {
     const char * text = "VICTORY!";
     int fontSize = 60;
 
@@ -280,7 +239,7 @@ void Wordly::drawPvpWin(void) const {
     DrawText(text, posX, posY, fontSize, GOLD);
 }
 
-void Wordly::drawPvpLose(void) const {
+void ViewContext::drawPvpLose(void) const {
     const char * text = "You lost";
     int fontSize = 60;
 
@@ -291,7 +250,7 @@ void Wordly::drawPvpLose(void) const {
     DrawText(text, posX, posY, fontSize, RED);
 }
 
-void Wordly::drawPvpDraw(void) const {
+void ViewContext::drawPvpDraw(void) const {
     const char * text = "DRAW";
     int fontSize = 60;
 
@@ -302,17 +261,17 @@ void Wordly::drawPvpDraw(void) const {
     DrawText(text, posX, posY, fontSize, LIGHTGRAY);
 }
 
-void Wordly::drawXp(int xp) const {
+void ViewContext::drawXp(int xp, bool win, bool draw) const {
     std::string score;
-    if(manager.packet.win) {
+    if(win) {
        score +=  " (+" + std::string{std::to_string(xp)} + ")";
     }
-    else if(!manager.packet.win && !manager.packet.draw) {
+    else if(!win && !draw) {
        score += " (-" + std::string{std::to_string(xp)} + ")";
     }
 
-    std::string text = "Total xp: " + std::to_string((int) totalXp + 
-    (manager.packet.win ? xp : !manager.packet.win && !manager.packet.draw ? -xp : 0)) + score;
+    std::string text = "Total xp: " + std::to_string((int) getTotalXp() + 
+    (win ? xp : !win && !draw ? -xp : 0)) + score;
     int size = MeasureText(text.c_str(), 20);
     int posY = 150;
     int posX = (GetScreenWidth() - size) / 2;

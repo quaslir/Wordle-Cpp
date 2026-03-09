@@ -15,4 +15,5 @@ class Timer {
     void start(void);
     void stop(void);
     std::string getCurrentTime(void) const;
+    void drawTimer(void) const;
 };

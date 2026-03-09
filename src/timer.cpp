@@ -35,3 +35,9 @@ return std::format("{:02}:{:02}", (int) minutes, (int) seconds);
 void Timer::stop(void) {
     active = false;
 }
+
+void Timer::drawTimer(void) const {
+        std::string text = getCurrentTime();
+        int fontSize = 20;
+        DrawText(text.c_str(), 20, 20, fontSize, LIGHTGRAY);
+    }

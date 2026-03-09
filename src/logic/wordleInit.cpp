@@ -3,23 +3,23 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 Wordly::Wordly(std::istream & s) : ss(s) {
-    this->state = MAIN_MENU;
+   gameState.state = MAIN_MENU;
     this->initHistoryFile();
      this->initHistory();
     if(usersHistory.exists("username")) {
-        username = usersHistory.getValue<std::string>("username").value();
-        if(username.empty()) this->state = EMPTY_USERNAME;
-        trim(username);
-        if(username.empty()) this->state = EMPTY_USERNAME;
+        user.username = usersHistory.getValue<std::string>("username").value();
+        if(user.username.empty()) gameState.state = EMPTY_USERNAME;
+        trim(user.username);
+        if(user.username.empty()) gameState.state = EMPTY_USERNAME;
     }
-    else this->state = EMPTY_USERNAME;
+    else gameState.state = EMPTY_USERNAME;
 
-    if(state != EMPTY_USERNAME) {
+    if(gameState.state != EMPTY_USERNAME) {
         leaderboard.getXp = [this](int xp) {
-        this->totalXp = xp;
+        user.totalXp = xp;
        };
        std::thread([this] {
-        leaderboard.receiveUsersXp(username);
+        leaderboard.receiveUsersXp(user.username);
     }).detach();
     }
         this->parseFile();  
@@ -32,13 +32,13 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         auto second = x.value().getValue<long>("daily_challenge_id");
         if(first.has_value() && second.has_value()) {
 
-            dailyChallenge.first = first.value();
-            dailyChallenge.second = second.value();
-            if(!dailyChallenge.first) {
+            user.dailyChallenge.first = first.value();
+            user.dailyChallenge.second = second.value();
+            if(!user.dailyChallenge.first) {
                 long current = generateDayId();
-                if(current != dailyChallenge.second) {
-                    dailyChallenge.first = true;
-                    dailyChallenge.second = current;
+                if(current != user.dailyChallenge.second) {
+                    user.dailyChallenge.first = true;
+                    user.dailyChallenge.second = current;
                     usersHistory.stringify("../history.json");
                 }
             }
@@ -48,29 +48,123 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         this->initKeyboard();
            
        leaderboard.changeState = [this]() {
-        this->state = MAIN_MENU;
+        gameState.state = MAIN_MENU;
        };
        
        leaderboard.getUsername = [this]() {
-        return this->username;
+        return user.username;
        };
        manager.setOnWord([this] (const std::string & word) {
         for(int i = 0; i < 5; i++) {
-        history[activeY][activeX++].c = word[i];  
+        gameState.history[view.activeY][view.activeX++].c = word[i];  
     }
     updateKeyStatus();
        });
 
     settings.onState = [this] () {
-        if(state == PVP) {
+        if(gameState.state == PVP) {
             manager.disconnect();
         }
-        state = MAIN_MENU;
+        gameState.state = MAIN_MENU;
         clearVariables();
     };
 
     settings.onClose = [this] () {
         openSettings = false;
+    };
+
+    view.onDailyChallenge = [this]() {
+        return user.dailyChallenge.first;
+    };
+
+    view.onClick = [this] (int i) {
+        switch (i) {
+            case 0 :    
+            if(view.onDailyChallenge()) {
+                gameState.state = DAILY_CHALLENGE; 
+                mainTimer.start();
+                getRandomWordDayChallenge();
+                user.dailyChallenge.second = generateDayId();
+            }
+                break;
+            case 1 :
+                gameState.state = PRACTICE;
+                mainTimer.start();
+                getRandomWord();
+                std::cout << gameState.word << std::endl;
+
+                break;
+            case 2 :
+            gameState.state = AUTOPLAY;
+             mainTimer.start();
+            getRandomWord();
+            break;
+
+            case 3:
+            if(settings.offlineMode) break;
+            gameState.state = LEADERBOARD;
+            break;
+
+            case 4:
+            if(settings.offlineMode) break;
+            gameState.state = PVP;
+            manager.connect("ws://localhost:8000");
+            break;
+
+            case 5: 
+            std::exit(0);
+        }
+    };
+
+    view.getUsername = [this] () {
+        return user.username;
+    };
+
+    view.onSettings = [this] () {
+        openSettings = !openSettings;
+    };
+
+    view.onPlayAgain = [this] () {
+        clearVariables();
+        getRandomWord();
+        mainTimer.start();
+    };
+
+    view.onExit = [this] () {
+        clearVariables();
+        gameState.state = MAIN_MENU;
+    };
+
+    view.getAttempts = [this] () {
+        return gameState.attempts;
+    };
+
+    view.getUserWon = [this] () {
+        return gameState.userWon;
+    };
+
+    view.getTotalXp = [this] () {
+        return user.totalXp;
+    };
+
+    view.getWord = [this] () {
+        return gameState.word;
+    };
+
+    view.getMins = [this] () {
+        return mainTimer.getMins();
+    };
+
+    view.getSeconds = [this] () {
+        return mainTimer.getSeconds();
+    };
+
+    view.getDistribution = [this] () -> const std::optional<ParserJSON> &{
+        cachedDistribution = usersHistory.getObject("guess_distribution");
+        return cachedDistribution;
+    };
+    view.getValue = [this](const std::string &key) {
+        return usersHistory.getValue<int>(key);
     };
 }
 
@@ -138,5 +232,5 @@ void Wordly::initHistory(void) {
             return;
         }
         std::uniform_int_distribution<> dis(0, rs.size() - 1);
-         this->word = rs[dis(gen)];
+        gameState.word = rs[dis(gen)];
     }

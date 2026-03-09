@@ -8,10 +8,10 @@ text.erase(text.find_last_not_of(" \t\r\n") + 1);
 void Wordly::checkUsername(std::string & buffer) {
             trim(buffer);
             if(buffer.empty()) return;
-            this->username = buffer;
-            state = MAIN_MENU;
+            user.username = buffer;
+            gameState.state = MAIN_MENU;
             try {
-               usersHistory.updateValue<std::string>("username", username);
+               usersHistory.updateValue<std::string>("username", user.username);
                usersHistory.stringify("../history.json");
             } catch(...) {
                 std::cerr << "Json data was corrupted, could not update username" << std::endl;

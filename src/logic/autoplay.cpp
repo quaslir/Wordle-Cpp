@@ -1,15 +1,12 @@
 #include "../wordle.hpp"
 
-bool Wordly::getAutoplayStatus(void) const {
-    return state == AUTOPLAY;
-}
 std::string Wordly::generateTheMostAccurateWord(void) const {
 std::string notInWord;
 std::unordered_map<int, char> incorrectPosition;
 std::unordered_map<int, char> correct;
 std::vector<std::string> total;
 std::string buffer;
-for(const auto & row : history) {
+for(const auto & row : gameState.history) {
 
         buffer.clear();
     for(int i = 0; i < row.size(); i++) {
@@ -60,22 +57,22 @@ if(mostProbableWord != rs.end())  return *mostProbableWord;
 return "";
 }
 void Wordly::autoBotPlay(void) {
-    if(activeY == 6 || pendingGameOver) return;
+    if(view.activeY == 6 || pendingGameOver) return;
     if(botTimer >= 0) {
         botTimer -= GetFrameTime();
         return;
     }
     std::string target;
-    if(activeY ==0) {
+    if(view.activeY ==0) {
         target = rs[1];
     }
     else {
 target = generateTheMostAccurateWord();
     }
     std::uniform_int_distribution<> dis(0, rs.size());
-    if(activeX == 0) {
+    if(view.activeX == 0) {
     for(int i = 0; i < 5; i++) {
-    history[activeY][activeX++].c = target[i];  
+    gameState.history[view.activeY][view.activeX++].c = target[i];  
     }
     if(wordChecker());
     else botTimer = 0.8f;

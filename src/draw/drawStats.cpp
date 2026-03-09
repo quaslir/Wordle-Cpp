@@ -1,6 +1,6 @@
-#include "../wordle.hpp"
-
-void Wordly::gameOverScreenRenderer(void) {
+#include "../view.hpp"
+#include "button.hpp"
+void ViewContext::gameOverScreenRenderer(void) {
 
     
     DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), ColorAlpha(BLACK, 0.5f));
@@ -8,12 +8,11 @@ void Wordly::gameOverScreenRenderer(void) {
 
     DrawRectangleRec(panel, ColorAlpha(DARKGRAY, 0.9f));
     DrawRectangleLinesEx(panel,2 , GREEN);
-    if(userWon) {
+    if(getUserWon()) {
     DrawText("WELL DONE!", panel.x + 20, panel.y + 20, 32, GREEN); 
-    std::string usersTime = this->mainTimer.getCurrentTime();
-    std::string text = std::string("You guessed the word ") + "\"" + this->word + "\"\n" + "in ";
-    float minutes = this->mainTimer.getMins();
-    float seconds = this->mainTimer.getSeconds();
+    std::string text = std::string("You guessed the word ") + "\"" + getWord()+ "\"\n" + "in ";
+    float minutes = getMins();
+    float seconds = getSeconds();
     if(minutes) {
         
         
@@ -27,7 +26,7 @@ void Wordly::gameOverScreenRenderer(void) {
     DrawText(text.c_str(), panel.x + 20, panel.y + 60, 20, GREEN);
     } else {
         DrawText("NEXT TIME...", panel.x + 20, panel.y + 20, 32, RED);
-        std::string str = std::string("WORD WAS: ") + "\"" + this->word + "\"";
+        std::string str = std::string("WORD WAS: ") + "\"" + getWord() + "\"";
         DrawText(str.c_str(), panel.x + 20, panel.y + 60, 20, LIGHTGRAY);  
     }
     
@@ -35,7 +34,7 @@ void Wordly::gameOverScreenRenderer(void) {
     
     int statY = panel.y + 130;
     auto drawStatRow = [&](const std::string & label, const std::string & key, int x) {
-        auto val = usersHistory.getValue<int>(key);
+        auto val = getValue(key);
         if(val.has_value()) {
             DrawText(std::to_string(val.value()).c_str(), x, statY, 30, WHITE);
             DrawText(label.c_str(), x, statY + 35, 12, LIGHTGRAY);
@@ -52,9 +51,7 @@ void Wordly::gameOverScreenRenderer(void) {
     Button playAgain (box, PINK, text);
     playAgain.drawBtn();
         if(playAgain.checkClick(GetMousePosition())) {
-        clearVariables();
-        getRandomWord();
-        mainTimer.start();
+            onPlayAgain();
     }
 
     Rectangle box2 =  {280, 600, 120, 30};
@@ -63,17 +60,15 @@ void Wordly::gameOverScreenRenderer(void) {
     exit.drawBtn();
 
     if(exit.checkClick(GetMousePosition())) {
-                clearVariables();
-                state = MAIN_MENU;
+        onExit();
     }
 }
 
-    void Wordly::drawGuessDistribution(const Rectangle & rec) const {
+    void ViewContext::drawGuessDistribution(const Rectangle & rec) const {
         int startY = rec.y + 180;
         int maxWidth = GetScreenWidth();
         int maxWins = 0;
-        auto distribution = usersHistory.getObject("guess_distribution");
-
+        auto distribution = getDistribution();
         if(distribution.has_value()) {
             for(int i = 1; i <= 6; i++) {
                 auto current = distribution->getValue<int>(std::to_string(i));
@@ -90,7 +85,7 @@ void Wordly::gameOverScreenRenderer(void) {
                     if(current.value() != 0) {
                       barW = 25.0f + ((float) val /  maxWins) * (rec.width - 100.0f);
                     }
-                    Color barC = (attempts == i) ? GREEN : DARKGRAY;
+                    Color barC = (getAttempts() == i) ? GREEN : DARKGRAY;
 
                     DrawText(std::to_string(i).c_str(), rec.x + 20, startY + (i * 30),20,WHITE);
                     DrawRectangle(rec.x + 50, startY +(i * 30), (int) barW, 25, barC);
