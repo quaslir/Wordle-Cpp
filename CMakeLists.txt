@@ -35,27 +35,30 @@ add_subdirectory(vendor/json-parser)
 set(SOURCES
     src/main.cpp        
     src/wordle.cpp
-    src/draw/button.cpp
+    src/button.cpp
     src/keyboard.cpp
     src/timer.cpp
-    src/draw/wordleDraw.cpp
+    src/wordleDraw.cpp
     src/wordleUsername.cpp
     src/textBox.cpp
-    src/draw/drawStats.cpp
-    src/leaderboard/leaderboard.cpp
-    src/pvp/network.cpp
-    src/logic/wordleInit.cpp
-    src/logic/autoplay.cpp
-    src/logic/wordleUpdate.cpp
-    src/settings/settings.cpp
+    src/drawStats.cpp
+    src/leaderboard.cpp
+    src/network.cpp
+    src/wordleInit.cpp
+    src/autoplay.cpp
+    src/wordleUpdate.cpp
+    src/settings.cpp
     src/post.cpp
 
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/raylib/src vendor/json-parser/)
 
+target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} json-parser raylib CURL::libcurl ixwebsocket)
 

@@ -1,4 +1,4 @@
-#include "../wordle.hpp"
+#include "wordle.hpp"
 
 std::string Wordly::generateTheMostAccurateWord(void) const {
 std::string notInWord;

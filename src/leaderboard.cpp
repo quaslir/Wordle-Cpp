@@ -1,7 +1,7 @@
 #include "leaderboard.hpp"
-#include "../draw/button.hpp"
-#include "../pvp/network.hpp"
-#include "../post.hpp"
+#include "button.hpp"
+#include "network.hpp"
+#include "post.hpp"
 void Leaderboard::loadLeaderboard(void) {
 
     std::string buffer = getRequest("http://localhost:3000/leaderboard");
@@ -118,3 +118,5 @@ buffer = postRequest("http://localhost:3000/getUsersXp", dataFormatted);
     getXp(x.value());
 
 }
+
+

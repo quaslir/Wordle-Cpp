@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "raylib.h"
 #include <sstream>
-#include "../draw/drawLogo.hpp"
+#include "drawLogo.hpp"
 #include <functional>
 #include "parser.hpp"
 class Leaderboard {
@@ -20,4 +20,6 @@ class Leaderboard {
 
     void updateLeaderboard(const std::string & username, const size_t xp);
     void receiveUsersXp(const std::string & username);
+    
+
 };

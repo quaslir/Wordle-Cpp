@@ -1,42 +1,21 @@
 #include "wordle.hpp"
 
-
-bool Wordly::isEmpty(std::string_view str) const{
-        return str.empty() || str.find_first_not_of(" \t\r\n") == std::string::npos;
-}
-
-    bool Wordly::handleInput(std::string_view word) const{
-        if(word.length() != 5) return false;
-
-        for(const auto & x : word) {
-            if(!isalpha(x)) return false;
-        }
-        return true;
-    }
-
-            void Wordly::parseFile(void) {
+        void Wordly::parseFile(void) {
         std::string buffer;
         while(getline(ss, buffer)) {
-            if(isEmpty(buffer)) continue;
+            if(utils::isEmpty(buffer)) continue;
 
             rs.push_back(buffer);
             dictionary.insert(buffer);
          }
 
     }
-    bool Wordly::lengthChecker(void) const {
-        for(const auto &c : gameState.history[view.activeY]) {
-            if(!isalpha(c.c)) return false;
-        }
 
-        return true;
-    }
     void Wordly::clearHistory(void) {
         std::for_each(gameState.history.begin(), gameState.history.end(), [] (std::array<Character, 5> & arr) {
             return arr.fill(Character(' ', NOT_IN));
         });
     }
-    size_t Wordly::getLength(const std::string & str) const {return str.length();}
     
         std::string GameState::handleHardMode(const std::string & toCheck) const {
             std::string error;
@@ -50,6 +29,51 @@ bool Wordly::isEmpty(std::string_view str) const{
                 }
             }
             return "";
+        }
+        void Profile::updateCommonStats(void) {
+            auto x  = usersHistory.getValue<int>("total_games");
+
+        if(x.has_value()) {
+                usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
+            }
+            auto current = usersHistory.getValue<int>("current_streak");
+            auto best = usersHistory.getValue<int>("best_streak");
+            if(current.has_value() && best.has_value()) {
+                if(current.value() > best.value()) {
+                    usersHistory.updateValue<std::string>("best_streak", std::to_string(current.value()));
+                }
+
+            }
+        }
+        void Profile::updateUsersStatsWin(void) {
+            auto current = usersHistory.getValue<int>("current_streak");
+            usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
+            auto y = usersHistory.getValue<int>("wins");
+            if(y.has_value()) {
+                usersHistory.updateValue<std::string>("wins",std::to_string(y.value() + 1));
+            }
+            auto guessDistribution = usersHistory.getObject("guess_distribution");
+            if(guessDistribution.has_value()) {
+                auto currentValue =  guessDistribution.value().getValue<int>(std::to_string(getAttempts()));
+                if(currentValue.has_value()) {
+                    guessDistribution.value().updateValue<std::string>(std::to_string(getAttempts()), std::to_string(currentValue.value() + 1));
+                    usersHistory.updateValue<std::string>("guess_distribution", guessDistribution->toString());
+                }
+                
+            }
+            usersHistory.stringify("../history.json");
+        }
+
+        void Profile::updateUsersStatsLose(void) {
+            
+            auto y = usersHistory.getValue<int>("losses");
+            usersHistory.updateValue<std::string>("current_streak", "0");
+
+            if(y.has_value()) {
+                usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));
+            }
+            usersHistory.stringify("../history.json");
+            
         }
       bool Wordly::wordChecker(void) {
             std::string toCheck;
@@ -83,74 +107,22 @@ bool Wordly::isEmpty(std::string_view str) const{
             timer = 2.0f;
         }
         else if(toCheck == gameState.word) {
-          
-            try {
-              if(gameState.state == DAILY_CHALLENGE) updateDailyChallengeStatus();
-            auto current = user.usersHistory.getValue<int>("current_streak");
-            user.usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
-            auto best = user.usersHistory.getValue<int>("best_streak");
-            if(current.has_value() && best.has_value()) {
-                if(current.value() + 1 > best.value()) {
-                    user.usersHistory.updateValue<std::string>("best_streak", std::to_string(current.value() + 1));
-                }
-            }
-            auto x  = user.usersHistory.getValue<int>("total_games");
-            auto y = user.usersHistory.getValue<int>("wins");
-            if(x.has_value()) {
-                user.usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
-            }
-            if(y.has_value()) {
-                user.usersHistory.updateValue<std::string>("wins",std::to_string(y.value() + 1));
-            }
-            auto guessDistribution = user.usersHistory.getObject("guess_distribution");
-            if(guessDistribution.has_value()) {
-                auto currentValue =  guessDistribution.value().getValue<int>(std::to_string(gameState.attempts));
-                if(currentValue.has_value()) {
-                    guessDistribution.value().updateValue<std::string>(std::to_string(gameState.attempts), std::to_string(currentValue.value() + 1));
-                    user.usersHistory.updateValue<std::string>("guess_distribution", guessDistribution->toString());
-                }
-                
-            }
-            
+              if(gameState.state == DAILY_CHALLENGE) user.updateDailyChallengeStatus();
+            user.updateUsersStatsWin();
             pendingGameOver = true;
             timer = 2.0f;
-            user.usersHistory.stringify("../history.json");
 
-        } catch(...) {
-            std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
-        }
     } 
         else if(gameState.attempts == 6) {
-            try {
-                if(gameState.state == DAILY_CHALLENGE) updateDailyChallengeStatus();
-            auto x  = user.usersHistory.getValue<int>("total_games");
-            auto y = user.usersHistory.getValue<int>("losses");
-            auto current = user.usersHistory.getValue<int>("current_streak");
-            user.usersHistory.updateValue<std::string>("current_streak", "0");
-            auto best = user.usersHistory.getValue<int>("best_streak");
-            if(current.has_value() && best.has_value()) {
-                if(current.value() > best.value()) {
-                    user.usersHistory.updateValue<std::string>("best_streak", std::to_string(current.value()));
-                }
-
-            }
-            if(x.has_value()) {
-                user.usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
-            }
-            if(y.has_value()) {
-                user.usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));
-            }
-            
+            if(gameState.state == DAILY_CHALLENGE) user.updateDailyChallengeStatus();
+            user.updateUsersStatsLose();
             pendingGameOver = true;
             timer = 2.0f;
-            user.usersHistory.stringify("../history.json");
-        } catch(...) {
-            std::cerr << "history.json file was corrupted, please delete this file" << std::endl;
-        }
         }
         gameState.userWon = toCheck == gameState.word;
         return toCheck == gameState.word;
     }
+
 
 void Wordly::updateCurrentWord(const char & c) {
 if(view.activeX < 5 && view.activeY < 6) {
@@ -192,7 +164,7 @@ void Wordly::enter(void) {
 }
 
 void Wordly::writeKey(void) {
-for(const auto & x : keyboard) {
+for(const auto & x : keyboard.keyboard) {
     if(x.clickStatus()) {
             if(!view.errorMessage.empty()) {
                     view.errorMessage.clear();
@@ -215,18 +187,8 @@ for(const auto & x : keyboard) {
 }
 }
 
-
-long Wordly::generateDayId(void) const {
-    auto now = std::chrono::system_clock::now();
-    time_t formatted = std::chrono::system_clock::to_time_t(now);
-    
-    struct tm * parts = std::localtime(&formatted);
-
-    return (parts->tm_year + 1900) * 1000 + (parts->tm_mon + 1) * 100 + parts->tm_mday;
-}
-
 void Wordly::getRandomWordDayChallenge(void) {
-    long id = generateDayId();
+    long id = utils::generateDayId();
     gameState.word = rs[id % rs.size()];
 }
 
@@ -243,7 +205,7 @@ void Wordly::clearVariables(void) {
                 leaderboard.leaderboardUpdated = false;
                 leaderboard.leaderboardLoaded = false;
                 gameState.mustUsedChars.clear();
-                initKeyboard();
+                keyboard.init();
 }
 
 

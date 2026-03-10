@@ -1,6 +1,6 @@
-#include "../view.hpp"
+#include "view.hpp"
 #include "drawLogo.hpp"
-#include "../config.hpp"
+#include "config.hpp"
 
 
 

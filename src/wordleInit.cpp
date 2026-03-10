@@ -1,4 +1,4 @@
-#include "../wordle.hpp"
+#include "wordle.hpp"
 std::random_device rd;
 std::mt19937 gen(rd());
 
@@ -35,7 +35,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             user.dailyChallenge.first = first.value();
             user.dailyChallenge.second = second.value();
             if(!user.dailyChallenge.first) {
-                long current = generateDayId();
+                long current = utils::generateDayId();
                 if(current != user.dailyChallenge.second) {
                     user.dailyChallenge.first = true;
                     user.dailyChallenge.second = current;
@@ -45,7 +45,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         }
     }
        }
-        this->initKeyboard();
+       keyboard.init();
            
        leaderboard.changeState = [this]() {
         gameState.state = MAIN_MENU;
@@ -84,7 +84,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
                 gameState.state = DAILY_CHALLENGE; 
                 gameState.mainTimer.start();
                 getRandomWordDayChallenge();
-                user.dailyChallenge.second = generateDayId();
+                user.dailyChallenge.second = utils::generateDayId();
             }
                 break;
             case 1 :
@@ -172,7 +172,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
 
     view.getKeyboard = [this] () -> const std::vector<Key>&{
-        return this->keyboard;
+        return this->keyboard.keyboard;
     };
 
     view.setKey = [this] (const Rectangle & rec, Key & key) {
@@ -209,6 +209,10 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     view.getOpenSettings = [this](void) {
         return openSettings;
     };
+
+    user.getAttempts = [this] (void) {
+        return gameState.attempts;
+    };
 }
 
 void Wordly::initHistoryFile(void) {
@@ -243,26 +247,6 @@ void Wordly::initHistoryFile(void) {
     main.stringify("../history.json");
 }
 
-
-void Wordly::initKeyboard(void) {
-keyboard.clear();
-std::string layout{"qwertyuiopasdfghjklDELzxcvbnmENT"};
-std::string buffer;
-for(int i = 0; i < layout.size(); i++) {
-    buffer.clear();
-    if(layout[i] == 'D') {
-        while(layout[i] != 'z') buffer += layout[i++];
-    }
-    else if(layout[i] == 'E') {
-        while(layout[i]) buffer += layout[i++];
-    }
-    else {
-         buffer += layout[i];
-    }
-   
-    keyboard.push_back({buffer, NOT_CHECKED});
-}
-}
 
 void Wordly::initHistory(void) {
         std::ifstream file ("../history.json");

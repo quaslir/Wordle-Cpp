@@ -1,5 +1,5 @@
 #include <iostream>
-#include "leaderboard/leaderboard.hpp"
+#include "leaderboard.hpp"
 #include <fstream>
 #include <random>
 #include <array>
@@ -9,22 +9,22 @@
 #include "timer.hpp"
 #include <exception>
 #include "textBox.hpp"
-#include "./pvp/network.hpp"
+#include "network.hpp"
 #include <chrono>
-#include "settings/settings.hpp"
+#include "settings.hpp"
 #include <thread>
 #include "post.hpp"
 #include "config.hpp"
 #include "gameState.hpp"
 #include "view.hpp"
 #include "profile.hpp"
-
+#include "utils.hpp"
 class Wordly {
     private :
     std::unordered_set<std::string> dictionary;
     std::vector<std::string> rs;
     std::istream & ss;
-    std::vector<Key> keyboard;
+    Keyboard keyboard;
     ViewContext view;
     GameState gameState;
     std::optional<ParserJSON> cachedDistribution;
@@ -37,23 +37,17 @@ class Wordly {
     bool openSettings = false;
     Settings settings;
     Coordinates pos = {0, 0};
-    bool isEmpty(std::string_view str) const;
     void initHistoryFile(void);
-    bool handleInput(std::string_view word) const;
-    void updateDailyChallengeStatus(void);
     void checkUsername(std::string & buffer);
-        void initKeyboard(void);
     void getRandomWord(void);
     void getRandomWordFromServer(void);
     void getRandomWordDayChallenge(void);
     void writeKey(void);
     void parseFile(void);
-    
-    bool lengthChecker(void) const;
+    void handlePvpState(void);
+    void handleLeaderboardState(void);
     std::string generateTheMostAccurateWord(void) const;
     void clearHistory(void);
-    long generateDayId(void) const;
-    size_t getLength(const std::string & str) const;
     void initHistory(void);
     void enter(void);
 

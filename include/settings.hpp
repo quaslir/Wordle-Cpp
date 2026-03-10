@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "../draw/button.hpp"
+#include "button.hpp"
 #include <functional>
 class Settings {
     public:
