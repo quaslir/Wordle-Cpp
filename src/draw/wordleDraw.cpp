@@ -1,10 +1,7 @@
 #include "../view.hpp"
-#include "../wordle.hpp"
-int Wordly::centerTextByX(const std::string & text, int fontSize, int width, int marginX = 0) const {
-int textWidth = MeasureText(text.c_str(), fontSize);
+#include "drawLogo.hpp"
+#include "../config.hpp"
 
-return marginX + (width - textWidth) / 2;
-}
 
 
 void drawPattern(void) {
@@ -23,7 +20,7 @@ void ViewContext::drawFrontScreen(void) {
     drawLogo();
     drawPattern();
     drawUsername();
-    //if(openSettings) return;
+    if(getOpenSettings()) return;
     const int numButtons = 4;
     static const std::vector<std::string> buttons = {"Daily challenge", "Practice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
     float btnW = 280.f;
@@ -58,12 +55,17 @@ void ViewContext::drawError(const std::string & msg) const {
         float x = (GetScreenWidth() - textSize) / 2;
         DrawText(msg.c_str(), (int) x, 680, fontSize, RED);
     }
-void Wordly::renderKeyBoard(void) {
-int posY = pos.y + SQUARE_SIZE + 30;
+void ViewContext::renderKeyBoard(void) {
+Coordinates pos = getPos();
+
+int posY = (5 * SQUARE_SIZE * 1.1 + 90) + SQUARE_SIZE + 30;
 int posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
 int CELL_SIZE = SQUARE_SIZE / 1.8;
 std::string character;
-for(auto & x : keyboard) {
+auto & keys = const_cast<std::vector<Key>&>(getKeyboard());
+
+for(auto & x : keys) {
+
     character.clear();
     character += x.c;
     Color color = x.status == NOT_CHECKED ? LIGHTGRAY : x.status == CORRECT ? GREEN : x.status == INCORRECT ? YELLOW : DARKGRAY;
@@ -73,21 +75,19 @@ for(auto & x : keyboard) {
     float textX = box.x + (box.width / 2) - (textSize.x / 2);
     float textY = box.y + (box.height / 2) - (textSize.y / 2);
     bool specialButton  = x.c == "ENT" || x.c == "DEL" ? 1 : 0;
-    int size = 0;
-    if(specialButton) {
-         x.box = Rectangle(posX, posY, CELL_SIZE * 1.5, CELL_SIZE);
-         size = CELL_SIZE * 1.5;
-    }
-    else {
-        size = CELL_SIZE;
-         x.box = Rectangle(posX, posY, size,size);
-    }
-   
-    DrawRectangle(posX, posY, size, CELL_SIZE, color);
-    DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
-
+    int size = CELL_SIZE;
+        DrawRectangle(posX, posY, box.width, box.height, color);
+        setKey(box, x);
+   if(specialButton) {
+    posX += (size * 1.5) + 6;
+   }
+   else {
     posX += size + 6;
-
+     
+   }
+   
+    DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
+   
     if(x.c == "p" || x.c == "l") {
         posY += CELL_SIZE + 6;
         posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
@@ -124,17 +124,15 @@ void ViewContext::drawUsername(void) const{
 }
 
 
-void Wordly::drawGrid(const float offset) {
-    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
+void ViewContext::drawGrid(const float offset) {
+    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 5 * 1.1)) / 2;
        for(size_t i = 0; i < 6; i++) {
-        float currentRowOffset = i == view.activeY ? offset : 0.0f;
+        float currentRowOffset = i == activeY ? offset : 0.0f;
         for(size_t j = 0; j < 5; j++) {
-            auto c = gameState.history[i][j];
+            Character c = getChar(j, i);
         float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
         float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
-        if(i == 5) {
-            pos.y = (i * SQUARE_SIZE * 1.1) + 90;
-        }
+
         Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
             Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), FONT_SIZE, 2);
             float textX = box.x + (box.width / 2) - (textSize.x / 2);
@@ -147,58 +145,44 @@ void Wordly::drawGrid(const float offset) {
        }
 }
 
-void Wordly::drawOriginalStateGame(void) {
-    mainTimer.update();
-    mainTimer.drawTimer();
+void ViewContext::drawOriginalStateGame(void) {
+    
     drawLogo();
-    view.drawUsername();
-    if(!gameState.gameOver) {
+    drawUsername();
+    if(!getGameOver()) {
     float offset = 0.0f;
-    if(pendingGameOver) {
-        mainTimer.stop();
-        timer -= GetFrameTime();
 
-        if(timer <= 0) {
-            pendingGameOver = false;
-            gameState.gameOver = true;
-            timer  =0;
-        }
-    }
-    else {
-        if(gameState.state == AUTOPLAY) {
-            autoBotPlay();
-        }
-    }
-    if(view.shakeTimer > 0) {
-        view.shakeTimer -= GetFrameTime();
-        offset = sinf(view.shakeTimer * 60.f) * view.shakeIntensity * (view.shakeTimer / 0.5f);
+    if(shakeTimer > 0) {
+        shakeTimer -= GetFrameTime();
+        offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
     }
 
     drawGrid(offset);
-       renderKeyBoard();
+    
+    renderKeyBoard();
     } else {
-        view.gameOverScreenRenderer();
+        gameOverScreenRenderer();
     }
 
-    if(view.renderErrorMessage) {
-        view.drawError(view.errorMessage);
+    if(renderErrorMessage) {
+        drawError(errorMessage);
     }
 }
 
 
-void Wordly::drawPvp(void) {
+void ViewContext::drawPvp(void) {
     drawLogo();
-    view.drawUsername();
-      if(manager.getStatus()) {
+    drawUsername();
+      if(getPvpStatus()) {
         float offset = 0.0f;
-         if(view.shakeTimer > 0) {
-        view.shakeTimer -= GetFrameTime();
-        offset = sinf(view.shakeTimer * 60.f) * view.shakeIntensity * (view.shakeTimer / 0.5f);
+         if(shakeTimer > 0) {
+        shakeTimer -= GetFrameTime();
+        offset = sinf(shakeTimer * 60.f) * shakeIntensity * (shakeTimer / 0.5f);
     }
           drawGrid(offset);
           renderKeyBoard();
-          if(!view.errorMessage.empty()) {
-            view.drawError(view.errorMessage);
+          if(!errorMessage.empty()) {
+            drawError(errorMessage);
           }
     }
     else {
@@ -213,15 +197,7 @@ void Wordly::drawPvp(void) {
         Button btn (rec, colorBtn, "Back");
     btn.drawBtn();
     if(btn.checkClick(GetMousePosition())) {
-        manager.disconnect();
-         clearVariables();
-         manager.isWaitingForServer = false;
-         manager.packet.received = false;
-         manager.packet.win = false;
-         manager.packet.draw = false;
-         manager.gameOver = false;
-         leaderboard.leaderboardUpdated = false;
-        gameState.state = MAIN_MENU;
+        onBackBtn();
     }
     }
   
@@ -279,3 +255,18 @@ void ViewContext::drawXp(int xp, bool win, bool draw) const {
     DrawText(text.c_str(), posX, posY, 20, RAYWHITE);
 
 }   
+
+
+    Color ViewContext::getColor(const Type & t)const {
+        switch(t) {
+            case INCORRECT_POS :
+            return YELLOW;
+
+            case CORRECT_POS :
+            return GREEN;
+
+            default: 
+            return GRAY;
+        }
+        return GRAY;
+    }

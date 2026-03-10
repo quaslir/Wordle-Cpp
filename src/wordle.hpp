@@ -14,17 +14,10 @@
 #include "settings/settings.hpp"
 #include <thread>
 #include "post.hpp"
-#define SQUARE_SIZE 65
-#define FONT_SIZE 30
+#include "config.hpp"
 #include "gameState.hpp"
 #include "view.hpp"
 #include "profile.hpp"
-
-struct Coordinates {
-    int x, y;
-};
-
-
 
 class Wordly {
     private :
@@ -38,7 +31,6 @@ class Wordly {
     float timer = 0.0f;
    bool pendingGameOver = false;
     float botTimer = 0.0f;
-    Timer mainTimer;
     Profile user;
     Leaderboard leaderboard;
     NetworkManager manager;
@@ -51,16 +43,14 @@ class Wordly {
     void updateDailyChallengeStatus(void);
     void checkUsername(std::string & buffer);
         void initKeyboard(void);
-    int centerTextByX(const std::string & text, int fontSize, int width, int marginX) const;
     void getRandomWord(void);
     void getRandomWordFromServer(void);
     void getRandomWordDayChallenge(void);
     void writeKey(void);
     void parseFile(void);
-    void renderKeyBoard(void) ;
+    
     bool lengthChecker(void) const;
     std::string generateTheMostAccurateWord(void) const;
-    Color getColor(const Type & t)const;
     void clearHistory(void);
     long generateDayId(void) const;
     size_t getLength(const std::string & str) const;
@@ -68,15 +58,11 @@ class Wordly {
     void enter(void);
 
     
-    ParserJSON usersHistory;
 
     void setUsername(void);
     void trim(std::string & text) const;
     void clearVariables(void);
-    void drawOriginalStateGame(void);
      void update(void);
-     void drawPvp(void);
-     void drawGrid(const float offset);
      void readKey(void);
      void updateKeyStatus(void);
      void updatePvp(void);

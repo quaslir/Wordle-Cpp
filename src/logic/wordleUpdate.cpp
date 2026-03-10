@@ -1,5 +1,5 @@
 #include "../wordle.hpp"
-
+#include <exception>
 void Wordly::update(void) {
     if(openSettings) return;
 if(gameState.state == EMPTY_USERNAME) {
@@ -9,7 +9,7 @@ if(gameState.state == EMPTY_USERNAME) {
     }
     if(!gameState.gameOver) {
     if(pendingGameOver) {
-            mainTimer.stop();
+        gameState.mainTimer.stop();
         timer -= GetFrameTime();
 
         if(timer <= 0) {
@@ -24,11 +24,10 @@ if(gameState.state == EMPTY_USERNAME) {
         }
     }
     if(gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE) {
+    readKey();
     writeKey();
     }
     
-} else {
-        view.gameOverScreenRenderer();
     }
 }
 
@@ -62,11 +61,12 @@ void Wordly::updatePvp(void) {
 }
 
 void Wordly::play(void) {
-
+gameState.mainTimer.update();
 update();
 if((gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE || gameState.state == AUTOPLAY) && !openSettings) {
-    readKey();
-    drawOriginalStateGame();
+    
+    gameState.mainTimer.drawTimer();
+    view.drawOriginalStateGame();
 }
 else if(gameState.state == LEADERBOARD) {
     if(!leaderboard.leaderboardLoaded) {
@@ -83,7 +83,8 @@ else if(gameState.state == LEADERBOARD) {
 }
 
 else if(gameState.state == PVP) { 
-    drawPvp();
+        pos.y = (5 * SQUARE_SIZE * 1.1) + 90;
+    view.drawPvp();
     if(manager.gameOver && !manager.connected()) {
         clearVariables();
         manager.disconnect();
@@ -155,20 +156,20 @@ if(openSettings) {
 
 void Wordly::updateDailyChallengeStatus(void) {
     try {
-        auto dailyCh = usersHistory.getObject("daily_challenge").value();
+        auto dailyCh = user.usersHistory.getObject("daily_challenge").value();
     dailyCh.updateValue<std::string>("daily_challenge_active", "false");
     dailyCh.updateValue<std::string>("daily_challenge_id", std::to_string(generateDayId()));
-    usersHistory.updateValue<std::string>("daily_challenge", dailyCh.toString());
+    user.usersHistory.updateValue<std::string>("daily_challenge", dailyCh.toString());
     user.dailyChallenge.first = false;
-    } catch(...) {
-        std::cerr << "Json file was corrupted" << std::endl;
+    } catch(const std::exception & error) {
+        std::cerr << error.what() << std::endl;
     } 
 }
 
 
 void Wordly::updateKeyStatus(void) {
 
-    size_t idx = 0;
+        size_t idx = 0;
         for(auto & c : gameState.history[view.activeY]) {
             if(gameState.word.find(c.c) == std::string::npos) {
                 c.type = NOT_IN;

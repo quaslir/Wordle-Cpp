@@ -1,5 +1,8 @@
 #include <string>
 #include <unordered_set>
+#include <array>
+#include "timer.hpp"
+#pragma once
 enum gameState_t {
     MAIN_MENU,
     AUTOPLAY,
@@ -26,5 +29,10 @@ struct GameState {
     bool userWon = false;
     bool gameOver = false;
     gameState_t state;
+    Timer mainTimer;
 
+    std::string handleHardMode(const std::string & toCheck) const;
 };
+
+
+

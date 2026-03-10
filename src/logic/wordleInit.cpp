@@ -6,8 +6,8 @@ Wordly::Wordly(std::istream & s) : ss(s) {
    gameState.state = MAIN_MENU;
     this->initHistoryFile();
      this->initHistory();
-    if(usersHistory.exists("username")) {
-        user.username = usersHistory.getValue<std::string>("username").value();
+    if(user.usersHistory.exists("username")) {
+        user.username = user.usersHistory.getValue<std::string>("username").value();
         if(user.username.empty()) gameState.state = EMPTY_USERNAME;
         trim(user.username);
         if(user.username.empty()) gameState.state = EMPTY_USERNAME;
@@ -23,9 +23,9 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     }).detach();
     }
         this->parseFile();  
-       if(usersHistory.exists("daily_challenge")) {
+       if(user.usersHistory.exists("daily_challenge")) {
 
-        auto x = usersHistory.getObject("daily_challenge");
+        auto x = user.usersHistory.getObject("daily_challenge");
         if(x.has_value()) {
                             
         auto first = x.value().getValue<bool>("daily_challenge_active");
@@ -39,7 +39,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
                 if(current != user.dailyChallenge.second) {
                     user.dailyChallenge.first = true;
                     user.dailyChallenge.second = current;
-                    usersHistory.stringify("../history.json");
+                    user.usersHistory.stringify("../history.json");
                 }
             }
         }
@@ -82,21 +82,21 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             case 0 :    
             if(view.onDailyChallenge()) {
                 gameState.state = DAILY_CHALLENGE; 
-                mainTimer.start();
+                gameState.mainTimer.start();
                 getRandomWordDayChallenge();
                 user.dailyChallenge.second = generateDayId();
             }
                 break;
             case 1 :
                 gameState.state = PRACTICE;
-                mainTimer.start();
+                gameState.mainTimer.start();
                 getRandomWord();
                 std::cout << gameState.word << std::endl;
 
                 break;
             case 2 :
             gameState.state = AUTOPLAY;
-             mainTimer.start();
+             gameState.mainTimer.start();
             getRandomWord();
             break;
 
@@ -127,7 +127,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     view.onPlayAgain = [this] () {
         clearVariables();
         getRandomWord();
-        mainTimer.start();
+        gameState.mainTimer.start();
     };
 
     view.onExit = [this] () {
@@ -152,19 +152,62 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
 
     view.getMins = [this] () {
-        return mainTimer.getMins();
+        return gameState.mainTimer.getMins();
     };
 
     view.getSeconds = [this] () {
-        return mainTimer.getSeconds();
+        return gameState.mainTimer.getSeconds();
     };
 
     view.getDistribution = [this] () -> const std::optional<ParserJSON> &{
-        cachedDistribution = usersHistory.getObject("guess_distribution");
+        cachedDistribution = user.usersHistory.getObject("guess_distribution");
         return cachedDistribution;
     };
     view.getValue = [this](const std::string &key) {
-        return usersHistory.getValue<int>(key);
+        return user.usersHistory.getValue<int>(key);
+    };
+
+    view.getPos = [this] () {
+        return pos;
+    };
+
+    view.getKeyboard = [this] () -> const std::vector<Key>&{
+        return this->keyboard;
+    };
+
+    view.setKey = [this] (const Rectangle & rec, Key & key) {
+        key.box = rec;
+    };
+
+    view.getChar = [this] (int x, int y) {
+        if(x < 5 && x >= 0 && y < 6 && y >= 0) {
+            return gameState.history[y][x];
+        }
+
+        return Character(' ', NOT_IN);
+    };
+
+    view.getPvpStatus = [this](void) {
+        return manager.getStatus();
+    };
+
+    view.onBackBtn = [this] (void) {
+        manager.disconnect();
+         clearVariables();
+         manager.isWaitingForServer = false;
+         manager.packet.received = false;
+         manager.packet.win = false;
+         manager.packet.draw = false;
+         manager.gameOver = false;
+         leaderboard.leaderboardUpdated = false;
+        gameState.state = MAIN_MENU;
+    };
+
+    view.getGameOver = [this](void) {
+        return gameState.gameOver;
+    };
+    view.getOpenSettings = [this](void) {
+        return openSettings;
     };
 }
 
@@ -223,7 +266,7 @@ for(int i = 0; i < layout.size(); i++) {
 
 void Wordly::initHistory(void) {
         std::ifstream file ("../history.json");
-        this->usersHistory.parse(file);
+        user.usersHistory.parse(file);
     }
 
     void Wordly::getRandomWord(void)  {
