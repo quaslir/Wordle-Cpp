@@ -33,7 +33,7 @@ class Wordly {
     float botTimer = 0.0f;
     Profile user;
     Leaderboard leaderboard;
-    NetworkManager manager;
+    Pvp pvp;
     bool openSettings = false;
     Settings settings;
     Coordinates pos = {0, 0};
@@ -60,7 +60,6 @@ class Wordly {
      void readKey(void);
      void updateKeyStatus(void);
      void updatePvp(void);
-     void wordCheckerHelpFunctionForError(void);
      size_t calculateXpDistribution(void) const;
     public :
      bool wordChecker(void);

@@ -1,6 +1,6 @@
 #include "wordle.hpp"
 
-        void Wordly::parseFile(void) {
+void Wordly::parseFile(void) {
         std::string buffer;
         while(getline(ss, buffer)) {
             if(utils::isEmpty(buffer)) continue;
@@ -86,17 +86,18 @@
          }
          if(settings.hardMode) {
            std::string error = gameState.handleHardMode(toCheck);
+
             if(!error.empty()) {
-                view.errorMessage = error;
-                view.renderErrorMessage = true;
+                view.setErrorMsg(error);
+                return false;
             }
          }
          if(settings.offlineMode && !dictionary.contains(toCheck)) {
-           wordCheckerHelpFunctionForError();
+           view.setErrorMsg("This word does not exists in our database");
            return false;
          }
          else if(!settings.offlineMode && !wordCheckerFromServer(toCheck)) {
-             wordCheckerHelpFunctionForError();
+             view.setErrorMsg("This word does not exists in our database");
             return false;
          }
          view.renderErrorMessage = false;
@@ -147,7 +148,7 @@ void Wordly::enter(void) {
         wordChecker();
         }
             else {
-                if(!manager.isWaitingForServer) {
+                if(!pvp.isWaitingForServer) {
                 std::string usersWord;
                 for(const auto & x : gameState.history[view.activeY]) {
                     usersWord += x.c;
@@ -156,8 +157,8 @@ void Wordly::enter(void) {
                     view.shakeTimer = 0.5f;
                     return; 
                 }
-                manager.isWaitingForServer = true;    
-                manager.sendGamePacket(usersWord);
+                pvp.isWaitingForServer = true;    
+                pvp.sendGamePacket(usersWord);
                 
             }
         }
@@ -210,14 +211,13 @@ void Wordly::clearVariables(void) {
 
 
 void Wordly::readKey(void){
-    if(gameState.state == AUTOPLAY) {
-    } else {
+    if(gameState.state != AUTOPLAY) {
         int key = GetCharPressed();
         while(key > 0) {
             if((key >= 32) && (key <= 125)) {
             updateCurrentWord((char) key);
-            if(view.renderErrorMessage || manager.packet.error) {
-                    manager.packet.error = false;
+            if(view.renderErrorMessage || pvp.packet.error) {
+                    pvp.packet.error = false;
                     view.errorMessage.clear();
                     view.renderErrorMessage = false;
 
@@ -261,6 +261,7 @@ bool Wordly::wordCheckerFromServer(const std::string & toCheck) {
 
 
 void Wordly::getRandomWordFromServer(void) {
+    try {
     std::string raw = getRequest("http://localhost:3000/word-gen");
     ParserJSON parser;
     std::stringstream ss (raw);
@@ -272,10 +273,8 @@ void Wordly::getRandomWordFromServer(void) {
             gameState.word = x.value();
         }
     }
- }
-
- void Wordly::wordCheckerHelpFunctionForError(void) {
- view.errorMessage = "This word does not exists in our database";
-            view.renderErrorMessage = true;
-            view.shakeTimer = 0.5f;
+} catch(const std::exception & error) {
+    std::cerr << error.what() << std::endl;
+    settings.offlineMode = true;
+}
  }

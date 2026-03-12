@@ -46,86 +46,80 @@ void Wordly::handleLeaderboardState(void) {
 void Wordly::handlePvpState(void) {
 pos.y = (5 * SQUARE_SIZE * 1.1) + 90;
     view.drawPvp();
-    if(manager.gameOver && !manager.connected()) {
+    if(pvp.gameOver && !pvp.connected()) {
         clearVariables();
-        manager.disconnect();
+        pvp.disconnect();
         gameState.state = MAIN_MENU;
-        manager.isWaitingForServer = false;
-         manager.packet.received = false;
-         manager.packet.win = false;
-         manager.packet.draw = false;
-         manager.gameOver = false;
          leaderboard.leaderboardUpdated = false;
         return;
     }
         
     updatePvp();
-        if(manager.packet.turn) {
+        if(pvp.packet.turn) {
             if(!view.renderErrorMessage) {
             view.errorMessage = "Your turn";
             }
             readKey();
             writeKey();
     } else view.errorMessage.clear();
-    if(!manager.getStatus() && !manager.gameOver) {
+    if(!pvp.getStatus() && !pvp.gameOver) {
         DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
     }
     
 
-        if(manager.gameOver) {
+        if(pvp.gameOver) {
                 size_t xp = calculateXpDistribution();
                 if(!leaderboard.leaderboardUpdated) {
-                    if(manager.packet.win) {
+                    if(pvp.packet.win) {
                         std::thread([&] {
                             leaderboard.updateLeaderboard(user.username, user.totalXp + xp);
                         }).detach();
                     }
-                    else if(!manager.packet.win && !manager.packet.draw) {
+                    else if(!pvp.packet.win && !pvp.packet.draw) {
+                        size_t newXp = user.totalXp - xp < 0 ? 0 : user.totalXp - xp;
                    std::thread([&] {
-                            leaderboard.updateLeaderboard(user.username, user.totalXp - xp);
+                            leaderboard.updateLeaderboard(user.username, newXp);
                         }).detach();
                     }
                     leaderboard.leaderboardUpdated = true;
                     leaderboard.receiveUsersXp(user.username);
                 }
-        if(manager.packet.win) {
+        if(pvp.packet.win) {
 
             view.drawPvpWin();
         }
-        else if(!manager.packet.win && !manager.packet.draw) {
+        else if(!pvp.packet.win && !pvp.packet.draw) {
             view.drawPvpLose();
         }
         else view.drawPvpDraw();
-        view.drawXp(xp, manager.packet.win, manager.packet.draw);
+        view.drawXp(xp, pvp.packet.win, pvp.packet.draw);
     }
 }
 
 
 void Wordly::updatePvp(void) {
 
-    manager.receive();
+    pvp.receive();
 
-    if(manager.packet.received) {
+    if(pvp.packet.received) {
 
-        if(manager.isWaitingForServer) {
-        manager.isWaitingForServer = false;
-        if(manager.packet.error) {
-            view.renderErrorMessage = true;
-                    view.errorMessage = "Incorrect word";
-                    view.shakeTimer = 0.5f;
+        if(pvp.isWaitingForServer) {
+        pvp.isWaitingForServer = false;
+        if(pvp.packet.error) {
+                    view.setErrorMsg("Incorrect word");
         }
         else {
              updateKeyStatus();
         }
         }
     
-        else if(!manager.wordReceved){
-        gameState.word = manager.packet.word;
-        manager.wordReceved = true;
+        else if(!pvp.wordReceved){
+        gameState.word = pvp.packet.word;
+        pvp.wordReceved = true;
     }
         
 
-        manager.packet.received = false;
+        pvp.packet.received = false;
                
     }
 }
@@ -155,7 +149,6 @@ else if(gameState.state == EMPTY_USERNAME) {
      view.drawFrontScreen();
     
 }
-
 
 if(openSettings) {
     settings.drawSettings();

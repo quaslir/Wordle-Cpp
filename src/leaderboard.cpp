@@ -3,7 +3,7 @@
 #include "network.hpp"
 #include "post.hpp"
 void Leaderboard::loadLeaderboard(void) {
-
+    try {
     std::string buffer = getRequest("http://localhost:3000/leaderboard");
     ParserJSON ps;
     std::stringstream ss (buffer);
@@ -22,6 +22,11 @@ void Leaderboard::loadLeaderboard(void) {
         return first.second > second.second;
     });
     leaderboardLoaded = true;
+} catch(const std::exception & error) {
+    std::cerr << error.what() << std::endl;
+    setOfflineState();
+    changeState();
+}
 
 }
 

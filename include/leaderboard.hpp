@@ -12,6 +12,7 @@ class Leaderboard {
     std::function<void(int)> getXp;
     std::function<void()> changeState;
     std::function<std::string()> getUsername;
+    std::function<void(void)> setOfflineState;
     bool leaderboardLoaded = false;
     bool leaderboardUpdated = false;
     std::vector<std::pair<std::string, size_t>>  leaderboard;

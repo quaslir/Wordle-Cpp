@@ -13,13 +13,13 @@ struct Packet {
     Packet() {}
 };
 
-class NetworkManager {
+class Pvp {
     public: 
         bool isWaitingForServer = false;
         bool wordReceved = false;
         Packet packet; 
         bool gameOver = false;
-    NetworkManager() {}
+    Pvp() {}
     bool connected(void) const;
     void disconnect(void);
     void sendmsg(const std::string & msg);

@@ -54,7 +54,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
        leaderboard.getUsername = [this]() {
         return user.username;
        };
-       manager.setOnWord([this] (const std::string & word) {
+       pvp.setOnWord([this] (const std::string & word) {
         for(int i = 0; i < 5; i++) {
         gameState.history[view.activeY][view.activeX++].c = word[i];  
     }
@@ -63,7 +63,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
 
     settings.onState = [this] () {
         if(gameState.state == PVP) {
-            manager.disconnect();
+            pvp.disconnect();
         }
         gameState.state = MAIN_MENU;
         clearVariables();
@@ -108,7 +108,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             case 4:
             if(settings.offlineMode) break;
             gameState.state = PVP;
-            manager.connect("ws://localhost:8000");
+            pvp.connect("ws://localhost:8000");
             break;
 
             case 5: 
@@ -188,17 +188,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
 
     view.getPvpStatus = [this](void) {
-        return manager.getStatus();
+        return pvp.getStatus();
     };
 
     view.onBackBtn = [this] (void) {
-        manager.disconnect();
+        pvp.disconnect();
          clearVariables();
-         manager.isWaitingForServer = false;
-         manager.packet.received = false;
-         manager.packet.win = false;
-         manager.packet.draw = false;
-         manager.gameOver = false;
          leaderboard.leaderboardUpdated = false;
         gameState.state = MAIN_MENU;
     };
@@ -212,6 +207,10 @@ Wordly::Wordly(std::istream & s) : ss(s) {
 
     user.getAttempts = [this] (void) {
         return gameState.attempts;
+    };
+
+    leaderboard.setOfflineState = [this] () {
+        settings.offlineMode = true;
     };
 }
 

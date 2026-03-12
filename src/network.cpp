@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <functional>
-void NetworkManager::connect(const std::string & addr) {
+void Pvp::connect(const std::string & addr) {
 _socket.setUrl(addr);
 
 _socket.setOnMessageCallback([this] (const ix::WebSocketMessagePtr & msg) {
@@ -14,24 +14,29 @@ _socket.setOnMessageCallback([this] (const ix::WebSocketMessagePtr & msg) {
 _socket.start();
 }
 
-bool NetworkManager::connected(void) const {return this->_connected;}
+bool Pvp::connected(void) const {return this->_connected;}
 
-void NetworkManager::sendmsg(const std::string & msg) {
+void Pvp::sendmsg(const std::string & msg) {
    if(_connected) {
     _socket.send(msg);
    }
 }
 
-void NetworkManager::disconnect(void) {
+void Pvp::disconnect(void) {
     parser.insert("STOP", packet.roomId);
     sendmsg(parser.toString());
     parser.clear();
     _socket.stop();
     this->_connected = false;
     this->gameStarted = false;
+    isWaitingForServer = false;
+    packet.received = false;
+    packet.win = false;
+    packet.draw = false;
+    gameOver = false;
 }
 
-void NetworkManager::receive(void) {
+void Pvp::receive(void) {
     if(!this->_connected) return;
 
     _socket.setOnMessageCallback([this] (const ix::WebSocketMessagePtr & msg) {
@@ -95,11 +100,11 @@ void NetworkManager::receive(void) {
     });
 }
 
-bool NetworkManager::getStatus(void) const{
+bool Pvp::getStatus(void) const{
 return gameStarted;
 }
 
-void NetworkManager::sendGamePacket(const std::string & str) {
+void Pvp::sendGamePacket(const std::string & str) {
     parser.insert("word",str);
     parser.insert("id", this->packet.roomId);
     std::string formatted = parser.toString();
@@ -108,7 +113,7 @@ void NetworkManager::sendGamePacket(const std::string & str) {
     }
 }
 
-void NetworkManager::setOnWord(std::function<void(const std::string &)> callback) {
+void Pvp::setOnWord(std::function<void(const std::string &)> callback) {
 onWord = callback;
 }
 

@@ -30,7 +30,7 @@ void Wordly::setUsername(void) {
     Rectangle rec = {startX, startY, boxW, boxH};
     Rectangle rec2 = {startX, startY + boxH + 15, boxW, boxH};
     float x = (boxW - MeasureText("ENTER YOUR NAME", 20)) / 2;
-    DrawText("ENTER YOUR NAME", x, startY - 40, 20, LIGHTGRAY);
+    DrawText("ENTER YOUR NAME", x + startX, startY - 40, 20, LIGHTGRAY);
     Color boxColor = buffer.size() > 0 ? RAYWHITE : GRAY;
     drawTextBox(rec, 2.0f, boxColor, 20, buffer);
     bool toSubmit = !buffer.empty();

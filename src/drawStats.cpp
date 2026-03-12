@@ -1,6 +1,6 @@
 #include "view.hpp"
 #include "button.hpp"
-void ViewContext::gameOverScreenRenderer(void) {
+void ViewContext::gameOverScreenRenderer(void)const {
 
     
     DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), ColorAlpha(BLACK, 0.5f));

@@ -39,9 +39,15 @@ std::string getRequest(const std::string & url) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, HttpCallback);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, & buffer);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
     
-    curl_easy_perform(curl);
-
+    CURLcode res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        std::string error = curl_easy_strerror(res);
+        curl_easy_cleanup(curl);
+        throw std::runtime_error("Network error: " + error);
+    }
     curl_easy_cleanup(curl);
 
     return buffer;

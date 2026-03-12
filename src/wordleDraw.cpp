@@ -15,7 +15,7 @@ void drawPattern(void) {
     }
 }
 
-void ViewContext::drawFrontScreen(void) {
+void ViewContext::drawFrontScreen(void) const {
     ClearBackground({18, 19, 19, 255});
     drawLogo();
     drawPattern();
@@ -50,12 +50,12 @@ void ViewContext::drawFrontScreen(void) {
 }
 
 void ViewContext::drawError(const std::string & msg) const {
-    int fontSize = 20;
+        int fontSize = 20;
         int textSize = MeasureText(msg.c_str(),fontSize);
         float x = (GetScreenWidth() - textSize) / 2;
         DrawText(msg.c_str(), (int) x, 680, fontSize, RED);
     }
-void ViewContext::renderKeyBoard(void) {
+void ViewContext::renderKeyBoard(void) const {
 Coordinates pos = getPos();
 
 int posY = (5 * SQUARE_SIZE * 1.1 + 90) + SQUARE_SIZE + 30;
@@ -124,7 +124,7 @@ void ViewContext::drawUsername(void) const{
 }
 
 
-void ViewContext::drawGrid(const float offset) {
+void ViewContext::drawGrid(const float offset) const{
     int marginX = (GetScreenWidth() - (SQUARE_SIZE * 5 * 1.1)) / 2;
        for(size_t i = 0; i < 6; i++) {
         float currentRowOffset = i == activeY ? offset : 0.0f;
@@ -145,7 +145,7 @@ void ViewContext::drawGrid(const float offset) {
        }
 }
 
-void ViewContext::drawOriginalStateGame(void) {
+void ViewContext::drawOriginalStateGame(void){
     
     drawLogo();
     drawUsername();
@@ -170,7 +170,7 @@ void ViewContext::drawOriginalStateGame(void) {
 }
 
 
-void ViewContext::drawPvp(void) {
+void ViewContext::drawPvp(void){
     drawLogo();
     drawUsername();
       if(getPvpStatus()) {
@@ -269,4 +269,10 @@ void ViewContext::drawXp(int xp, bool win, bool draw) const {
             return GRAY;
         }
         return GRAY;
+    }
+
+    void ViewContext::setErrorMsg(const std::string & msg) {
+         errorMessage = msg;
+         renderErrorMessage = true;
+        shakeTimer = 0.5f;
     }
