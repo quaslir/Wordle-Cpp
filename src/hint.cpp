@@ -14,13 +14,13 @@ void Hint::getHint(const std::string & word) {
 }
 
 void Hint::drawHintBtn(void) {
-    int y = GetScreenHeight() - 40;
+    int y = GetScreenHeight() - 50;
     int x = 50;
     int height = 30;
     int width = 130;
 
     Rectangle rec = {(float) x, (float) y, (float)width, (float)height};
-    Color color = CheckCollisionPointRec(GetMousePosition(), rec) ? DARKGRAY : RAYWHITE;
+    Color color = CheckCollisionPointRec(GetMousePosition(), rec) ? DARKGRAY : LIGHTGRAY;
     Button btn (rec, color, "Hint");
     btn.drawBtn();
     if(btn.checkClick(GetMousePosition())) {

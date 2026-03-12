@@ -160,6 +160,7 @@ void ViewContext::drawOriginalStateGame(void){
     drawGrid(offset);
     
     renderKeyBoard();
+        onHint();
     } else {
         gameOverScreenRenderer();
     }
@@ -167,7 +168,7 @@ void ViewContext::drawOriginalStateGame(void){
     if(renderErrorMessage || !errorMessage.empty()) {
         drawError(errorMessage);
     }
-onHint();
+
 }
 
 

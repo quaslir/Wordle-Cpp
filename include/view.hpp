@@ -17,6 +17,7 @@ float shakeIntensity = 10.0f;
 bool renderErrorMessage = false;
 std::string errorMessage = "";
 std::function<bool(void)> onDailyChallenge;
+std::function<bool(void)> onPractice;
 std::function<void(int i)> onClick;
 std::function<std::string(void)> getUsername;
 std::function<void(void)> onSettings;

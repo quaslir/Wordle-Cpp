@@ -43,10 +43,9 @@ std::string getRequest(const std::string & url) {
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
     
     CURLcode res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
-        std::string error = curl_easy_strerror(res);
+    if(res == CURLE_OPERATION_TIMEDOUT) {
         curl_easy_cleanup(curl);
-        throw std::runtime_error("Network error: " + error);
+        throw std::runtime_error("Request timed out!");
     }
     curl_easy_cleanup(curl);
 

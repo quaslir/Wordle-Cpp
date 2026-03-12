@@ -296,6 +296,7 @@ app.post("/word-check", (req, res) => {
 });
 
 app.post("/get-hint", async(req, res) => {
+
     const {word}:word_check = req.body;
     if(!word) return res.status(400).send("Word was not provided");
 

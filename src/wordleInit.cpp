@@ -206,9 +206,13 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
 
     view.onHint = [this] (void) {
-        if(!hint.hintLoaded) {
+        if(!hint.hintLoaded && (gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE)) {
         hint.drawHintBtn();
         }
+    };
+
+    view.onPractice = [this](void) {
+        return gameState.state == PRACTICE;
     };
 
     user.getAttempts = [this] (void) {

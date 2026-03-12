@@ -7,7 +7,7 @@ class Settings {
     bool offlineMode;
     std::function<void()> onState;
     std::function<void()> onClose;
-    Settings() : hardMode(false) {}
+    Settings() : hardMode(false), offlineMode(false) {}
 
     void drawSettings(void);
 };
