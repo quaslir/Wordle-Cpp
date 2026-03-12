@@ -49,6 +49,7 @@ set(SOURCES
     src/wordleUpdate.cpp
     src/settings.cpp
     src/post.cpp
+    src/hint.cpp
 
 )
 

@@ -38,6 +38,7 @@ std::function<bool(void)> getPvpStatus;
 std::function<void(void)> onBackBtn;
 std::function<bool(void)> getGameOver;
 std::function<bool(void)> getOpenSettings;
+std::function<void(void)> onHint;
 void drawError(const std::string & msg) const;
 void drawGuessDistribution(const Rectangle & rec) const;
 void renderKeyBoard(void) const ;

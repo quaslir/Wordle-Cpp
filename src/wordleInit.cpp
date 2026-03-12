@@ -205,6 +205,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         return openSettings;
     };
 
+    view.onHint = [this] (void) {
+        if(!hint.hintLoaded) {
+        hint.drawHintBtn();
+        }
+    };
+
     user.getAttempts = [this] (void) {
         return gameState.attempts;
     };

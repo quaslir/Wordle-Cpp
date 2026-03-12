@@ -164,9 +164,10 @@ void ViewContext::drawOriginalStateGame(void){
         gameOverScreenRenderer();
     }
 
-    if(renderErrorMessage) {
+    if(renderErrorMessage || !errorMessage.empty()) {
         drawError(errorMessage);
     }
+onHint();
 }
 
 
@@ -276,3 +277,4 @@ void ViewContext::drawXp(int xp, bool win, bool draw) const {
          renderErrorMessage = true;
         shakeTimer = 0.5f;
     }
+

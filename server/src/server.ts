@@ -295,4 +295,32 @@ app.post("/word-check", (req, res) => {
     return res.json({exists: EnglishDictionary.has(word)});
 });
 
+app.post("/get-hint", async(req, res) => {
+    const {word}:word_check = req.body;
+    if(!word) return res.status(400).send("Word was not provided");
+
+    try {
+        const prompt = `Role: You are a cryptic game hint generator.
+Task: Create a short hint for the word: "[${word}]".
+Rules:
+
+Maximum 5 words.
+
+Do not use the word itself or its direct synonyms.
+
+Use an association, a function, or a "riddle" style.
+
+It should be challenging but logical.
+
+Output format: Only the hint text, nothing else.
+        `;
+    const data = await getLLMData(prompt);
+    console.log(data);
+    return res.send(data);
+    } catch(error) {
+    console.error(error);
+    return res.status(500);
+    }
+});
+
 app.listen(3000, () => console.log("Server is working on 3000 port"));

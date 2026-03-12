@@ -19,6 +19,7 @@
 #include "view.hpp"
 #include "profile.hpp"
 #include "utils.hpp"
+#include "hint.hpp"
 class Wordly {
     private :
     std::unordered_set<std::string> dictionary;
@@ -37,6 +38,7 @@ class Wordly {
     bool openSettings = false;
     Settings settings;
     Coordinates pos = {0, 0};
+    Hint hint;
     void initHistoryFile(void);
     void checkUsername(std::string & buffer);
     void getRandomWord(void);

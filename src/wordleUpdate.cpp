@@ -27,6 +27,13 @@ if(gameState.state == EMPTY_USERNAME) {
     gameState.mainTimer.update();
     readKey();
     writeKey();
+    if(!settings.offlineMode && hint.flagtoLoad) {
+        hint.getHint(gameState.word);
+    }
+    else if(hint.hintLoaded && !view.renderErrorMessage) {
+        view.errorMessage = hint.data;
+        view.renderErrorMessage = true;
+    }
     }
     
     }

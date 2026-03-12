@@ -1,5 +1,9 @@
 #include <chrono>
 #include <string_view>
+#include "post.hpp"
+#include "parser.hpp"
+#include <string>
+#include <sstream>
 #pragma once
 namespace utils {
    inline long generateDayId(void) {
