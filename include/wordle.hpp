@@ -22,6 +22,7 @@
 #include "hint.hpp"
 class Wordly {
     private :
+    Profile user;
     std::unordered_set<std::string> dictionary;
     std::vector<std::string> rs;
     std::istream & ss;
@@ -32,14 +33,12 @@ class Wordly {
     float timer = 0.0f;
    bool pendingGameOver = false;
     float botTimer = 0.0f;
-    Profile user;
     Leaderboard leaderboard;
     Pvp pvp;
     bool openSettings = false;
     Settings settings;
     Coordinates pos = {0, 0};
     Hint hint;
-    void initHistoryFile(void);
     void checkUsername(std::string & buffer);
     void getRandomWord(void);
     void getRandomWordFromServer(void);
@@ -50,7 +49,6 @@ class Wordly {
     void handleLeaderboardState(void);
     std::string generateTheMostAccurateWord(void) const;
     void clearHistory(void);
-    void initHistory(void);
     void enter(void);
 
     

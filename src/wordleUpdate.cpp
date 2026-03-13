@@ -19,12 +19,13 @@ if(gameState.state == EMPTY_USERNAME) {
         }
     }
     else {
+        gameState.mainTimer.update();
         if(gameState.state == AUTOPLAY) {
             autoBotPlay();
         }
     }
     if(gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE) {
-    gameState.mainTimer.update();
+
     readKey();
     writeKey();
     if(!settings.offlineMode && hint.flagtoLoad) {

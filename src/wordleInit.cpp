@@ -4,8 +4,9 @@ std::mt19937 gen(rd());
 
 Wordly::Wordly(std::istream & s) : ss(s) {
    gameState.state = MAIN_MENU;
-    this->initHistoryFile();
-     this->initHistory();
+    user.initHistoryFile(0);
+     user.initHistory();
+      this->parseFile();  
     if(user.usersHistory.exists("username")) {
         user.username = user.usersHistory.getValue<std::string>("username").value();
         if(user.username.empty()) gameState.state = EMPTY_USERNAME;
@@ -22,7 +23,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         leaderboard.receiveUsersXp(user.username);
     }).detach();
     }
-        this->parseFile();  
+       
        if(user.usersHistory.exists("daily_challenge")) {
 
         auto x = user.usersHistory.getObject("daily_challenge");
@@ -96,7 +97,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
                 break;
             case 2 :
             gameState.state = AUTOPLAY;
-             gameState.mainTimer.start();
+            gameState.mainTimer.start();
             getRandomWord();
             break;
 
@@ -206,7 +207,7 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
 
     view.onHint = [this] (void) {
-        if(!hint.hintLoaded && (gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE)) {
+        if(!view.renderErrorMessage && !hint.hintLoaded && (gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE)) {
         hint.drawHintBtn();
         }
     };
@@ -222,14 +223,16 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     leaderboard.setOfflineState = [this] () {
         settings.offlineMode = true;
     };
+    user.getDailyChallengeState = [this] () {
+        return gameState.state == DAILY_CHALLENGE;
+    };
 }
 
-void Wordly::initHistoryFile(void) {
-
-    std::ifstream historyCheck("../history.json");
-        if(historyCheck.is_open()) return;      
-        std::ofstream history("../history.json");
-    ParserJSON main;
+void Profile::initHistoryFile(bool force) {
+    std::ifstream historyCheck("../history.json", std::ios::out | std::ios::binary);
+        if(historyCheck.is_open() && !force) return;      
+    std::ofstream history("../history.json", std::ios::out | std::ios::binary);
+    ParserJSON main (true, "hello");
     main.insert("total_games", 0);
     main.insert("best_streak", 0);
     main.insert("last_played_date", "");
@@ -252,14 +255,20 @@ void Wordly::initHistoryFile(void) {
     submain.insert("6", 0);
 
     main.updateValue<std::string>("guess_distribution", submain.toString());
-
     main.stringify("../history.json");
 }
 
 
-void Wordly::initHistory(void) {
-        std::ifstream file ("../history.json");
-        user.usersHistory.parse(file);
+void Profile::initHistory(void) {
+        std::ifstream file ("../history.json", std::ios::out | std::ios::binary);
+        try {
+        usersHistory.parse(file);
+        } catch(const std::exception & error) {
+            std::cerr << error.what() << std::endl;
+            initHistoryFile(1);
+            usersHistory.clear();
+
+        }
     }
 
     void Wordly::getRandomWord(void)  {

@@ -71,12 +71,17 @@ for(auto & x : keys) {
     Color color = x.status == NOT_CHECKED ? LIGHTGRAY : x.status == CORRECT ? GREEN : x.status == INCORRECT ? YELLOW : DARKGRAY;
     Rectangle box = {(float) posX, (float) posY, (x.c == "ENT" || x.c == "DEL") ? (float) (CELL_SIZE * 1.5)
          : (float) CELL_SIZE, (float) CELL_SIZE};
+         bool onHover = CheckCollisionPointRec(GetMousePosition(), box) ? 1 : 0;
+         
     Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);
     float textX = box.x + (box.width / 2) - (textSize.x / 2);
     float textY = box.y + (box.height / 2) - (textSize.y / 2);
     bool specialButton  = x.c == "ENT" || x.c == "DEL" ? 1 : 0;
     int size = CELL_SIZE;
         DrawRectangle(posX, posY, box.width, box.height, color);
+        if(onHover) {
+            DrawRectangleLinesEx({(float) posX, (float) posY, box.width, box.height}, 2, Fade(WHITE, 0.7f));
+        }
         setKey(box, x);
    if(specialButton) {
     posX += (size * 1.5) + 6;
@@ -160,13 +165,13 @@ void ViewContext::drawOriginalStateGame(void){
     drawGrid(offset);
     
     renderKeyBoard();
-        onHint();
+    onHint();
+
+     if(renderErrorMessage || !errorMessage.empty()) {
+        drawError(errorMessage);
+    }
     } else {
         gameOverScreenRenderer();
-    }
-
-    if(renderErrorMessage || !errorMessage.empty()) {
-        drawError(errorMessage);
     }
 
 }

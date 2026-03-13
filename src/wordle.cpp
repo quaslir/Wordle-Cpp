@@ -32,7 +32,6 @@ void Wordly::parseFile(void) {
         }
         void Profile::updateCommonStats(void) {
             auto x  = usersHistory.getValue<int>("total_games");
-
         if(x.has_value()) {
                 usersHistory.updateValue<std::string>("total_games",std::to_string(x.value() + 1));
             }
@@ -46,8 +45,11 @@ void Wordly::parseFile(void) {
             }
         }
         void Profile::updateUsersStatsWin(void) {
+            updateCommonStats();
+            if(getDailyChallengeState()) {
             auto current = usersHistory.getValue<int>("current_streak");
             usersHistory.updateValue<std::string>("current_streak", std::to_string(current.value() + 1));
+            }
             auto y = usersHistory.getValue<int>("wins");
             if(y.has_value()) {
                 usersHistory.updateValue<std::string>("wins",std::to_string(y.value() + 1));
@@ -65,9 +67,11 @@ void Wordly::parseFile(void) {
         }
 
         void Profile::updateUsersStatsLose(void) {
-            
+            updateCommonStats();
             auto y = usersHistory.getValue<int>("losses");
+            if(getDailyChallengeState()) {
             usersHistory.updateValue<std::string>("current_streak", "0");
+        }
 
             if(y.has_value()) {
                 usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));

@@ -64,7 +64,7 @@ void Wordly::autoBotPlay(void) {
     }
     std::string target;
     if(view.activeY ==0) {
-        target = rs[1];
+        target = "crane";
     }
     else {
 target = generateTheMostAccurateWord();
