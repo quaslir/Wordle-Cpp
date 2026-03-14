@@ -30,6 +30,7 @@ void Pvp::disconnect(void) {
     this->_connected = false;
     this->gameStarted = false;
     isWaitingForServer = false;
+    wordReceved = false;
     packet.received = false;
     packet.win = false;
     packet.draw = false;

@@ -79,13 +79,13 @@ pos.y = (5 * SQUARE_SIZE * 1.1) + 90;
                 size_t xp = calculateXpDistribution();
                 if(!leaderboard.leaderboardUpdated) {
                     if(pvp.packet.win) {
-                        std::thread([&] {
+                        std::thread([this, xp] {
                             leaderboard.updateLeaderboard(user.username, user.totalXp + xp);
                         }).detach();
                     }
                     else if(!pvp.packet.win && !pvp.packet.draw) {
                         size_t newXp = user.totalXp - xp < 0 ? 0 : user.totalXp - xp;
-                   std::thread([&] {
+                   std::thread([this, newXp] {
                             leaderboard.updateLeaderboard(user.username, newXp);
                         }).detach();
                     }
@@ -114,7 +114,7 @@ void Wordly::updatePvp(void) {
         if(pvp.isWaitingForServer) {
         pvp.isWaitingForServer = false;
         if(pvp.packet.error) {
-                    view.setErrorMsg("Incorrect word");
+            view.setErrorMsg("Incorrect word");
         }
         else {
              updateKeyStatus();

@@ -61,17 +61,20 @@ class Wordly {
      void updateKeyStatus(void);
      void updatePvp(void);
      size_t calculateXpDistribution(void) const;
+          bool wordChecker(void);
+          bool wordCheckerFromServer(const std::string & toCheck);
+          void autoBotPlay(void);
+void updateCurrentWord(const char & c);
+
+void backspace(void);
     public :
-     bool wordChecker(void);
+
 
     Wordly(std::istream & s); 
 
 
-void autoBotPlay(void);
-void updateCurrentWord(const char & c);
 
-void backspace(void);
 void play(void);
 
-bool wordCheckerFromServer(const std::string & toCheck);
+
 };

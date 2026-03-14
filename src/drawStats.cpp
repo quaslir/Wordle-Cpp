@@ -48,15 +48,17 @@ void ViewContext::gameOverScreenRenderer(void)const {
     drawStatRow("Best streak", "best_streak", panel.x + 370);
     Rectangle box = {145, 600, 120, 30};
     std::string text = "Play again";
-    Button playAgain (box, PINK, text);
+    Color btnPlayAgainColor = CheckCollisionPointRec(GetMousePosition(), box) ? DARKGREEN : GREEN;
+    Button playAgain (box, btnPlayAgainColor, text);
     playAgain.drawBtn();
         if(playAgain.checkClick(GetMousePosition())) {
             onPlayAgain();
     }
 
     Rectangle box2 =  {280, 600, 120, 30};
+    Color btnExitColor = CheckCollisionPointRec(GetMousePosition(), box2) ? DARKGREEN : GREEN;
     std::string text2 = "Exit";
-    Button exit (box2, PINK, text2);
+    Button exit (box2, btnExitColor, text2);
     exit.drawBtn();
 
     if(exit.checkClick(GetMousePosition())) {

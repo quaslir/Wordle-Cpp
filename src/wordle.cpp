@@ -205,6 +205,7 @@ void Wordly::clearVariables(void) {
                 view.activeX = 0;
                 view.activeY = 0;
                 gameState.attempts = 0;
+                gameState.word.clear();
                 view.errorMessage = "";
                 view.renderErrorMessage = false;
                 leaderboard.leaderboardUpdated = false;
@@ -212,6 +213,7 @@ void Wordly::clearVariables(void) {
                 gameState.mustUsedChars.clear();
                 hint.reset();
                 keyboard.init();
+                
 }
 
 
