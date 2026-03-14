@@ -50,6 +50,7 @@ set(SOURCES
     src/settings.cpp
     src/post.cpp
     src/hint.cpp
+    src/music.cpp
 
 )
 

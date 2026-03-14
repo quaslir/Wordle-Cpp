@@ -7,6 +7,7 @@ class Settings {
     bool offlineMode;
     std::function<void()> onState;
     std::function<void()> onClose;
+    std::function<void(const Rectangle & rec)> onSlider;
     Settings() : hardMode(false), offlineMode(false) {}
 
     void drawSettings(void);

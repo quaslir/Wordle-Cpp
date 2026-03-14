@@ -130,22 +130,40 @@ void ViewContext::drawUsername(void) const{
 
 
 void ViewContext::drawGrid(const float offset) const{
-    int marginX = (GetScreenWidth() - (SQUARE_SIZE * 5 * 1.1)) / 2;
+    float gridheight = GetScreenHeight() * 0.6f;
+    float gridwidth = static_cast<float>(GetScreenWidth());
+
+    float maxSqHeight = (gridheight * 0.85f) / 6.0f;
+    float maxSqWidth = (gridwidth * 0.85f) / 5.0f;
+
+    float adaptiveSize = (maxSqHeight > maxSqWidth) ? maxSqWidth : maxSqHeight;
+
+    float spacing = adaptiveSize * 0.1f;
+
+    float totalGridWidth = (adaptiveSize * 5) + (spacing * 4);
+    float totalGridHeight = (adaptiveSize * 6) + (spacing * 5);
+
+        float marginX = (gridwidth - totalGridWidth) / 2.0f;
+        float marginY = (gridheight - totalGridHeight) / 2.0f;
+
+        float adaptiveFontSize = adaptiveSize * 0.5f;
        for(size_t i = 0; i < 6; i++) {
         float currentRowOffset = i == activeY ? offset : 0.0f;
         for(size_t j = 0; j < 5; j++) {
             Character c = getChar(j, i);
-        float calculateX = (float) ((j * SQUARE_SIZE * 1.1) + marginX + 15) + currentRowOffset;
-        float calculateY =  (float) ((i * SQUARE_SIZE * 1.1) + 90);
 
-        Rectangle box = {(float) calculateX,calculateY, SQUARE_SIZE, SQUARE_SIZE};
+        float calculateX = marginX + (j * (adaptiveSize + spacing)) + currentRowOffset;
+        float calculateY = marginY + (i * (adaptiveSize + spacing));
+
+        Rectangle box = {calculateX,calculateY, adaptiveSize, adaptiveSize};
+        DrawRectangleLinesEx(box, 3.0f, LIGHTGRAY);
             Vector2 textSize = MeasureTextEx(GetFontDefault(), std::string{c.c}.c_str(), FONT_SIZE, 2);
-            float textX = box.x + (box.width / 2) - (textSize.x / 2);
-            float textY = box.y + (box.height / 2) - (textSize.y / 2);
-            DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, FONT_SIZE, getColor(c.type));
-        float thickness = 3.0f;
+            float textX = box.x + (box.width / 2.0f) - (textSize.x / 2.0f);
+            float textY = box.y + (box.height / 2.0f) - (textSize.y / 2.0f);
+        DrawText(std::string{c.c}.c_str(), (int) textX, (int) textY, adaptiveFontSize, getColor(c.type));
 
-        DrawRectangleLinesEx(box, thickness, LIGHTGRAY);
+
+        
        }
        }
 }

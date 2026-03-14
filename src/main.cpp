@@ -17,8 +17,10 @@ int main(int argc, char * argv[]) {
             }
     }
 
-    Wordly wordly (file);
+   
     InitWindow(540, 730, "Worldy-C++");
+    InitAudioDevice();
+     Wordly wordly (file);
     SetTargetFPS(120);
     while(!WindowShouldClose()) {
         BeginDrawing();

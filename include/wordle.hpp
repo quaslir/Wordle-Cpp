@@ -20,6 +20,7 @@
 #include "profile.hpp"
 #include "utils.hpp"
 #include "hint.hpp"
+#include "music.hpp"
 class Wordly {
     private :
     Profile user;
@@ -39,6 +40,7 @@ class Wordly {
     Settings settings;
     Coordinates pos = {0, 0};
     Hint hint;
+    MusicManager music;
     void checkUsername(std::string & buffer);
     void getRandomWord(void);
     void getRandomWordFromServer(void);

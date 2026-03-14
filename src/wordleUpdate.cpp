@@ -133,7 +133,7 @@ void Wordly::updatePvp(void) {
 }
 
 void Wordly::play(void) {
-
+music.updateMusic();
 update();
 if((gameState.state == DAILY_CHALLENGE || gameState.state == PRACTICE || gameState.state == AUTOPLAY) && !openSettings) {
     

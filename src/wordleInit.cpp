@@ -3,6 +3,8 @@ std::random_device rd;
 std::mt19937 gen(rd());
 
 Wordly::Wordly(std::istream & s) : ss(s) {
+    music.loadAllFromFolder("../assets");
+    music.setCurrentMusic();
    gameState.state = MAIN_MENU;
     user.initHistoryFile(0);
      user.initHistory();
@@ -109,6 +111,8 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             case 4:
             if(settings.offlineMode) break;
             gameState.state = PVP;
+            music.currentIndex = 0;
+            music.setCurrentMusic();
             pvp.connect("ws://localhost:8000");
             break;
 
@@ -225,6 +229,10 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     };
     user.getDailyChallengeState = [this] () {
         return gameState.state == DAILY_CHALLENGE;
+    };
+
+    settings.onSlider = [this] (const Rectangle & rec) {
+        music.drawSlider(rec);
     };
 }
 

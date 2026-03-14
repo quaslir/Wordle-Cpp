@@ -22,16 +22,20 @@ void Settings::drawSettings(void) {
     DrawText("SETTINGS", (int) rec.x + 65, (int) rec.y + 22, 25, RAYWHITE);
 
     DrawLine(rec.x + 20, rec.y + 55, rec.x + width - 20, rec.y + 55, borderColor);
-       constexpr static std::array<std::string, 2> options = {"Hard Mode", "Offline mode"};
+       constexpr static std::array<std::string, 3> options = {"Hard Mode", "Offline mode", "Music"};
     for(int i = 0; i < options.size(); i++) {
     
     float startY = (rec.y + 80) + i * (50);
     DrawText(options[i].c_str(), rec.x + 30, startY, 20, RAYWHITE);
 
-    Rectangle checkOptins = {rec.x + rec.width - 60, startY, 25, 25};
-
-    if(CheckCollisionPointRec(GetMousePosition(), checkOptins)) {
-        DrawRectangleLinesEx(checkOptins, 2, YELLOW);
+    Rectangle checkOptions = {rec.x + rec.width - 60, startY, 25, 25};
+        if(i == 2) {
+            checkOptions = Rectangle(rec.x + 30 ,startY + 27, rec.width - 90, 25);
+            onSlider(checkOptions);
+            continue;
+        }
+    if(CheckCollisionPointRec(GetMousePosition(), checkOptions)) {
+        DrawRectangleLinesEx(checkOptions, 2, YELLOW);
 
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             switch(i) {
@@ -46,15 +50,15 @@ void Settings::drawSettings(void) {
         }
 
     } else {
-        DrawRectangleLinesEx(checkOptins, 2, GRAY);
+        DrawRectangleLinesEx(checkOptions, 2, GRAY);
     }
 
     if(i == 0 && hardMode) {
-        DrawRectangle(checkOptins.x + 5, checkOptins.y + 5, 15, 15, GREEN);
+        DrawRectangle(checkOptions.x + 5, checkOptions.y + 5, 15, 15, GREEN);
     }
 
     else if(i == 1 && offlineMode) {
-        DrawRectangle(checkOptins.x + 5, checkOptins.y + 5, 15, 15, GREEN);
+        DrawRectangle(checkOptions.x + 5, checkOptions.y + 5, 15, 15, GREEN);
     }
 
 }
