@@ -23,8 +23,8 @@ void ViewContext::drawFrontScreen(void) const {
     if(getOpenSettings()) return;
     const int numButtons = 4;
     static const std::vector<std::string> buttons = {"Daily challenge", "Practice mode", "Autoplay showcase", "Leaderboard", "PVP", "Exit"};
-    float btnW = 280.f;
-    float btnH  = 40.f;
+    float btnW = GetScreenWidth() * 0.5f;
+    float btnH  = GetScreenHeight() * 0.07f;
     float startX = (GetScreenWidth() - (float) btnW) / 2;
     float startY = 200;
     float spacing = 15;
@@ -50,17 +50,24 @@ void ViewContext::drawFrontScreen(void) const {
 }
 
 void ViewContext::drawError(const std::string & msg) const {
-        int fontSize = 20;
-        int textSize = MeasureText(msg.c_str(),fontSize);
+        float fontSize = GetScreenHeight() * 0.025f;
+        int textSize = MeasureText(msg.c_str(), (int) fontSize);
         float x = (GetScreenWidth() - textSize) / 2;
-        DrawText(msg.c_str(), (int) x, 680, fontSize, RED);
+        float y = (GetScreenHeight() - 60);
+        DrawText(msg.c_str(), (int) x, (int) y, (int) fontSize, RED);
     }
 void ViewContext::renderKeyBoard(void) const {
-Coordinates pos = getPos();
+float startY = GetScreenHeight() * 0.7f;
+float availableWidth = GetScreenWidth() * 0.9f;
 
-int posY = (5 * SQUARE_SIZE * 1.1 + 90) + SQUARE_SIZE + 30;
-int posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
-int CELL_SIZE = SQUARE_SIZE / 1.8;
+float keyWidth = availableWidth / 11.0f;
+float keyHeight = (GetScreenHeight() - startY) / 5.0f;
+
+float CELL_SIZE = (keyWidth < keyHeight) ? keyWidth : keyHeight;
+float spacing = CELL_SIZE * 0.15f;
+float posY = startY;
+float posX = (GetScreenWidth() - (10 * (CELL_SIZE + spacing))) / 2.0f;
+
 std::string character;
 auto & keys = const_cast<std::vector<Key>&>(getKeyboard());
 
@@ -71,31 +78,34 @@ for(auto & x : keys) {
     Color color = x.status == NOT_CHECKED ? LIGHTGRAY : x.status == CORRECT ? GREEN : x.status == INCORRECT ? YELLOW : DARKGRAY;
     Rectangle box = {(float) posX, (float) posY, (x.c == "ENT" || x.c == "DEL") ? (float) (CELL_SIZE * 1.5)
          : (float) CELL_SIZE, (float) CELL_SIZE};
+
+        
          bool onHover = CheckCollisionPointRec(GetMousePosition(), box) ? 1 : 0;
-         
+         if(onHover) {
+            DrawRectangleLinesEx({(float) posX, (float) posY, box.width, box.height}, 2, Fade(WHITE, 0.7f));
+        }
+
     Vector2 textSize = MeasureTextEx(GetFontDefault(), character.c_str(), 18.f, 2);
     float textX = box.x + (box.width / 2) - (textSize.x / 2);
     float textY = box.y + (box.height / 2) - (textSize.y / 2);
     bool specialButton  = x.c == "ENT" || x.c == "DEL" ? 1 : 0;
     int size = CELL_SIZE;
         DrawRectangle(posX, posY, box.width, box.height, color);
-        if(onHover) {
-            DrawRectangleLinesEx({(float) posX, (float) posY, box.width, box.height}, 2, Fade(WHITE, 0.7f));
-        }
+       
         setKey(box, x);
    if(specialButton) {
-    posX += (size * 1.5) + 6;
+    posX += (size * 1.5) + spacing;
    }
    else {
-    posX += size + 6;
+    posX += size + spacing;
      
    }
    
     DrawText(character.c_str(), (int) textX, (int) textY, 18, BLACK);
    
     if(x.c == "p" || x.c == "l") {
-        posY += CELL_SIZE + 6;
-        posX = (GetScreenWidth() - (SQUARE_SIZE * 6)) / 2;
+        posY += CELL_SIZE + spacing;
+        posX = (GetScreenWidth() - (10 * (CELL_SIZE + spacing))) / 2.0f;
     }
 
 }
@@ -133,10 +143,7 @@ void ViewContext::drawGrid(const float offset) const{
     float gridheight = GetScreenHeight() * 0.6f;
     float gridwidth = static_cast<float>(GetScreenWidth());
 
-    float maxSqHeight = (gridheight * 0.85f) / 6.0f;
-    float maxSqWidth = (gridwidth * 0.85f) / 5.0f;
-
-    float adaptiveSize = (maxSqHeight > maxSqWidth) ? maxSqWidth : maxSqHeight;
+    float adaptiveSize = optimizedSize();
 
     float spacing = adaptiveSize * 0.1f;
 
@@ -144,7 +151,7 @@ void ViewContext::drawGrid(const float offset) const{
     float totalGridHeight = (adaptiveSize * 6) + (spacing * 5);
 
         float marginX = (gridwidth - totalGridWidth) / 2.0f;
-        float marginY = (gridheight - totalGridHeight) / 2.0f;
+        float marginY = (gridheight - totalGridHeight) / 2.0f + adaptiveSize * 1.1f;
 
         float adaptiveFontSize = adaptiveSize * 0.5f;
        for(size_t i = 0; i < 6; i++) {

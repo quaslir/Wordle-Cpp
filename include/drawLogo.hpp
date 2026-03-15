@@ -1,9 +1,21 @@
 #include "raylib.h"
 #include <string>
+
+inline float optimizedSize(void) {
+    float gridheight = GetScreenHeight() * 0.6f;
+    float gridwidth = static_cast<float>(GetScreenWidth());
+
+    float maxSqHeight = (gridheight * 0.85f) / 6.0f;
+    float maxSqWidth = (gridwidth * 0.85f) / 5.0f;
+
+    return (maxSqHeight > maxSqWidth) ? maxSqWidth : maxSqHeight;
+}
+
+
 inline void drawLogo(void) {
     const std::string text = "WORDLE";
     int space = 10;
-    int squareSize = 50;
+    float squareSize = optimizedSize() * 0.9f;
         int x = (GetScreenWidth() / 2) - (((6 * squareSize) + (5 * space)) / 2);
         int y = 15;
         int fontSize = 40;

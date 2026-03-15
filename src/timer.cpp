@@ -38,6 +38,14 @@ void Timer::stop(void) {
 
 void Timer::drawTimer(void) const {
         std::string text = getCurrentTime();
-        int fontSize = 20;
-        DrawText(text.c_str(), 20, 20, fontSize, LIGHTGRAY);
+        int fontSize = GetScreenHeight() * 0.03f;
+        fontSize = fontSize < 15 ? 15 : fontSize;
+
+        Vector2 testSize = MeasureTextEx(GetFontDefault(), text.c_str(), (float) fontSize, 2);
+
+        float posX = GetScreenWidth() * 0.03f;
+        float posY = GetScreenHeight() * 0.03f;
+
+        DrawTextEx(GetFontDefault(), text.c_str(), {posX + 2, posY + 2}, (float) fontSize, 2, DARKGRAY);
+DrawTextEx(GetFontDefault(), text.c_str(), {posX, posY}, (float) fontSize, 2, LIGHTGRAY);
     }

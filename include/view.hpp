@@ -41,7 +41,7 @@ std::function<bool(void)> getGameOver;
 std::function<bool(void)> getOpenSettings;
 std::function<void(void)> onHint;
 void drawError(const std::string & msg) const;
-void drawGuessDistribution(const Rectangle & rec) const;
+void drawGuessDistribution(const Rectangle & rec, float startY) const;
 void renderKeyBoard(void) const ;
 void drawFrontScreen(void) const;
 void drawUsername(void) const;
