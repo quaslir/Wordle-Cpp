@@ -60,21 +60,28 @@ void Leaderboard::renderLeaderboard(void) {
     DrawRectangle(0,0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
     drawLogo();
 int screenWidth = GetScreenWidth();
-int panelWidth = 450;
-int rowHeight = 45;
+int panelWidth = screenWidth * 4/5;
+int rowHeight = (int) ((GetScreenHeight() * 0.65f) / 10);
 int x = (screenWidth - panelWidth) / 2;
-int y = 150;
-DrawRectangle(x, y - 40, panelWidth, 35, Fade(GRAY, 0.3f));
-DrawText("RANK", x + 10, y - 33, 20, GOLD);
-DrawText("PLAYER", x + 100, y - 33, 20, GOLD);
-DrawText("TOTAL XP", x + panelWidth - 110, y - 33, 20, GOLD);
+
+int startY = GetScreenHeight() * 0.2f;
+int fontSize = GetScreenHeight() * 0.025f;
+
+DrawRectangle(x, startY - 45, panelWidth, 40, Fade(DARKGRAY, 0.5f));
+DrawText("RANK", x + 15, startY - 35, 20, GOLD);
+DrawText("PLAYER", x + 100, startY - 35, 20, GOLD);
+
+const char * xpHeader = "TOTAL XP";
+int xpHeaderWidth = MeasureText(xpHeader, 20);
+
+DrawText(xpHeader, x + panelWidth - 15 - xpHeaderWidth, startY - 35, 20, GOLD);
 
     for(int i = 0; i < leaderboard.size(); i++) {
         Color rowColor  = (leaderboard[i].first == getUsername()) ? GREEN : RAYWHITE;
-        int currentY = y + (i * rowHeight);
+        int currentY = startY + (i * rowHeight);
 
         if(i % 2 == 0) {
-            DrawRectangle(x, currentY - 5, panelWidth, rowHeight - 5, Fade(WHITE, 0.05f));
+            DrawRectangle(x, currentY - 5, panelWidth, rowHeight, Fade(WHITE, 0.03f));
         }
 
         Color rankColor = i == 0 ? GOLD : i == 1 ? LIGHTGRAY : i == 2 ? ORANGE : WHITE;
@@ -84,8 +91,9 @@ DrawText("TOTAL XP", x + panelWidth - 110, y - 33, 20, GOLD);
         std::string xpStr = std::to_string((int) leaderboard[i].second);
         int textWidth = MeasureText(xpStr.c_str(), 22);
 
-        DrawText(xpStr.c_str(), x + panelWidth  - 15 - textWidth, currentY, 22, rowColor);
+        DrawText(xpStr.c_str(), x + panelWidth  - 15 - textWidth, currentY, fontSize, rowColor);
 
+        DrawRectangle(x, currentY + rowHeight - 7, panelWidth, 1, Fade(GRAY, 0.1f));
     }
 
  

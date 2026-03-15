@@ -4,8 +4,9 @@ void Settings::drawSettings(void) {
     Color modalBg = {39, 39, 42, 255};
     Color borderColor = {63, 63, 70, 255};
     Color accentColor = {34, 197, 94, 255};
-    const float width = 350.0f;
-    const float height = 450.0f;
+    const float width = GetScreenWidth() * 2.0f / 3.f;
+    const float height = GetScreenHeight() * 0.7f;
+    float fontSizeTitle = GetScreenHeight() * 0.03f;
     Rectangle rec = {(GetScreenWidth() - width) / 2.0f, (GetScreenHeight() - height) / 2.0f, width, height};
 
     DrawRectangleRounded({rec.x + 5, rec.y + 5, rec.width, rec.height}, 0.1f, 10, ColorAlpha(BLACK, 0.3f));
@@ -19,7 +20,7 @@ void Settings::drawSettings(void) {
     if(exitSettingsBtn.checkClick(GetMousePosition())) {
         onClose();
     }
-    DrawText("SETTINGS", (int) rec.x + 65, (int) rec.y + 22, 25, RAYWHITE);
+    DrawText("SETTINGS", (int) rec.x + 65, (int) rec.y + 22, fontSizeTitle, RAYWHITE);
 
     DrawLine(rec.x + 20, rec.y + 55, rec.x + width - 20, rec.y + 55, borderColor);
        constexpr static std::array<std::string, 3> options = {"Hard Mode", "Offline mode", "Music"};

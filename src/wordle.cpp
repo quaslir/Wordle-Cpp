@@ -64,6 +64,7 @@ void Wordly::parseFile(void) {
                 
             }
             usersHistory.stringify("../history.json");
+            updateCachedValues();
         }
 
         void Profile::updateUsersStatsLose(void) {
@@ -77,6 +78,7 @@ void Wordly::parseFile(void) {
                 usersHistory.updateValue<std::string>("losses",std::to_string(y.value() + 1));
             }
             usersHistory.stringify("../history.json");
+            updateCachedValues();
             
         }
       bool Wordly::wordChecker(void) {
@@ -285,3 +287,15 @@ void Wordly::getRandomWordFromServer(void) {
     settings.offlineMode = true;
 }
  }
+
+
+  void Profile::updateCachedValues(void) {
+    std::vector<std::string> stats = {"total_games", "wins", "losses", "current_streak", "best_streak"};
+
+    for(const auto & key : stats) {
+        auto value = usersHistory.getValue<int>(key);
+        if(value.has_value()) {
+            values[key] = value.value();
+        }
+    }
+  }

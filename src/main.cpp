@@ -17,7 +17,7 @@ int main(int argc, char * argv[]) {
             }
     }
 
-   
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(700, 900, "Worldy-C++");
     InitAudioDevice();
      Wordly wordly (file);

@@ -6,7 +6,7 @@
 #include "button.hpp"
 struct Hint {
     bool hintLoaded = false;
-    bool flagtoLoad;
+    bool flagtoLoad = false;
     std::string data;
 
     void getHint(const std::string & word);

@@ -1,4 +1,5 @@
 #include "wordle.hpp"
+#include <memory>
 std::random_device rd;
 std::mt19937 gen(rd());
 
@@ -168,8 +169,15 @@ Wordly::Wordly(std::istream & s) : ss(s) {
         cachedDistribution = user.usersHistory.getObject("guess_distribution");
         return cachedDistribution;
     };
-    view.getValue = [this](const std::string &key) {
-        return user.usersHistory.getValue<int>(key);
+
+    view.getValue = [this](const std::string &key) -> std::optional<int> {
+        auto it = user.values.find(key);
+
+        if(it != user.values.end()) {
+            return it->second;
+        }
+
+        return std::nullopt;
     };
 
     view.getPos = [this] () {
@@ -234,6 +242,8 @@ Wordly::Wordly(std::istream & s) : ss(s) {
     settings.onSlider = [this] (const Rectangle & rec) {
         music.drawSlider(rec);
     };
+
+    user.updateCachedValues();
 }
 
 void Profile::initHistoryFile(bool force) {

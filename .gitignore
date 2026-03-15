@@ -3,3 +3,4 @@ build/
 node_modules/
 history.json
 .vscode
+assets/

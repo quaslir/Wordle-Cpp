@@ -31,7 +31,7 @@ inline void drawLogo(void) {
 
    int textX  = currentX + (squareSize - textWidth) / 2;
    int textY = y + (squareSize - fontSize) / 2;
-      DrawText(buffer.c_str(), textX + 2, textY + 2, fontSize, BLACK);
+    DrawText(buffer.c_str(), textX + 2, textY + 2, fontSize, BLACK);
     DrawText(buffer.c_str(), textX, textY, fontSize, RAYWHITE);
     } 
     

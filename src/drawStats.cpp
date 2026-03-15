@@ -50,7 +50,7 @@ void ViewContext::gameOverScreenRenderer(void)const {
         auto val = getValue(key);
         if(val.has_value()) {
             DrawText(std::to_string(val.value()).c_str(), x, startY, sectionSize, WHITE);
-            DrawText(label.c_str(), x, startY + 35, sectionSize / 1.8, LIGHTGRAY);
+            DrawText(label.c_str(), x, startY + sectionSize + 5 , sectionSize / 1.8, LIGHTGRAY);
         }
     };
 
