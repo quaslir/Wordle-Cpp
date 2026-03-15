@@ -41,7 +41,6 @@ void Pvp::receive(void) {
     if(!this->_connected) return;
 
     _socket.setOnMessageCallback([this] (const ix::WebSocketMessagePtr & msg) {
-        std::cout << msg->str << std::endl;
         if(msg->type == ix::WebSocketMessageType::Message) {
             std::stringstream ss (msg->str);
             parser.parse(ss);

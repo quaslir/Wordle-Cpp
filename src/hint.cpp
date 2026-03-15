@@ -1,7 +1,6 @@
 #include "hint.hpp"
 #include "utils.hpp"
 void Hint::getHint(const std::string & word) {
-    std::cout << "here" << std::endl;
         ParserJSON parser;
         parser.insert("word", word);
         std::string data = parser.toString();

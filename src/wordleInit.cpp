@@ -95,7 +95,6 @@ Wordly::Wordly(std::istream & s) : ss(s) {
                 gameState.state = PRACTICE;
                 gameState.mainTimer.start();
                 getRandomWord();
-                std::cout << gameState.word << std::endl;
 
                 break;
             case 2 :

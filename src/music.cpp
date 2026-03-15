@@ -24,7 +24,6 @@ void MusicManager::loadAllFromFolder(const std::string & path) {
             std::string key = name;
             utils::normalizeKey(key);
             eventTracks[key] = name;
-            std::cout << key << std::endl;
             }
         }
     }

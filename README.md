@@ -96,6 +96,15 @@ Wordly-C++ uses a strict validation logic. To prevent **"vowel-spamming"** (e.g.
 
 ---
 
+### 🤖 AI Assistant (Hint System)
+
+If you find yourself stuck on a difficult word, the game features an **AI-powered hint system** to get you back on track:
+
+* **Smart Suggestions:** By clicking the AI Hint button, the assistant analyzes the current state of the board and provides a strategic word suggestion based on the remaining letters in the dictionary.
+* **Heuristic Logic:** The AI doesn't just give a random word; it uses an intelligent solver to pick the most optimal guess, helping you narrow down possibilities and maintain your winning streak.
+* **Balanced Gameplay:** Use it as a learning tool to understand the best guessing strategies or as a "panic button" when your streak is on the line.
+
+---
 ### ⚙️ Settings & Customization
 
 The settings menu allows you to tailor the game experience to your preference. Fine-tune your gameplay with the following options:
