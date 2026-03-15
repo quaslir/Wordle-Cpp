@@ -47,7 +47,7 @@ The game features an intelligent solver that attempts to crack the code using a 
 ```bash
 # Clone the repository
 git clone https://github.com/quaslir/Wordle-Cpp
-cd Wordly-C-
+cd Wordly-Cpp
 
 # Initialize raylib submodule
 git submodule update --init --recursive
