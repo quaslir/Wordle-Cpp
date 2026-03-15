@@ -112,8 +112,6 @@ Wordly::Wordly(std::istream & s) : ss(s) {
             case 4:
             if(settings.offlineMode) break;
             gameState.state = PVP;
-            music.currentIndex = 0;
-            music.setCurrentMusic();
             pvp.connect("ws://localhost:8000");
             break;
 
@@ -209,6 +207,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
          clearVariables();
          leaderboard.leaderboardUpdated = false;
         gameState.state = MAIN_MENU;
+        
+        if(music.activePlaylist) {
+            music.activePlaylist = false;
+            music.currentTrackPath.clear();
+        }
+        music.setCurrentMusic();
     };
 
     view.getGameOver = [this](void) {
@@ -241,6 +245,12 @@ Wordly::Wordly(std::istream & s) : ss(s) {
 
     settings.onSlider = [this] (const Rectangle & rec) {
         music.drawSlider(rec);
+    };
+
+    view.playVictory = [this] (void) {
+        if(!music.activePlaylist) {
+        music.playFromPlaylist("victory");
+        }
     };
 
     user.updateCachedValues();

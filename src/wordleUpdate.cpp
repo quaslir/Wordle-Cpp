@@ -52,8 +52,15 @@ void Wordly::handleLeaderboardState(void) {
 
 
 void Wordly::handlePvpState(void) {
+        view.drawPvp();
+        if(gameState.state != PVP) return;
+    if(!pvp.getStatus() && !pvp.gameOver) {
+        music.playFromPlaylist("singularity_calm");
+        DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
+    }
+    else music.playFromPlaylist("battle");
 pos.y = (5 * SQUARE_SIZE * 1.1) + 90;
-    view.drawPvp();
+
     if(pvp.gameOver && !pvp.connected()) {
         clearVariables();
         pvp.disconnect();
@@ -70,10 +77,7 @@ pos.y = (5 * SQUARE_SIZE * 1.1) + 90;
             readKey();
             writeKey();
     } else view.errorMessage.clear();
-    if(!pvp.getStatus() && !pvp.gameOver) {
-        DrawText("WAITING FOR OPPONENT...", GetScreenWidth() / 2 - 150, GetScreenHeight() / 2, 20, DARKGRAY);
-    }
-    
+
 
         if(pvp.gameOver) {
                 size_t xp = calculateXpDistribution();

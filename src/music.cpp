@@ -1,5 +1,6 @@
 #include "music.hpp"
-
+#include <iostream>
+#include "utils.hpp"
 MusicManager::~MusicManager() {
     UnloadMusicStream(currentMusic);
     CloseAudioDevice();
@@ -12,41 +13,76 @@ void MusicManager::loadAllFromFolder(const std::string & path) {
         if(file.is_regular_file()) {
             std::string extenstion = file.path().extension().string();
             if(extenstion != ".mp3" && extenstion != ".wav" && extenstion != ".ogg") continue;
-            musicPaths.push_back(file.path().string());
+            std::string name = file.path().string();
+            backgroundTracks.push_back(name);
+        }
+        else if(file.is_directory()) {
+            for(const auto & f : std::filesystem::directory_iterator(file.path().string())) {
+            std::string extenstion = f.path().extension().string();
+            if(extenstion != ".mp3" && extenstion != ".wav" && extenstion != ".ogg") continue;
+            std::string name = f.path().string();
+            std::string key = name;
+            utils::normalizeKey(key);
+            eventTracks[key] = name;
+            std::cout << key << std::endl;
+            }
         }
     }
-    currentIndex = musicPaths.size() - 1;
+    currentIndex = backgroundTracks.size() - 1;
 }
 
 void MusicManager::setCurrentMusic(void) {
 
     if(currentMusic.ctxData != nullptr) {
         UnloadMusicStream(currentMusic);
+        currentMusic = {0};
     }
 
-    if(musicPaths.empty()) return;
-
-
-    currentMusic = LoadMusicStream(musicPaths[currentIndex--].c_str());
-
+    if(backgroundTracks.empty()) return;
+    if(!activePlaylist) {
+        currentMusic = LoadMusicStream(backgroundTracks[currentIndex--].c_str());
+    }
     if(currentMusic.ctxData != nullptr) {
         PlayMusicStream(currentMusic);
         SetMusicVolume(currentMusic, volume);
     }
 
-    if(currentIndex == musicPaths.size()) currentIndex = 0;
+    if(currentIndex <= 0) currentIndex = backgroundTracks.size() - 1;
 }
 
 void MusicManager::updateMusic(void) {
-if(currentMusic.ctxData == nullptr) return;
+if(currentMusic.ctxData == nullptr || !IsMusicValid(currentMusic)) return;
 UpdateMusicStream(currentMusic);
 
 float timePlayed = GetMusicTimePlayed(currentMusic);
 float timeLength = GetMusicTimeLength(currentMusic);
 
 if(timePlayed >= timeLength - 0.1f) {
+    if(activePlaylist){
+        activePlaylist = false;
+        currentTrackPath.clear();
+    }
     setCurrentMusic();
 }
+}
+
+void MusicManager::playFromPlaylist(const std::string & key) {
+if(currentTrackPath == eventTracks[key]) return;
+
+currentTrackPath = eventTracks[key];
+
+if(currentMusic.ctxData != nullptr) {
+        UnloadMusicStream(currentMusic);
+        currentMusic = {0};
+}
+currentMusic = LoadMusicStream(currentTrackPath.c_str());
+activePlaylist = true;
+
+if(currentMusic.ctxData != nullptr) {
+        PlayMusicStream(currentMusic);
+        SetMusicVolume(currentMusic, volume);
+}
+
 }
 
 void MusicManager::drawSlider(const Rectangle & rec) {

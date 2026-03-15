@@ -238,33 +238,33 @@ void ViewContext::drawPvp(void){
 
 void ViewContext::drawPvpWin(void) const {
     const char * text = "VICTORY!";
-    int fontSize = 60;
+    int fontSize = (int) (GetScreenHeight() * 0.15f);
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY  = fontSize + 20;
+   int posY  = (int) (GetScreenHeight() * 0.16f);
     DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
     DrawText(text, posX, posY, fontSize, GOLD);
 }
 
 void ViewContext::drawPvpLose(void) const {
     const char * text = "You lost";
-    int fontSize = 60;
+    int fontSize = (int) (GetScreenHeight() * 0.15f);
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY = fontSize + 20;
+    int posY  = (int) (GetScreenHeight() * 0.16f);
     DrawText(text, posX + 4, posY + 4, fontSize, BLUE);
     DrawText(text, posX, posY, fontSize, RED);
 }
 
 void ViewContext::drawPvpDraw(void) const {
     const char * text = "DRAW";
-    int fontSize = 60;
+     int fontSize = (int) (GetScreenHeight() * 0.15f);
 
     int textW = MeasureText(text, fontSize);
     int posX = (GetScreenWidth() - textW) / 2;
-    int posY  = fontSize + 20;
+    int posY  = (int) (GetScreenHeight() * 0.16f);
     DrawText(text, posX + 4, posY + 4, fontSize, MAROON);
     DrawText(text, posX, posY, fontSize, LIGHTGRAY);
 }
@@ -281,7 +281,7 @@ void ViewContext::drawXp(int xp, bool win, bool draw) const {
     std::string text = "Total xp: " + std::to_string((int) getTotalXp() + 
     (win ? xp : !win && !draw ? -xp : 0)) + score;
     int size = MeasureText(text.c_str(), 20);
-    int posY = 150;
+    int posY = (int) ((GetScreenHeight() * 0.16f) + GetScreenHeight() * 0.15f + 20);
     int posX = (GetScreenWidth() - size) / 2;
 
     DrawText(text.c_str(), posX, posY, 20, RAYWHITE);

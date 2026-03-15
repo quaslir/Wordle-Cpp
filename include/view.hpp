@@ -40,6 +40,7 @@ std::function<void(void)> onBackBtn;
 std::function<bool(void)> getGameOver;
 std::function<bool(void)> getOpenSettings;
 std::function<void(void)> onHint;
+std::function<void(void)> playVictory;
 void drawError(const std::string & msg) const;
 void drawGuessDistribution(const Rectangle & rec, float startY) const;
 void renderKeyBoard(void) const ;

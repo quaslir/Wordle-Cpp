@@ -13,7 +13,6 @@ void ViewContext::gameOverScreenRenderer(void)const {
     float subTitleSize = GetScreenHeight() * 0.03f;
     float textStartY = panel.y + titleSize + 40;
     if(getUserWon()) {
-
     DrawText("WELL DONE!", panel.x + 20, panel.y + 20, titleSize, GREEN); 
     std::string text;
     int minutes = (int) getMins();
@@ -50,7 +49,7 @@ void ViewContext::gameOverScreenRenderer(void)const {
         auto val = getValue(key);
         if(val.has_value()) {
             DrawText(std::to_string(val.value()).c_str(), x, startY, sectionSize, WHITE);
-            DrawText(label.c_str(), x, startY + sectionSize + 5 , sectionSize / 1.8, LIGHTGRAY);
+            DrawText(label.c_str(), x, startY + sectionSize + 5 , sectionSize / 2.5, LIGHTGRAY);
         }
     };
 
@@ -58,10 +57,13 @@ void ViewContext::gameOverScreenRenderer(void)const {
     std::vector<std::pair<std::string, std::string>> stats = {{"Total games", "total_games"}, 
 {"Wins", "wins"}, {"Losses", "losses"}, {"Current streak", "current_streak"}, {"Best streak", "best_streak"}};
     float currentX = panel.x + 30;
+    float availableWidth = (panel.x + panel.width - 30 - currentX) / 5;
     for(const auto & stat: stats) {
+        bool longText = stat.first.size() > 10;
+        if(longText) currentX -= 10;
         drawStatRow(stat.first, stat.second, currentX);
-
-        currentX += MeasureText(stat.first.c_str(), sectionSize / 1.5);
+        if(longText) currentX += availableWidth + 20;
+        else currentX += availableWidth;
     }
         drawGuessDistribution(panel, startY + sectionSize * 3);
 

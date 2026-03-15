@@ -118,6 +118,7 @@ void Wordly::parseFile(void) {
             user.updateUsersStatsWin();
             pendingGameOver = true;
             timer = 2.0f;
+            music.playFromPlaylist("victory");
 
     } 
         else if(gameState.attempts == 6) {
