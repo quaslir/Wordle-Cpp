@@ -1,6 +1,6 @@
 # Wordle-Cpp
 
-![Screenshot](example.png)
+![Screenshot](/Screens/screen1.png) ![Screenshot](/Screens/screen2.png) ![Screenshot](/Screens/screen3.png) ![Screenshot](/Screens/screen4.png) ![Screenshot](/Screens/screen5.png)
 
 ## Overview
 
