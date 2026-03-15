@@ -10,10 +10,14 @@
 
 * **Dynamic Dictionary:** Loads almost 6000 popular 5-letter English words.
 * **Anti-Cheat System:** Only valid dictionary words are accepted as guesses.
-* **Customizable UI:** Change colors and themes via an external configuration file.
 * **Cross-platform:** Easy to build using CMake.
 * **Autoplay Mode:** Intelligent AI solver to assist or play for you.
 * **User Statistics:** Tracks `current streak`, `total wins`, `win distribution`, `total lost games`, and `best streak`.
+* **Dual Play Modes:**
+    * **Single Player:** Relaxed offline experience with persistent statistics and AI assistance.
+    * **Real-time PvP:** Competitive online matches using a custom socket-based protocol for low-latency synchronization.
+* **Smart Audio Manager:** Fully integrated background music system and event-driven sound effects (Victory/Battle) with automated playlist rotation.
+* **Global Leaderboards:** Competitive ranking system with asynchronous data fetching to track top players' XP worldwide.
 
 ---
 
@@ -45,9 +49,6 @@ The game features an intelligent solver that attempts to crack the code using a 
 git clone https://github.com/quaslir/Wordle-Cpp
 cd Wordly-C-
 
-# Clone json parsing library
-git clone https://gitlab.com/main845804/json-parser-c
-
 # Initialize raylib submodule
 git submodule update --init --recursive
 
@@ -65,33 +66,14 @@ make
 #### In the root directory, there are two important files: `history.json` and `sgb-words.txt`. 
 
 * The first will be created automatically and stores history data; deleting this file will cause all your history to be reset to zero. 
-* The second file is the main dictionary; if you delete this file or move it to another directory, you will need to pass the name of the dictionary via the command line:
+* The second file is the main dictionary; if you delete this file or move it to another directory, game will use online dictionary, and you won't be able to play offline mode.
 
 ```bash
-./Wordle-Cpp "../PATH_TO_DICTIONARY"
+./Wordle-Cpp
 ```
-#### In case a path is not provided, the game will not launch.
+
 ---
-## Configuration
 
-You can customize the visual experience by editing the `config.conf` file. The game looks for this file in the src directory.
-
-| Key | Value Example | Description |
-| :--- | :--- | :--- |
-| **BG_COLOR** | `BLACK`, `RAYWHITE` | Background color |
-| **GRID_COLOR** | `GREEN`, `GRAY` | Color of the letter cells |
-| **TEXT_COLOR** | `BLUE`, `WHITE` | Main UI text color |
-| **HARD_MODE** | `TRUE`, `FALSE` | Harder playing mode (you must use a particular letter if it has previously been revealed)|
-| **AUTOPLAY** | `TRUE`, `FALSE` | A simple bot will attempt to guess the hidden word |
-
-**Example `config.conf`:**
-```conf
-BG_COLOR=BLACK
-GRID_COLOR=GREEN
-TEXT_COLOR=BLUE
-HARD_MODE=FALSE
-AUTOPLAY=FALSE
-```
 ## Controls
 
 | Input | Action |
@@ -113,4 +95,44 @@ Wordly-C++ uses a strict validation logic. To prevent **"vowel-spamming"** (e.g.
 * ⬜ **Gray**: Letter is not in the word at all.
 
 ---
+
+### ⚙️ Settings & Customization
+
+The settings menu allows you to tailor the game experience to your preference. Fine-tune your gameplay with the following options:
+
+* **Hard Mode:** For those seeking a greater challenge. Enabling this mode obliges the user to use all revealed hints (green and yellow letters) in all following guess attempts.
+* **Offline Mode:** Enable this to use a local dictionary instead of the remote word provider. 
+    * **Note:** In Offline Mode, the **Global Leaderboard** and **PvP Mode** are disabled to ensure data integrity and synchronization.
+* **Music Volume:** Adjust the game's atmosphere with a dedicated volume slider, controlling the playback levels of the smart audio manager.
+
+---
+
+### 🔒 Security & Data Integrity
+
+To ensure fair play and protect the integrity of player progress, the game implements a multi-layered security system for local data:
+
+* **XOR Encryption:** User statistics and sensitive local data are stored in a `.json` format, but are fully encrypted using an **XOR cipher**. This prevents casual snooping or direct editing of the file.
+* **Integrity Checksum:** The system generates a unique **checksum** for the data file. Every time the game loads, it validates the current file against this signature to identify any unauthorized external modifications.
+* **Anti-Tamper Protocol:** If the game detects that the stats file has been tampered with or the checksum fails to match, a "Reset on Detection" policy is triggered. **All user statistics will be immediately reset to zero** to prevent cheating.
+
+---
+
+### ⚔️ PvP Mode: Real-Time Duel
+
+Experience a high-stakes competitive mode where speed and logic are your only weapons. In **PvP Mode**, you go head-to-head with another player in real-time.
+
+* **Shared Word Space:** Both players guess the exact same hidden word simultaneously.
+* **Winner Takes All:** The first player to successfully guess the word claims the victory and receives **XP**. The opponent fails the challenge.
+* **Networking Stack:** * **Client:** Built from the ground up using **C++ Web-Sockets**.
+    * **Central Server:** A high-performance backend built with **TypeScript**, handling match-making and packet synchronization.
+
+#### 🛠️ Running a Local Server
+If you want to host your own match-making instance:
+1. Navigate to the `server/` directory.
+2. Install dependencies: `npm install`.
+3. Start the development server:
+   ```bash
+   
+   npm run dev
+
 *Created by **Karl** as a Computer Science practice project.*
